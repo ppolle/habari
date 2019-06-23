@@ -1,6 +1,6 @@
 import sys
 
 if 'test' in sys.argv:
-    from sly.settings.test import *
+    from habari.settings.test import *
 else:
-    from sly.settings.dev import * 
+    from habari.settings.dev import * 

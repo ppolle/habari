@@ -1,6 +1,6 @@
 import sys
 
 if 'runserver' in sys.argv:
-	from sly.settings.local import *
+	from habari.settings.local import *
 else:
-	from sly.settings.prod import *
+	from habari.settings.prod import *
