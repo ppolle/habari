@@ -35,6 +35,7 @@ class DNCrawler:
 		return link
 
 	def get_story_details(self, link):
+		from datetime import datetime
 		story= requests.get(link)
 		if story.status_code == 200:
 			soup = BeautifulSoup(story.content, 'html.parser')
@@ -42,6 +43,7 @@ class DNCrawler:
 			image_url = self.make_relative_links_absolute(soup.select('.story-view header img')[0].get('src'))
 			title = [t.get_text() for t in soup.select('.story-view header h2')][0]
 			publication_date = [p.get_text() for p in soup.select('.story-view header h6')][0]
+			date = datetime.strptime(publication_date, '%A %B %d %Y')
 			author = [a.get_text() for a in soup.select('.story-view .author strong')][0]
 		else:
 			print('Getting stuff failed')
@@ -49,7 +51,7 @@ class DNCrawler:
 		return {'article_url':url,
     			'image_url':image_url,
     			'article_title':title,
-    			'publication_date':publication_date,
+    			'publication_date':date,
     			'author':author}
 
 	def update_top_stories(self):
