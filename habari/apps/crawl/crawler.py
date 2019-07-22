@@ -56,10 +56,13 @@ class DNCrawler:
 		top_articles = self.get_top_stories()
 		article_info = []
 		for article in top_articles:
-			print('Updating top stories')
-			article_info.append(self.get_story_details(article['url']))
+			try:
+				print('Updating story content for ' + article['url'])
+				article_info.append(self.get_story_details(article['url']))
+			except Exception as e:
+				print('{0} error while getting {1}'.format(e, article['url']))
 
 		return article_info
 
-crawler = DNCrawler()
-crawl = print(crawler.update_top_stories())
+# crawler = DNCrawler()
+# crawl = print(crawler.update_top_stories())
