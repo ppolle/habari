@@ -61,7 +61,7 @@ class DNCrawler:
 			try:
 				print('Updating story content for ' + article['url'])
 				story = self.get_story_details(article['url'])
-				if not Article.objects.filter(article_url=story['article_url']).exists():
+				if Article.objects.filter(article_url=article['url']).exists() == False:
 					article_info.append(Article(title=story['article_title'],
 						article_url=story['article_url'],
 						article_image_url=story['image_url'],
