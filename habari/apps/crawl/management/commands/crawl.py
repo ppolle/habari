@@ -10,5 +10,5 @@ class Command(BaseCommand):
     	crawl = crawler.update_top_stories()
     	# time = timezone.now().strftime('%X')
     	# self.stdout.write("It's now %s" % time)
-    	for c in crawl:
-    		print(c)
+    	# for c in crawl:
+    	# 	print(c)

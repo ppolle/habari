@@ -12,14 +12,13 @@ class DNCrawler:
 		story_links = []
 		if top_stories.status_code == 200:
 			soup = soup = BeautifulSoup(top_stories.content, 'html.parser')
-			teaser = soup.select('.story-teaser a')
+			teaser = soup.select('.small-story-list a')
+			teaser =  teaser + soup.select('.story-teaser a')
 			for t in teaser:
-				if t not in story_links:
+				if self.make_relative_links_absolute(t.get('href')) not in story_links:
 					story_links.append(
 					    {'url': self.make_relative_links_absolute(t.get('href'))})
 		return story_links
-			# print(teaser)
-			# print(soup.prettify())
 
 	def make_relative_links_absolute(self, link):
 		print('Sanitizing '+ str(link))
@@ -55,16 +54,27 @@ class DNCrawler:
     			'author':author}
 
 	def update_top_stories(self):
+		from habari.apps.crawl.models import Article
 		top_articles = self.get_top_stories()
 		article_info = []
 		for article in top_articles:
 			try:
 				print('Updating story content for ' + article['url'])
-				article_info.append(self.get_story_details(article['url']))
+				story = self.get_story_details(article['url'])
+				if not Article.objects.filter(article_url=story['article_url']).exists():
+					article_info.append(Article(title=story['article_title'],
+						article_url=story['article_url'],
+						article_image_url=story['image_url'],
+						author=story['author'],
+						publication_date=story['publication_date'],
+						summary='blah blah blah',
+						news_source='DN',
+						))
+
 			except Exception as e:
 				print('{0} error while getting {1}'.format(e, article['url']))
 
-		return article_info
+		Article.objects.bulk_create(article_info)
+		print('Succesfully updated Daily Nation Latest Articles')
 
-# crawler = DNCrawler()
-# crawl = print(crawler.update_top_stories())
+		return article_info

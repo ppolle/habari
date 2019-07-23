@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='article',
             name='publication_date',
-            field=models.DateField(default=9878),
+            field=models.DateField(auto_now_add=True),
             preserve_default=False,
         ),
         migrations.AlterField(
