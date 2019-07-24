@@ -15,9 +15,9 @@ class DNCrawler:
 			teaser = soup.select('.small-story-list a')
 			teaser =  teaser + soup.select('.story-teaser a')
 			for t in teaser:
-				if self.make_relative_links_absolute(t.get('href')) not in story_links:
-					story_links.append(
-					    {'url': self.make_relative_links_absolute(t.get('href'))})
+				t =  self.make_relative_links_absolute(t.get('href'))
+				if t not in story_links:
+					story_links.append(t)
 		return story_links
 
 	def make_relative_links_absolute(self, link):
@@ -59,22 +59,24 @@ class DNCrawler:
 		article_info = []
 		for article in top_articles:
 			try:
-				print('Updating story content for ' + article['url'])
-				story = self.get_story_details(article['url'])
-				if Article.objects.filter(article_url=article['url']).exists() == False:
+				print('Updating story content for ' + article)
+				story = self.get_story_details(article)
+				if not Article.objects.filter(article_url=article).exists():
 					article_info.append(Article(title=story['article_title'],
 						article_url=story['article_url'],
 						article_image_url=story['image_url'],
 						author=story['author'],
 						publication_date=story['publication_date'],
 						summary='blah blah blah',
-						news_source='DN',
+						news_source='DN'
 						))
 
 			except Exception as e:
-				print('{0} error while getting {1}'.format(e, article['url']))
-
-		Article.objects.bulk_create(article_info)
-		print('Succesfully updated Daily Nation Latest Articles')
+				print('{0} error while getting {1}'.format(e, article))
+		try:
+			Article.objects.bulk_create(article_info)
+			print('Succesfully updated Daily Nation Latest Articles')
+		except Exception as e:
+			print('Error!!!{}'.format(e))
 
 		return article_info
