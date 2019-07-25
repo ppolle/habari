@@ -16,7 +16,7 @@ class Article(models.Model):
 	publication_date = models.DateField()
 	summary = models.CharField(max_length=3000)
 	news_source = models.CharField(max_length=100, choices=NEWS_SOURCE_CHOICES)
-	slug = AutoSlugField(blank=False, populate_from='title', unique=True)
+	slug = AutoSlugField(blank=False, populate_from='title')
 	timestamp = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
