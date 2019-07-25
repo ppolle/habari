@@ -1,8 +1,21 @@
 import requests
 from bs4 import BeautifulSoup
 
+class AbstractBaseCrawler:
+	def make_relative_links_absolute(self, link):
+		print('Sanitizing '+ str(link))
+		import re
+		try:
+			from urlparse import urljoin
+		except ImportError:
+			from urllib.parse import urljoin
 
-class DNCrawler:
+		if not link.startswith(self.url):
+			link = urljoin(self.url, link)
+
+		return link
+
+class DNCrawler(AbstractBaseCrawler):
 	def __init__(self):
 		self.url = 'https://www.nation.co.ke/'
 
@@ -19,19 +32,6 @@ class DNCrawler:
 				if t not in story_links:
 					story_links.append(t)
 		return story_links
-
-	def make_relative_links_absolute(self, link):
-		print('Sanitizing '+ str(link))
-		import re
-		try:
-			from urlparse import urljoin
-		except ImportError:
-			from urllib.parse import urljoin
-
-		if not link.startswith(self.url):
-			link = urljoin(self.url, link)
-
-		return link
 
 	def get_story_details(self, link):
 		from datetime import datetime
@@ -75,8 +75,79 @@ class DNCrawler:
 				print('{0} error while getting {1}'.format(e, article))
 		try:
 			Article.objects.bulk_create(article_info)
-			print('Succesfully updated Daily Nation Latest Articles')
+			print('')
+			print('Succesfully updated Daily Nation Latest Articles.{} new articles added'.format(len(article_info)))
 		except Exception as e:
 			print('Error!!!{}'.format(e))
 
 		return article_info
+
+class BDCrawler(AbstractBaseCrawler):
+	def __init__(self):
+		self.url = 'https://www.businessdailyafrica.com/'
+
+	def get_top_stories(self):
+		print('Getting top stories')
+		top_stories = requests.get(self.url)
+		story_links = []
+
+		if top_stories.status_code == 200:
+			soup = BeautifulSoup(top_stories.content, 'html.parser')
+			articles = soup.select('.article a')
+
+			for article in articles:
+				article =  self.make_relative_links_absolute(article.get('href'))
+
+				if article not in story_links:
+					story_links.append(article)
+
+		return story_links
+
+
+	def get_story_details(self, link):
+		from datetime import datetime
+		story = requests.get(link)
+		if story.status_code == 200:
+			soup = BeautifulSoup(story.content, 'html.parser')
+
+			title = soup.find(class_='article-title').get_text()
+			image_url = soup.select_one('.article-img-story img.photo_article').get('src')
+			publication_date = soup.select_one('.page-box-inner header small.byline').get_text()
+			date = datetime.strptime(publication_date, '%A, %B %d, %Y %H:%M')
+			author = soup.select_one('.page-box-inner .mobileShow small.byline').get_text()
+		
+		return {'article_url':link,
+    			'image_url':image_url,
+    			'article_title':title,
+    			'publication_date':date,
+    			'author':author
+    			}
+	
+	def update_top_stories(self):
+		from habari.apps.crawl.models import Article
+		top_articles = self.get_top_stories()
+		article_info = []
+		for article in top_articles:
+			try:
+				print('Updating story content for ' + article)
+				story = self.get_story_details(article)
+				if not Article.objects.filter(article_url=article).exists():
+					article_info.append(Article(title=story['article_title'],
+						article_url=story['article_url'],
+						article_image_url=story['image_url'],
+						author=story['author'],
+						publication_date=story['publication_date'],
+						summary='blah blah blah',
+						news_source='BD'
+						))
+
+			except Exception as e:
+				print('{0} error while getting {1}'.format(e, article))
+
+		try:
+			Article.objects.bulk_create(article_info)
+			print('')
+			print('Succesfully updated Business Daily Latest Articles.{} new articles added'.format(len(article_info)))
+		except Exception as e:
+			print('Error!!!{}'.format(e))
+
