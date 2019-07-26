@@ -25,8 +25,8 @@ class Command(BaseCommand):
     		dn_crawler = crawler.DNCrawler()
     		bd_crawler = crawler.BDCrawler()
 
-    		dn_crawl = crawler.update_top_stories()
-    		bd_crawl = crawler.update_top_stories()
+    		dn_crawl = dn_crawler.update_top_stories()
+    		bd_crawl = bd_crawler.update_top_stories()
 
     		self.stdout.write(self.style.SUCCESS('Succesfully updated Latest Articles'))
 
