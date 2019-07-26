@@ -31,8 +31,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     #Third party Apps
+    'rest_framework',
     #habari apps
     'habari.apps.crawl',
+    'habari.apps.api',
 ]
 
 MIDDLEWARE_CLASSES = [
