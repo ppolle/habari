@@ -2,11 +2,11 @@
 from __future__ import unicode_literals
 
 from habari.apps.crawl.models import Article
-from serializers import ArticleSerializer
+from .serializers import ArticleSerializer
 from rest_framework import generics
 
 # Create your views here.
-class ArticleList(generics.ListView):
+class ArticleList(generics.ListAPIView):
 	"""
 	Retrieve a list of news articles from different sources
 	"""
