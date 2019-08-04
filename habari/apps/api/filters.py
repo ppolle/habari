@@ -4,6 +4,7 @@ from habari.apps.crawl.models import Article
 
 class ArticleFilter(filters.FilterSet):
     source = filters.CharFilter(field_name="news_source", lookup_expr='exact')
+    title = filters.CharFilter(field_name="title", lookup_expr='icontains')
 
     class Meta:
         model = Article
