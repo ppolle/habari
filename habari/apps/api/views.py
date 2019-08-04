@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.shortcuts import render
+from habari.apps.crawl.models import Article
+from serializers import ArticleSerializer
+from rest_framework import generics
 
 # Create your views here.
+class ArticleList(generics.ListView):
+	"""
+	Retrieve a list of news articles from different sources
+	"""
+	queryset = Article.objects.all()
+	serializer_class = ArticleSerializer
