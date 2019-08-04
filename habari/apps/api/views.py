@@ -3,7 +3,9 @@ from __future__ import unicode_literals
 
 from habari.apps.crawl.models import Article
 from .serializers import ArticleSerializer
+from django_filters import rest_framework as filters
 from rest_framework import generics
+from .filters import ArticleFilter
 
 # Create your views here.
 class ArticleList(generics.ListAPIView):
@@ -12,3 +14,5 @@ class ArticleList(generics.ListAPIView):
 	"""
 	queryset = Article.objects.all()
 	serializer_class = ArticleSerializer
+	filter_backends = (filters.DjangoFilterBackend,)
+	filterset_class = ArticleFilter

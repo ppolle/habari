@@ -32,6 +32,7 @@ INSTALLED_APPS = [
 
     #Third party Apps
     'rest_framework',
+    'django_filters',
     #habari apps
     'habari.apps.crawl',
     'habari.apps.api',
