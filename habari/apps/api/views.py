@@ -14,5 +14,4 @@ class ArticleList(generics.ListAPIView):
 	"""
 	queryset = Article.objects.all()
 	serializer_class = ArticleSerializer
-	filter_backends = (filters.DjangoFilterBackend,)
 	filterset_class = ArticleFilter
