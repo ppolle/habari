@@ -19,21 +19,50 @@ class DNCrawler(AbstractBaseCrawler):
 	def __init__(self):
 		self.url = 'https://www.nation.co.ke/'
 
-	def get_top_stories(self):
-		print('Getting top stories')
-		top_stories = requests.get(self.url)
-		story_links = []
-		if top_stories.status_code == 200:
-			soup = soup = BeautifulSoup(top_stories.content, 'html.parser')
-			small_story_list = soup.select('.small-story-list a')
-			story_teaser = soup.select('.story-teaser a')
-			nation_prime = soup.select('.gallery-words a')
-			stories = small_story_list + story_teaser + nation_prime
+	def get_category_links(self):
+		print('Getting links to all categories and sub-categories')
+		get_categories = requests.get(self.url)
+		categories = []
 
-			for t in stories:
-				t =  self.make_relative_links_absolute(t.get('href'))
-				if t not in story_links:
-					story_links.append(t)
+		if get_categories.status_code == 200:
+			soup = BeautifulSoup(get_categories.content, 'html.parser')
+			all_categories = soup.select('.menu-vertical a')
+
+			for category in all_categories:
+				cat = self.make_relative_links_absolute(category.get('href'))
+
+				if not cat.startswith('https://www.nation.co.ke/photo/') or not cat.startswith('https://www.nation.co.ke/video/'):
+					categories.append(cat)
+		plus = 0
+		for c in categories:
+			plus = plus+1
+			print('({0}) {1}'.format(plus, c))
+		return categories
+
+
+	def get_top_stories(self):
+		print('Getting the latest stories')
+		story_links = []
+		for stories in self.get_category_links():
+			try:
+				top_stories = requests.get(stories)
+				if top_stories.status_code == 200:
+					soup = BeautifulSoup(top_stories.content, 'html.parser')
+					small_story_list = soup.select('.small-story-list a')
+					story_teaser = soup.select('.story-teaser a')
+					nation_prime = soup.select('.gallery-words a')
+					latest_news  = soup.select('most-popular-item a')
+
+					stories = small_story_list + story_teaser + nation_prime + latest_news
+
+					for t in stories:
+						t =  self.make_relative_links_absolute(t.get('href'))
+						if t not in story_links:
+							story_links.append(t)
+				
+			except Exception as e:
+				print('{0} error while getting top stories for {1}'.format(e, stories))
+
 		return story_links
 
 	def get_story_details(self, link):
