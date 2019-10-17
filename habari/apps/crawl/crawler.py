@@ -25,9 +25,12 @@ class DNCrawler(AbstractBaseCrawler):
 		story_links = []
 		if top_stories.status_code == 200:
 			soup = soup = BeautifulSoup(top_stories.content, 'html.parser')
-			teaser = soup.select('.small-story-list a')
-			teaser =  teaser + soup.select('.story-teaser a')
-			for t in teaser:
+			small_story_list = soup.select('.small-story-list a')
+			story_teaser = soup.select('.story-teaser a')
+			nation_prime = soup.select('.gallery-words a')
+			stories = small_story_list + story_teaser + nation_prime
+
+			for t in stories:
 				t =  self.make_relative_links_absolute(t.get('href'))
 				if t not in story_links:
 					story_links.append(t)
@@ -45,7 +48,7 @@ class DNCrawler(AbstractBaseCrawler):
 			date = datetime.strptime(publication_date, '%A %B %d %Y')
 			author = [a.get_text() for a in soup.select('.story-view .author strong')][0]
 		else:
-			print('Getting stuff failed')
+			print('Failed to get {} details.'.format(link))
 
 		return {'article_url':url,
     			'image_url':image_url,
