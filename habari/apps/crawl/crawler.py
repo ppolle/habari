@@ -22,7 +22,7 @@ class DNCrawler(AbstractBaseCrawler):
 	def get_category_links(self):
 		print('Getting links to all categories and sub-categories')
 		get_categories = requests.get(self.url)
-		categories = []
+		categories = [self.url,]
 
 		if get_categories.status_code == 200:
 			soup = BeautifulSoup(get_categories.content, 'html.parser')
@@ -31,7 +31,7 @@ class DNCrawler(AbstractBaseCrawler):
 			for category in all_categories:
 				cat = self.make_relative_links_absolute(category.get('href'))
 
-				if not cat.startswith('https://www.nation.co.ke/photo/') or not cat.startswith('https://www.nation.co.ke/video/'):
+				while not cat.startswith('https://www.nation.co.ke/photo/'):
 					categories.append(cat)
 		plus = 0
 		for c in categories:
@@ -70,7 +70,6 @@ class DNCrawler(AbstractBaseCrawler):
 		story= requests.get(link)
 		if story.status_code == 200:
 			soup = BeautifulSoup(story.content, 'html.parser')
-			url = link
 			image_url = self.make_relative_links_absolute(soup.select('.story-view header img')[0].get('src'))
 			title = [t.get_text() for t in soup.select('.story-view header h2')][0]
 			publication_date = [p.get_text() for p in soup.select('.story-view header h6')][0]
@@ -79,7 +78,7 @@ class DNCrawler(AbstractBaseCrawler):
 		else:
 			print('Failed to get {} details.'.format(link))
 
-		return {'article_url':url,
+		return {'article_url':link,
     			'image_url':image_url,
     			'article_title':title,
     			'publication_date':date,
