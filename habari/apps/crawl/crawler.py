@@ -31,7 +31,7 @@ class DNCrawler(AbstractBaseCrawler):
 			for category in all_categories:
 				cat = self.make_relative_links_absolute(category.get('href'))
 
-				while not cat.startswith('https://www.nation.co.ke/photo/'):
+				if not cat.startswith('https://www.nation.co.ke/photo/'):
 					categories.append(cat)
 		plus = 0
 		for c in categories:
