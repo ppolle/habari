@@ -140,10 +140,9 @@ class BDCrawler(AbstractBaseCrawler):
 
 	def get_top_stories(self):
 		print('Getting top stories')
-		
 		story_links = []
 
-		for stories in self.get_catgory_links():
+		for stories in self.get_category_links():
 			try:
 				top_stories = requests.get(stories)
 				if top_stories.status_code == 200:
@@ -152,7 +151,6 @@ class BDCrawler(AbstractBaseCrawler):
 
 					for article in articles:
 						article =  self.make_relative_links_absolute(article.get('href'))
-
 						if article not in story_links:
 							story_links.append(article)
 
