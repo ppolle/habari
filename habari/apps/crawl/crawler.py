@@ -117,20 +117,47 @@ class BDCrawler(AbstractBaseCrawler):
 	def __init__(self):
 		self.url = 'https://www.businessdailyafrica.com/'
 
+	def get_category_links(self):
+		print('Getting links to all categories and sub-categories')
+		get_categories = requests.get(self.url)
+		categories = [self.url,]
+
+		if get_categories.status_code == 200:
+			soup = BeautifulSoup(get_categories.content, 'html.parser')
+			all_categories = soup.select('.menu-vertical a')
+
+			for category in all_categories:
+				cat = self.make_relative_links_absolute(category.get('href'))
+
+				if not cat.startswith('https://www.businessdailyafrica.com/videos/'):
+					categories.append(cat)
+		plus = 0
+		for c in categories:
+			plus = plus+1
+			print('({0}) {1}'.format(plus, c))
+		return categories
+
+
 	def get_top_stories(self):
 		print('Getting top stories')
-		top_stories = requests.get(self.url)
+		
 		story_links = []
 
-		if top_stories.status_code == 200:
-			soup = BeautifulSoup(top_stories.content, 'html.parser')
-			articles = soup.select('.article a')
+		for stories in self.get_catgory_links():
+			try:
+				top_stories = requests.get(stories)
+				if top_stories.status_code == 200:
+					soup = BeautifulSoup(top_stories.content, 'html.parser')
+					articles = soup.select('.article a')
 
-			for article in articles:
-				article =  self.make_relative_links_absolute(article.get('href'))
+					for article in articles:
+						article =  self.make_relative_links_absolute(article.get('href'))
 
-				if article not in story_links:
-					story_links.append(article)
+						if article not in story_links:
+							story_links.append(article)
+
+			except Exception as e:
+				print('{0} error while getting top stories for {1}'.format(e, stories))
 
 		return story_links
 
