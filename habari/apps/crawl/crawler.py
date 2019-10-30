@@ -167,7 +167,7 @@ class BDCrawler(AbstractBaseCrawler):
 			soup = BeautifulSoup(story.content, 'html.parser')
 
 			title = soup.find(class_='article-title').get_text()
-			image_url = soup.select_one('.article-img-story img.photo_article').get('src')
+			image_url = self.make_relative_links_absolute(soup.select_one('.article-img-story img.photo_article').get('src'))
 			publication_date = soup.select_one('.page-box-inner header small.byline').get_text()
 			date = datetime.strptime(publication_date, '%A, %B %d, %Y %H:%M')
 			author = soup.select_one('.page-box-inner .mobileShow small.byline').get_text().strip()[2:]
