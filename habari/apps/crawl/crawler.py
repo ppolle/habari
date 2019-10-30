@@ -74,7 +74,7 @@ class DNCrawler(AbstractBaseCrawler):
 			title = [t.get_text() for t in soup.select('.story-view header h2')][0]
 			publication_date = [p.get_text() for p in soup.select('.story-view header h6')][0]
 			date = datetime.strptime(publication_date, '%A %B %d %Y')
-			author = [a.get_text() for a in soup.select('.story-view .author strong')][0]
+			author = [a.get_text() for a in soup.select('.story-view .author strong')][0].strip()[2:]
 		else:
 			print('Failed to get {} details.'.format(link))
 
@@ -170,7 +170,7 @@ class BDCrawler(AbstractBaseCrawler):
 			image_url = soup.select_one('.article-img-story img.photo_article').get('src')
 			publication_date = soup.select_one('.page-box-inner header small.byline').get_text()
 			date = datetime.strptime(publication_date, '%A, %B %d, %Y %H:%M')
-			author = soup.select_one('.page-box-inner .mobileShow small.byline').get_text()
+			author = soup.select_one('.page-box-inner .mobileShow small.byline').get_text().strip()[2:]
 		
 		return {'article_url':link,
     			'image_url':image_url,
