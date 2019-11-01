@@ -31,7 +31,9 @@ class DNCrawler(AbstractBaseCrawler):
 			for category in all_categories:
 				cat = self.make_relative_links_absolute(category.get('href'))
 
-				if not cat.startswith('https://www.nation.co.ke/photo/'):
+				if cat.startswith('https://www.nation.co.ke/photo/') or cat.startswith('https://www.nation.co.ke/video/'):
+					pass
+				else:
 					categories.append(cat)
 		plus = 0
 		for c in categories:
@@ -129,7 +131,9 @@ class BDCrawler(AbstractBaseCrawler):
 			for category in all_categories:
 				cat = self.make_relative_links_absolute(category.get('href'))
 
-				if not cat.startswith('https://www.businessdailyafrica.com/videos/'):
+				if cat.startswith('https://www.businessdailyafrica.com/videos/') or cat.startswith('https://www.businessdailyafrica.com/datahub/'):
+					pass
+				else:
 					categories.append(cat)
 		plus = 0
 		for c in categories:
