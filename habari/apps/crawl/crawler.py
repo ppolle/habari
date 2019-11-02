@@ -86,6 +86,28 @@ class DNCrawler(AbstractBaseCrawler):
     			'publication_date':date,
     			'author':author}
 
+	# def get_newsplex_story_details(self, link):
+	# 	from datetime import datetime
+	# 	story = requests.get(link)
+
+	# 	if story.status_code == 200:
+ #    		soup = beautifulSoup(story.content, 'html.parser')
+ #    		image_url = self.make_relative_links_absolute()
+ #    		title = 
+ #    		publication_date =
+ #    		date = 
+ #    		author = 
+    	
+ #    	else:
+ #    		print('Failed to get {} details'. format(link))
+
+ #    	return {'article_url':link,
+ #    			'image_url':image_url,
+ #    			'article_title':title,
+ #    			'publication_date':date,
+ #    			'author':author
+ #    			}
+
 	def update_top_stories(self):
 		from habari.apps.crawl.models import Article
 		top_articles = self.get_top_stories()
@@ -182,7 +204,7 @@ class BDCrawler(AbstractBaseCrawler):
     			'publication_date':date,
     			'author':author
     			}
-	
+
 	def update_top_stories(self):
 		from habari.apps.crawl.models import Article
 		top_articles = self.get_top_stories()
