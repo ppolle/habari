@@ -18,6 +18,5 @@ class ArticleList(generics.ListAPIView):
 	def get_queryset(self):
 		from datetime import datetime, timedelta
 
-		time_threshold = datetime.today() - timedelta(days=1)
-		results = Article.objects.filter(publication_date__gte=time_threshold)
-		return results
+		last_day = datetime.today() - timedelta(days=1)
+		return Article.objects.filter(publication_date__gte=last_day)
