@@ -75,7 +75,7 @@ class DNCrawler(AbstractBaseCrawler):
 
         return story_links
 
-    def get_story_details(self, link):
+    def get_main_story_details(self, link):
         from datetime import datetime
         story = requests.get(link)
 
@@ -99,12 +99,12 @@ class DNCrawler(AbstractBaseCrawler):
                 'publication_date': date,
                 'author': author}
 
-    def get_newsplex_story_details(self, link):
+    def get_newsplex_and_healthynation_story_details(self, link):
     	from datetime import datetime
     	story = requests.get(link)
 
     	if story.status_code == 200:
-    		soup = beautifulSoup(story.content, 'html.parser')
+    		soup = BeautifulSoup(story.content, 'html.parser')
     		image_url = self.make_relative_links_absolute(soup.select_one('.hero.hero-chart .figcap-box img').get('src'))
     		title = soup.select_one('.hero.hero-chart').get_text()
     		publication_date = soup.select_one('date').get_text()
@@ -128,7 +128,10 @@ class DNCrawler(AbstractBaseCrawler):
         for article in top_articles:
             try:
                 print('Updating story content for ' + article)
-                story = self.get_story_details(article)
+                if article.startswith('https://www.nation.co.ke/health') or article.startswith('https://www.nation.co.ke/newsplex'):
+                	story = self.get_newsplex_and_healthynation_story_details(article)
+                else:
+                	story = self.get_main_story_details(article)
                 if not Article.objects.filter(article_url=article).exists():
                     article_info.append(Article(title=story['article_title'],
                                                 article_url=story['article_url'],
