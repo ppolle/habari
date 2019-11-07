@@ -55,14 +55,14 @@ class DNCrawler(AbstractBaseCrawler):
 
                 	if stories.startswith('https://www.nation.co.ke/health') or stories.startswith('https://www.nation.co.ke/newsplex'):
                 		stories = soup.select('article a')
-                	# else:
-	                #     soup = BeautifulSoup(top_stories.content, 'html.parser')
-	                #     small_story_list = soup.select('.small-story-list a')
-	                #     story_teaser = soup.select('.story-teaser a')
-	                #     nation_prime = soup.select('.gallery-words a')
-	                #     latest_news = soup.select('.most-popular-item a')
+                	else:
+	                    soup = BeautifulSoup(top_stories.content, 'html.parser')
+	                    small_story_list = soup.select('.small-story-list a')
+	                    story_teaser = soup.select('.story-teaser a')
+	                    nation_prime = soup.select('.gallery-words a')
+	                    latest_news = soup.select('.most-popular-item a')
 
-	                #     stories = small_story_list + story_teaser + nation_prime + latest_news
+	                    stories = small_story_list + story_teaser + nation_prime + latest_news
 
 	                for t in stories:
 	                	t = self.make_relative_links_absolute(t.get('href'))
