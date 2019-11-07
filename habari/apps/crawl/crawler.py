@@ -51,19 +51,24 @@ class DNCrawler(AbstractBaseCrawler):
             try:
                 top_stories = requests.get(stories)
                 if top_stories.status_code == 200:
-                    soup = BeautifulSoup(top_stories.content, 'html.parser')
-                    small_story_list = soup.select('.small-story-list a')
-                    story_teaser = soup.select('.story-teaser a')
-                    nation_prime = soup.select('.gallery-words a')
-                    latest_news = soup.select('.most-popular-item a')
+                	soup = BeautifulSoup(top_stories.content, 'html.parser')
 
-                    stories = small_story_list + story_teaser + nation_prime + latest_news
+                	if stories.startswith('https://www.nation.co.ke/health') or stories.startswith('https://www.nation.co.ke/newsplex'):
+                		stories = soup.select('article a')
+                	# else:
+	                #     soup = BeautifulSoup(top_stories.content, 'html.parser')
+	                #     small_story_list = soup.select('.small-story-list a')
+	                #     story_teaser = soup.select('.story-teaser a')
+	                #     nation_prime = soup.select('.gallery-words a')
+	                #     latest_news = soup.select('.most-popular-item a')
 
-                    for t in stories:
-                        t = self.make_relative_links_absolute(t.get('href'))
-                        if t not in story_links:
-                            story_links.append(t)
+	                #     stories = small_story_list + story_teaser + nation_prime + latest_news
 
+	                for t in stories:
+	                	t = self.make_relative_links_absolute(t.get('href'))
+	                	if t not in story_links:
+	                		story_links.append(t)
+					
             except Exception as e:
                 print(
                     '{0} error while getting top stories for {1}'.format(e, stories))
