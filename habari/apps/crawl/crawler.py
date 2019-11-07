@@ -108,7 +108,7 @@ class DNCrawler(AbstractBaseCrawler):
     		image_url = self.make_relative_links_absolute(soup.select_one('.hero.hero-chart .figcap-box img').get('src'))
     		title = soup.select_one('.hero.hero-chart').get_text()
     		publication_date = soup.select_one('date').get_text()
-    		date =
+    		date = datetime.strptime(publication_date, '%d/%m/%Y')
     		author = soup.select_one('.byline figcaption h6').get_text().strip()[2:]
 
     	else:
