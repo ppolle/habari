@@ -78,6 +78,7 @@ class DNCrawler(AbstractBaseCrawler):
     def get_story_details(self, link):
         from datetime import datetime
         story = requests.get(link)
+
         if story.status_code == 200:
             soup = BeautifulSoup(story.content, 'html.parser')
             image_url = self.make_relative_links_absolute(
@@ -98,27 +99,27 @@ class DNCrawler(AbstractBaseCrawler):
                 'publication_date': date,
                 'author': author}
 
-    # def get_newsplex_story_details(self, link):
-    # 	from datetime import datetime
-    # 	story = requests.get(link)
+    def get_newsplex_story_details(self, link):
+    	from datetime import datetime
+    	story = requests.get(link)
 
-    # 	if story.status_code == 200:
- #    		soup = beautifulSoup(story.content, 'html.parser')
- #    		image_url = self.make_relative_links_absolute()
- #    		title =
- #    		publication_date =
- #    		date =
- #    		author =
+    	if story.status_code == 200:
+    		soup = beautifulSoup(story.content, 'html.parser')
+    		image_url = self.make_relative_links_absolute(soup.select_one('.hero.hero-chart .figcap-box img').get('src'))
+    		title = soup.select_one('.hero.hero-chart').get_text()
+    		publication_date = soup.select_one('date').get_text()
+    		date =
+    		author = soup.select_one('.byline figcaption h6').get_text().strip()[2:]
 
- #    	else:
- #    		print('Failed to get {} details'. format(link))
+    	else:
+    		print('Failed to get {} details'. format(link))
 
- #    	return {'article_url':link,
- #    			'image_url':image_url,
- #    			'article_title':title,
- #    			'publication_date':date,
- #    			'author':author
- #    			}
+    	return {'article_url':link,
+    			'image_url':image_url,
+    			'article_title':title,
+    			'publication_date':date,
+    			'author':author
+    			}
 
     def update_top_stories(self):
         from habari.apps.crawl.models import Article
