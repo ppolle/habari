@@ -5,7 +5,6 @@ from bs4 import BeautifulSoup
 class AbstractBaseCrawler:
     def make_relative_links_absolute(self, link):
         print('Sanitizing ' + str(link))
-        import re
         try:
             from urlparse import urljoin
         except ImportError:
@@ -20,13 +19,19 @@ class AbstractBaseCrawler:
     	import re
     	from datetime import datetime, timedelta
 
-    	matches = re.search(r"(\d+ weeks?,? )?(\d+ days?,? )?(\d+ hours?,? )?(\d+ mins?,? )?(\d+ secs? )?ago", date_string)
-    	if matches:
+    	date_pattern_1 = re.search(r"(\d+ weeks?,? )?(\d+ days?,? )?(\d+ hours?,? )?(\d+ mins?,? )?(\d+ secs? )?ago", date_string)
+    	date_pattern_2 = re.search(r"^(0[1-9]|[12][0-9]|3[01])[- /.](0[1-9]|1[012])[- /.](19|20)\d\d$", date_string)
+    	
+    	if date_pattern_1:
     		parsed_date_String = [date_string.split()[:2]]
     		time_dict = dict((fmt,float(amount)) for amount,fmt in parsed_date_String)
     		dt = timedelta(**time_dict)
     		return datetime.now() - dt
-    	else:
+    	
+    	if date_pattern_2:
+    		return datetime.strptime(date_string, '%a %b %d %H:%M:%S %Z %Y')
+
+    	if date_pattern_3:
     		return datetime.strptime(date_string, '%a %b %d %H:%M:%S %Z %Y')
 
 
