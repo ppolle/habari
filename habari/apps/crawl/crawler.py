@@ -16,6 +16,19 @@ class AbstractBaseCrawler:
 
         return link
 
+    def create_datetime_object_from_string(self, date_string):
+    	import re
+    	from datetime import datetime, timedelta
+
+    	matches = re.search(r"(\d+ weeks?,? )?(\d+ days?,? )?(\d+ hours?,? )?(\d+ mins?,? )?(\d+ secs? )?ago", date_string)
+    	if matches:
+    		parsed_date_String = [date_string.split()[:2]]
+    		time_dict = dict((fmt,float(amount)) for amount,fmt in parsed_date_String)
+    		dt = timedelta(**time_dict)
+    		return datetime.now() - dt
+    	else:
+    		return datetime.strptime(date_string, '%a %b %d %H:%M:%S %Z %Y')
+
 
 class DNCrawler(AbstractBaseCrawler):
     def __init__(self):
@@ -55,14 +68,14 @@ class DNCrawler(AbstractBaseCrawler):
 
                 	if stories.startswith('https://www.nation.co.ke/health') or stories.startswith('https://www.nation.co.ke/newsplex'):
                 		stories = soup.select('article a')
-                	else:
-	                    soup = BeautifulSoup(top_stories.content, 'html.parser')
-	                    small_story_list = soup.select('.small-story-list a')
-	                    story_teaser = soup.select('.story-teaser a')
-	                    nation_prime = soup.select('.gallery-words a')
-	                    latest_news = soup.select('.most-popular-item a')
+                	# else:
+	                #     soup = BeautifulSoup(top_stories.content, 'html.parser')
+	                #     small_story_list = soup.select('.small-story-list a')
+	                #     story_teaser = soup.select('.story-teaser a')
+	                #     nation_prime = soup.select('.gallery-words a')
+	                #     latest_news = soup.select('.most-popular-item a')
 
-	                    stories = small_story_list + story_teaser + nation_prime + latest_news
+	                #     stories = small_story_list + story_teaser + nation_prime + latest_news
 
 	                for t in stories:
 	                	t = self.make_relative_links_absolute(t.get('href'))
@@ -108,7 +121,7 @@ class DNCrawler(AbstractBaseCrawler):
     		image_url = self.make_relative_links_absolute(soup.select_one('.hero.hero-chart .figcap-box img').get('src'))
     		title = soup.select_one('.hero.hero-chart').get_text()
     		publication_date = soup.select_one('date').get_text()
-    		date = datetime.strptime(publication_date, '%a %b %d %H:%M:%S %Z %Y')
+    		date = self.create_datetime_object_from_string(publication_date)
     		author = soup.select_one('.byline figcaption h6').get_text().strip()[2:]
 
     	else:
