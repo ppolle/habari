@@ -101,10 +101,10 @@ class DNCrawler(AbstractBaseCrawler):
 
                         stories = small_story_list + story_teaser + nation_prime + latest_news
 
-                    for t in stories:
-                        t = self.make_relative_links_absolute(t.get('href'))
-                        if t not in story_links:
-                            story_links.append(t)
+                    for story in stories:
+                        story = self.make_relative_links_absolute(t.get('href'))
+                        if story not in story_links and self.check_for_top_level_domain(story):
+                            story_links.append(story)
 
             except Exception as e:
                 print(
@@ -229,7 +229,7 @@ class BDCrawler(AbstractBaseCrawler):
                     for article in articles:
                         article = self.make_relative_links_absolute(
                             article.get('href'))
-                        if article not in story_links:
+                        if article not in story_links and self.check_for_top_level_domain():
                             story_links.append(article)
 
             except Exception as e:
