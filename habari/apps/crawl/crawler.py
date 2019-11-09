@@ -1,5 +1,6 @@
 import re
 import requests
+import tldextract
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 from habari.apps.crawl.models import Article
@@ -38,6 +39,21 @@ class AbstractBaseCrawler:
 
         if date_pattern_3:
             return datetime.strptime(date_string, '%a %b %d %H:%M:%S %Z %Y')
+
+    def check_for_top_level_domain(self, link):
+        '''
+        makes sure that links are the same top level domain as the news site being crawled
+        '''
+        base_tld = tldextract.extract(self.url).registered_domain
+        link_tld = tldextract.extract(link).registered_domain
+
+        if link.startswith('https://') or link.startswith('http://'):
+            if base_tld == link_tld:
+                return True
+            else:
+                return False
+        else:
+            return False
 
 
 class DNCrawler(AbstractBaseCrawler):
