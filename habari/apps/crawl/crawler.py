@@ -21,7 +21,8 @@ class AbstractBaseCrawler:
 
     	date_pattern_1 = re.search(r"(\d+ weeks?,? )?(\d+ days?,? )?(\d+ hours?,? )?(\d+ mins?,? )?(\d+ secs? )?ago", date_string)
     	date_pattern_2 = re.search(r"^(0[1-9]|[12][0-9]|3[01])[- /.](0[1-9]|1[012])[- /.](19|20)\d\d$", date_string)
-    	
+    	date_pattern_3 = re.search(r"^(Sun|Mon|Tue|Wed|Thur|Fri|Sat)\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s(0[1-9]|[12][0-9]|3[01])\s[0-5][0-9]:[0-5][0-9]:[0-5][0-9]\s(UTC|IST|CST)\s(19|20)\d\d$", date_string)
+
     	if date_pattern_1:
     		parsed_date_String = [date_string.split()[:2]]
     		time_dict = dict((fmt,float(amount)) for amount,fmt in parsed_date_String)
@@ -29,7 +30,7 @@ class AbstractBaseCrawler:
     		return datetime.now() - dt
     	
     	if date_pattern_2:
-    		return datetime.strptime(date_string, '%a %b %d %H:%M:%S %Z %Y')
+    		return datetime.strptime(date_string, '%d/%m/%Y')
 
     	if date_pattern_3:
     		return datetime.strptime(date_string, '%a %b %d %H:%M:%S %Z %Y')
@@ -73,14 +74,14 @@ class DNCrawler(AbstractBaseCrawler):
 
                 	if stories.startswith('https://www.nation.co.ke/health') or stories.startswith('https://www.nation.co.ke/newsplex'):
                 		stories = soup.select('article a')
-                	# else:
-	                #     soup = BeautifulSoup(top_stories.content, 'html.parser')
-	                #     small_story_list = soup.select('.small-story-list a')
-	                #     story_teaser = soup.select('.story-teaser a')
-	                #     nation_prime = soup.select('.gallery-words a')
-	                #     latest_news = soup.select('.most-popular-item a')
+                	else:
+	                    soup = BeautifulSoup(top_stories.content, 'html.parser')
+	                    small_story_list = soup.select('.small-story-list a')
+	                    story_teaser = soup.select('.story-teaser a')
+	                    nation_prime = soup.select('.gallery-words a')
+	                    latest_news = soup.select('.most-popular-item a')
 
-	                #     stories = small_story_list + story_teaser + nation_prime + latest_news
+	                    stories = small_story_list + story_teaser + nation_prime + latest_news
 
 	                for t in stories:
 	                	t = self.make_relative_links_absolute(t.get('href'))
