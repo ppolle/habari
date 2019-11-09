@@ -229,7 +229,7 @@ class BDCrawler(AbstractBaseCrawler):
                     for article in articles:
                         article = self.make_relative_links_absolute(
                             article.get('href'))
-                        if article not in story_links and self.check_for_top_level_domain():
+                        if article not in story_links and self.check_for_top_level_domain(article):
                             story_links.append(article)
 
             except Exception as e:
