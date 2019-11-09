@@ -1,5 +1,8 @@
+import re
 import requests
 from bs4 import BeautifulSoup
+from datetime import datetime, timedelta
+from habari.apps.crawl.models import Article
 
 
 class AbstractBaseCrawler:
@@ -16,9 +19,6 @@ class AbstractBaseCrawler:
         return link
 
     def create_datetime_object_from_string(self, date_string):
-    	import re
-    	from datetime import datetime, timedelta
-
     	date_pattern_1 = re.search(r"(\d+ weeks?,? )?(\d+ days?,? )?(\d+ hours?,? )?(\d+ mins?,? )?(\d+ secs? )?ago", date_string)
     	date_pattern_2 = re.search(r"^(0[1-9]|[12][0-9]|3[01])[- /.](0[1-9]|1[012])[- /.](19|20)\d\d$", date_string)
     	date_pattern_3 = re.search(r"^(Sun|Mon|Tue|Wed|Thur|Fri|Sat)\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s(0[1-9]|[12][0-9]|3[01])\s[0-5][0-9]:[0-5][0-9]:[0-5][0-9]\s(UTC|IST|CST)\s(19|20)\d\d$", date_string)
@@ -57,10 +57,7 @@ class DNCrawler(AbstractBaseCrawler):
                     pass
                 else:
                     categories.append(cat)
-        plus = 0
-        for c in categories:
-            plus = plus+1
-            print('({0}) {1}'.format(plus, c))
+
         return categories
 
     def get_top_stories(self):
@@ -95,7 +92,6 @@ class DNCrawler(AbstractBaseCrawler):
         return story_links
 
     def get_main_story_details(self, link):
-        from datetime import datetime
         story = requests.get(link)
 
         if story.status_code == 200:
@@ -119,7 +115,6 @@ class DNCrawler(AbstractBaseCrawler):
                 'author': author}
 
     def get_newsplex_and_healthynation_story_details(self, link):
-    	from datetime import datetime
     	story = requests.get(link)
 
     	if story.status_code == 200:
@@ -141,7 +136,6 @@ class DNCrawler(AbstractBaseCrawler):
     			}
 
     def update_top_stories(self):
-        from habari.apps.crawl.models import Article
         top_articles = self.get_top_stories()
         article_info = []
         for article in top_articles:
@@ -194,10 +188,7 @@ class BDCrawler(AbstractBaseCrawler):
                     pass
                 else:
                     categories.append(cat)
-        plus = 0
-        for c in categories:
-            plus = plus+1
-            print('({0}) {1}'.format(plus, c))
+
         return categories
 
     def get_top_stories(self):
@@ -224,7 +215,6 @@ class BDCrawler(AbstractBaseCrawler):
         return story_links
 
     def get_story_details(self, link):
-        from datetime import datetime
         story = requests.get(link)
         if story.status_code == 200:
             soup = BeautifulSoup(story.content, 'html.parser')
@@ -246,7 +236,6 @@ class BDCrawler(AbstractBaseCrawler):
                 }
 
     def update_top_stories(self):
-        from habari.apps.crawl.models import Article
         top_articles = self.get_top_stories()
         article_info = []
         for article in top_articles:
