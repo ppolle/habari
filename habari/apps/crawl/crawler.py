@@ -102,7 +102,7 @@ class DNCrawler(AbstractBaseCrawler):
                         stories = small_story_list + story_teaser + nation_prime + latest_news
 
                     for story in stories:
-                        story = self.make_relative_links_absolute(t.get('href'))
+                        story = self.make_relative_links_absolute(story.get('href'))
                         if story not in story_links and self.check_for_top_level_domain(story):
                             story_links.append(story)
 
