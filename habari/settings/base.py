@@ -118,5 +118,50 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+# ==============================================================================
+# Celery Project Settings settings
+# ==============================================================================
+
 CELERY_BROKER_URL = 'amqp://localhost'
 CELERY_TIMEZONE = 'Africa/Nairobi'
+
+# ==============================================================================
+# Logging settings
+# ==============================================================================
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        'file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'formatter': 'verbose',
+            'filename': os.path.join(BASE_DIR, 'logs/django.log'),
+            'maxBytes': '16777216', # 16megabytes
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console, file'],
+            'level': 'INFO'
+            'propagate': True,
+        },
+    }
+}
