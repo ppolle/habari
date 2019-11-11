@@ -112,8 +112,7 @@ class DNCrawler(AbstractBaseCrawler):
             except Exception as e:
                 logger.exception(
                     '{0} error while getting top stories for {1}'.format(e, stories))
-
-                raise
+                
 
         return story_links
 
@@ -133,8 +132,7 @@ class DNCrawler(AbstractBaseCrawler):
                 '.story-view .author strong')][0].strip()[2:]
         else:
             logger.exception('Failed to get {} details.'.format(link))
-
-            raise
+            
 
         return {'article_url': link,
                 'image_url': image_url,
@@ -188,8 +186,7 @@ class DNCrawler(AbstractBaseCrawler):
 
             except Exception as e:
                 logger.exception('Crawling Error: {0} while getting data from: {1}'.format(e, article))
-
-                raise
+                
         try:
             Article.objects.bulk_create(article_info)
             logger.info('')
@@ -197,8 +194,7 @@ class DNCrawler(AbstractBaseCrawler):
                 len(article_info)))
         except Exception as e:
             logger.exception('Error!!!{}'.format(e))
-
-            raise
+            
 
         return article_info
 
@@ -247,7 +243,6 @@ class BDCrawler(AbstractBaseCrawler):
                 logger.exception(
                     'Crawl Error: {0} ,while getting top stories for: {1}'.format(e, stories))
 
-                raise
 
         return story_links
 
@@ -292,7 +287,6 @@ class BDCrawler(AbstractBaseCrawler):
             except Exception as e:
                 logger.exception('Crawling Error: {0} while getting data from: {1}'.format(e, article))
 
-                raise
 
         try:
             Article.objects.bulk_create(article_info)
