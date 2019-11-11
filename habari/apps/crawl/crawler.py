@@ -1,14 +1,17 @@
 import re
+import logging
 import requests
 import tldextract
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 from habari.apps.crawl.models import Article
 
+logger = logging.getLogger(__name__)
+
 
 class AbstractBaseCrawler:
     def make_relative_links_absolute(self, link):
-        print('Sanitizing ' + str(link))
+        logger.info('Sanitizing ' + str(link))
         try:
             from urlparse import urljoin
         except ImportError:
@@ -61,7 +64,7 @@ class DNCrawler(AbstractBaseCrawler):
         self.url = 'https://www.nation.co.ke/'
 
     def get_category_links(self):
-        print('Getting links to all categories and sub-categories')
+        logger.info('Getting links to all categories and sub-categories')
         get_categories = requests.get(self.url)
         categories = [self.url, ]
 
