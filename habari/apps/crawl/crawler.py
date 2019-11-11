@@ -84,7 +84,7 @@ class DNCrawler(AbstractBaseCrawler):
         return categories
 
     def get_top_stories(self):
-        print('Getting the latest stories')
+        logger.info('Getting the latest stories')
         story_links = []
         for stories in self.get_category_links():
             try:
@@ -110,8 +110,10 @@ class DNCrawler(AbstractBaseCrawler):
                             story_links.append(story)
 
             except Exception as e:
-                print(
+                logger.exception(
                     '{0} error while getting top stories for {1}'.format(e, stories))
+
+                raise
 
         return story_links
 
@@ -130,7 +132,9 @@ class DNCrawler(AbstractBaseCrawler):
             author = [a.get_text() for a in soup.select(
                 '.story-view .author strong')][0].strip()[2:]
         else:
-            print('Failed to get {} details.'.format(link))
+            logger.exception('Failed to get {} details.'.format(link))
+
+            raise
 
         return {'article_url': link,
                 'image_url': image_url,
@@ -152,7 +156,7 @@ class DNCrawler(AbstractBaseCrawler):
                 '.byline figcaption h6').get_text().strip()[2:]
 
         else:
-            print('Failed to get {} details'. format(link))
+            logger.exception('Failed to get {} details'. format(link))
 
         return {'article_url': link,
                 'image_url': image_url,
@@ -166,7 +170,7 @@ class DNCrawler(AbstractBaseCrawler):
         article_info = []
         for article in top_articles:
             try:
-                print('Updating story content for ' + article)
+                logger.info('Updating story content for ' + article)
                 if article.startswith('https://www.nation.co.ke/health') or article.startswith('https://www.nation.co.ke/newsplex'):
                     story = self.get_newsplex_and_healthynation_story_details(
                         article)
@@ -183,14 +187,18 @@ class DNCrawler(AbstractBaseCrawler):
                                                 ))
 
             except Exception as e:
-                print('{0} error while getting {1}'.format(e, article))
+                logger.exception('Crawling Error: {0} while getting data from: {1}'.format(e, article))
+
+                raise
         try:
             Article.objects.bulk_create(article_info)
-            print('')
-            print('Succesfully updated Daily Nation Latest Articles.{} new articles added'.format(
+            logger.info('')
+            logger.info('Succesfully updated Daily Nation Latest Articles.{} new articles added'.format(
                 len(article_info)))
         except Exception as e:
-            print('Error!!!{}'.format(e))
+            logger.exception('Error!!!{}'.format(e))
+
+            raise
 
         return article_info
 
@@ -200,7 +208,7 @@ class BDCrawler(AbstractBaseCrawler):
         self.url = 'https://www.businessdailyafrica.com/'
 
     def get_category_links(self):
-        print('Getting links to all categories and sub-categories')
+        logger.info('Getting links to all categories and sub-categories')
         get_categories = requests.get(self.url)
         categories = [self.url, ]
 
@@ -219,7 +227,7 @@ class BDCrawler(AbstractBaseCrawler):
         return categories
 
     def get_top_stories(self):
-        print('Getting top stories')
+        logger.info('Getting top stories')
         story_links = []
 
         for stories in self.get_category_links():
@@ -236,8 +244,10 @@ class BDCrawler(AbstractBaseCrawler):
                             story_links.append(article)
 
             except Exception as e:
-                print(
-                    '{0} error while getting top stories for {1}'.format(e, stories))
+                logger.exception(
+                    'Crawl Error: {0} ,while getting top stories for: {1}'.format(e, stories))
+
+                raise
 
         return story_links
 
@@ -267,7 +277,7 @@ class BDCrawler(AbstractBaseCrawler):
         article_info = []
         for article in top_articles:
             try:
-                print('Updating story content for ' + article)
+                logger.info('Updating story content for ' + article)
                 story = self.get_story_details(article)
                 if not Article.objects.filter(article_url=article).exists():
                     article_info.append(Article(title=story['article_title'],
@@ -280,12 +290,14 @@ class BDCrawler(AbstractBaseCrawler):
                                                 ))
 
             except Exception as e:
-                print('{0} error while getting {1}'.format(e, article))
+                logger.exception('Crawling Error: {0} while getting data from: {1}'.format(e, article))
+
+                raise
 
         try:
             Article.objects.bulk_create(article_info)
-            print('')
-            print('Succesfully updated Business Daily Latest Articles.{} new articles added'.format(
+            logging.info('')
+            logging.info('Succesfully updated Business Daily Latest Articles.{} new articles added'.format(
                 len(article_info)))
         except Exception as e:
-            print('Error!!!{}'.format(e))
+            logging.exception('Error!!!{}'.format(e))

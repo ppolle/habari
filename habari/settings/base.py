@@ -134,12 +134,10 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '{levelname} {asctime} {module} {message}',
-            'style': '{',
+            'format': '%(levelname)s %(asctime)s %(module)s %(message)s'
         },
         'simple': {
-            'format': '{levelname} {message}',
-            'style': '{',
+            'format': '%(message)s'
         },
     },
 
@@ -153,15 +151,13 @@ LOGGING = {
             'level': 'ERROR',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
-            'filename': os.path.join(BASE_DIR, 'logs/django.log'),
-            'maxBytes': '16777216', # 16megabytes
-        },
+            'filename': os.path.join(BASE_DIR, 'logs/django.log')
+        }
     },
     'loggers': {
         '': {
-            'handlers': ['console, file'],
-            'level': 'INFO'
-            'propagate': True,
-        },
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+        }
     }
 }
