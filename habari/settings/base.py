@@ -149,9 +149,12 @@ LOGGING = {
         },
         'file': {
             'level': 'ERROR',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
             'formatter': 'verbose',
-            'filename': os.path.join(BASE_DIR, 'logs/django.log')
+            'when': 'D',
+            'interval': 1,
+            'backupCount': 10,
+            'filename': os.path.join(BASE_DIR, 'logs/development.log')
         }
     },
     'loggers': {
