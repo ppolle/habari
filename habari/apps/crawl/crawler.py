@@ -291,8 +291,8 @@ class EACrawler(AbstractBaseCrawler):
     def __init__(self):
         self.url = 'https://www.theeastafrican.co.ke/'
 
-    def get_category_links(self):
-        print('Getting all categories')
+    def get_rss_feed_links(self):
+        print('Getting RSS feeds links')
         get_categories= requests.get(self.url)
         categories = [self.url, ]
         rss_feeds = []
@@ -313,9 +313,37 @@ class EACrawler(AbstractBaseCrawler):
                 rss_feeds.append(rss)
 
         return rss_feeds
-
         
     def get_top_stories(self):
-        pass
+        rss_feeds = self.get_rss_feed_links()
+        stories = []
+        for rss in rss_feeds:
+            try:
+                request = requests.get(rss)
+                if request.status_code == 200:
+                    soup = BeautifulSoup(request.content, 'xml')
+                    articles = soup.find_all('item')
+
+                    for article in articles:
+                        if article.find('name').string == 'title':
+                            title = article.find('value').string
+
+                        if article.find('name').string == 'description':
+                            summary = article.find('value').string
+
+                        if article.find('name').string == 'link':
+                            link = article.find('value').string
+
+                        if article.find('name').string == 'dc:date':
+                            date = article.find('value').string
+                        stories.append({
+                            'title': title,
+                            'article_url': link,
+                            'publication_date': date,
+                            'summary': summary,})
+            except Exception as e:
+                print('Error:{0} while getting stories from {1}'.format(e,rss))
+        return stories
+        
     def update_top_stories(self):
         pass
