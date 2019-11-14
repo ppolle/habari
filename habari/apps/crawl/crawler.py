@@ -326,17 +326,10 @@ class EACrawler(AbstractBaseCrawler):
                     articles = soup.find_all('item')
 
                     for article in articles:
-                        if article.find('name').string == 'title':
-                            title = article.find('value').string
-
-                        if article.find('name').string == 'description':
-                            summary = article.find('value').string
-
-                        if article.find('name').string == 'link':
-                            link = article.find('value').string
-
-                        if article.find('name').string == 'dc:date':
-                            date = article.find('value').string
+                        title = article.title.get_text()
+                        summary = article.description.get_text()
+                        link = article.link.get_text()
+                        date = article.date.get_text()
                         
                         stories.append({
                             'title': title,
@@ -349,7 +342,9 @@ class EACrawler(AbstractBaseCrawler):
         return stories
         
     def update_top_stories(self):
-        for item in self.get_top_stories():
+        total = self.get_top_stories()
+        print('{} stories to be created'.format(len(total)))
+        for item in total:
             print(item)
             print('')
         pass
