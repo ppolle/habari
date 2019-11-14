@@ -330,12 +330,16 @@ class EACrawler(AbstractBaseCrawler):
                         summary = article.description.get_text()
                         link = article.link.get_text()
                         date = article.date.get_text()
+                        publication_date = datetime.strptime(date, '%Y-%m-%dT%H:%M:%SZ')
                         
-                        stories.append({
+                        article_details = {
                             'title': title,
                             'article_url': link,
-                            'publication_date': date,
-                            'summary': summary,})
+                            'publication_date': publication_date,
+                            'summary': summary,}
+
+                        if article_details not in stories:
+                            stories.append(article_details)
 
             except Exception as e:
                 print('Error:{0} while getting stories from {1}'.format(e,rss))
