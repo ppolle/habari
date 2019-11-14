@@ -319,6 +319,7 @@ class EACrawler(AbstractBaseCrawler):
         stories = []
         for rss in rss_feeds:
             try:
+                print('Getting top stories from {}'.format(rss))
                 request = requests.get(rss)
                 if request.status_code == 200:
                     soup = BeautifulSoup(request.content, 'xml')
@@ -336,14 +337,19 @@ class EACrawler(AbstractBaseCrawler):
 
                         if article.find('name').string == 'dc:date':
                             date = article.find('value').string
+                        
                         stories.append({
                             'title': title,
                             'article_url': link,
                             'publication_date': date,
                             'summary': summary,})
+
             except Exception as e:
                 print('Error:{0} while getting stories from {1}'.format(e,rss))
         return stories
         
     def update_top_stories(self):
+        for item in self.get_top_stories():
+            print(item)
+            print('')
         pass
