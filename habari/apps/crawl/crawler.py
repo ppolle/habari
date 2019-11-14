@@ -286,3 +286,27 @@ class BDCrawler(AbstractBaseCrawler):
                 len(article_info)))
         except Exception as e:
             print('Error!!!{}'.format(e))
+
+class EACrawler(AbstractBaseCrawler):
+    def __init__(self):
+        self.url = 'https://www.theeastafrican.co.ke/'
+
+    def get_category_links(self):
+        print('Getting all categories')
+        get_categories= requests.get(self.url)
+        categories = [self.url, ]
+
+        if get_categories.status_code == 200:
+            soup = BeautifulSoup(get_categories.content, 'html.parser')
+            all_categories = soup.select('.menu-vertical a')
+
+            for category in all_categories:
+                category = self.make_relative_links_absolute(category.get('href'))
+                categories.append(category)
+
+        return categories
+        
+    def get_top_stories(self):
+        pass
+    def update_top_stories(self):
+        pass
