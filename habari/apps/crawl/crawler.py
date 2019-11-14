@@ -295,6 +295,7 @@ class EACrawler(AbstractBaseCrawler):
         print('Getting all categories')
         get_categories= requests.get(self.url)
         categories = [self.url, ]
+        rss_feeds = []
 
         if get_categories.status_code == 200:
             soup = BeautifulSoup(get_categories.content, 'html.parser')
@@ -304,7 +305,15 @@ class EACrawler(AbstractBaseCrawler):
                 category = self.make_relative_links_absolute(category.get('href'))
                 categories.append(category)
 
-        return categories
+        for category in categories:
+            request = requests.get(category)
+            if request.status_code == 200:
+                soup = BeautifulSoup(request.content, 'html.parser')
+                rss = self.make_relative_links_absolute(soup.select('.social-networks a')[4].get('href'))
+                rss_feeds.append(rss)
+
+        return rss_feeds
+
         
     def get_top_stories(self):
         pass
