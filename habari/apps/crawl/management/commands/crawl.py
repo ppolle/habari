@@ -21,6 +21,11 @@ class Command(BaseCommand):
     		crawl = dn_crawler.update_top_stories()
     		self.stdout.write(self.style.SUCCESS('Succesfully updated Daily Nation Latest Articles.'))
 
+        if source == 'EA':
+            ea_crawler = crawler.EACrawler()
+            crawl = ea_crawler.update_top_stories()
+            self.stdout.write(self.style.SUCCESS('Succesfully updated The east African Latest Articles.'))
+
     	if source == 'all':
     		dn_crawler = crawler.DNCrawler()
     		bd_crawler = crawler.BDCrawler()
