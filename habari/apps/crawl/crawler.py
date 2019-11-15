@@ -286,3 +286,104 @@ class BDCrawler(AbstractBaseCrawler):
                 len(article_info)))
         except Exception as e:
             print('Error!!!{}'.format(e))
+
+class CTCrawler(AbstractBaseCrawler):
+    def __init__(self):
+        self.url = 'https://www.theeastafrican.co.ke/'
+
+    def get_rss_feed_links(self):
+        print('Getting RSS feeds links')
+        get_categories= requests.get(self.url)
+        categories = [self.url, ]
+        rss_feeds = []
+
+        if get_categories.status_code == 200:
+            soup = BeautifulSoup(get_categories.content, 'html.parser')
+            all_categories = soup.select('.menu-vertical a')
+
+            for category in all_categories:
+                category = self.make_relative_links_absolute(category.get('href'))
+                categories.append(category)
+
+        for category in categories:
+            request = requests.get(category)
+            if request.status_code == 200:
+                soup = BeautifulSoup(request.content, 'html.parser')
+                rss = self.make_relative_links_absolute(soup.select('.social-networks a')[4].get('href'))
+                rss_feeds.append(rss)
+
+        return rss_feeds
+        
+    def get_top_stories(self):
+        rss_feeds = self.get_rss_feed_links()
+        stories = []
+        for rss in rss_feeds:
+            try:
+                print('Getting top stories from {}'.format(rss))
+                request = requests.get(rss)
+                if request.status_code == 200:
+                    soup = BeautifulSoup(request.content, 'xml')
+                    articles = soup.find_all('item')
+
+                    for article in articles:
+                        title = article.title.get_text()
+                        summary = article.description.get_text()
+                        link = article.link.get_text()
+                        date = article.date.get_text()
+                        publication_date = datetime.strptime(date, '%Y-%m-%dT%H:%M:%SZ')
+                        
+                        article_details = {
+                            'title': title,
+                            'article_url': link,
+                            'publication_date': publication_date,
+                            'summary': summary,}
+
+                        if article_details not in stories:
+                            stories.append(article_details)
+
+            except Exception as e:
+                print('Error:{0} while getting stories from {1}'.format(e,rss))
+        return stories
+
+    def update_article_details(self, article):
+        request = requests.get(article['article_url'])
+
+        if request.status_code == 200:
+            soup = BeautifulSoup(request.content, 'lxml')
+            image_url = self.make_relative_links_absolute(
+                soup.select('.story-view header img')[0].get('src'))
+            author = [a.get_text() for a in soup.select(
+                '.story-view .author strong')][0].strip()[2:]
+            article['article_image_url'] = image_url
+            article['author'] = author
+
+        return article
+        
+    def update_top_stories(self):
+        articles = self.get_top_stories()
+        article_info = []
+        for article in articles:
+            try:
+                print('Updating article details for: {}'.format(article['article_url']))
+                self.update_article_details(article)
+                if not Article.objects.filter(article_url=article['article_url']).exists():
+                    article_info.append(Article(title=article['title'],
+                                                article_url=article['article_url'],
+                                                article_image_url=article['article_image_url'],
+                                                author=article['author'],
+                                                publication_date=article['publication_date'],
+                                                summary=article['summary'],
+                                                news_source='EA'
+                                                ))
+
+            except Exception as e:
+                print('Error!!:{0} .. While getting {1}'.format(e, article))
+        
+        
+        try:
+            Article.objects.bulk_create(article_info)
+            print('')
+            print('Succesfully updated Latest East African Articles.{} new articles added'.format(
+                len(article_info)))
+        except Exception as e:
+            print('Error!!!{}'.format(e))
