@@ -363,8 +363,8 @@ class EACrawler(AbstractBaseCrawler):
         articles = self.get_top_stories()
         article_info = []
         for article in articles:
-            print('Updating article details for: {}'.format(article['article_url']))
             try:
+                print('Updating article details for: {}'.format(article['article_url']))
                 self.update_article_details(article)
                 if not Article.objects.filter(article_url=article['article_url']).exists():
                     article_info.append(Article(title=article['title'],
