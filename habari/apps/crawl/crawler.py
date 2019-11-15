@@ -344,11 +344,46 @@ class EACrawler(AbstractBaseCrawler):
             except Exception as e:
                 print('Error:{0} while getting stories from {1}'.format(e,rss))
         return stories
+
+    def update_article_details(self, article):
+        request = requests.get(article['article_url'])
+
+        if request.status_code == 200:
+            soup = BeautifulSoup(request.content, 'lxml')
+            image_url = self.make_relative_links_absolute(
+                soup.select('.story-view header img')[0].get('src'))
+            author = [a.get_text() for a in soup.select(
+                '.story-view .author strong')][0].strip()[2:]
+            article['article_image_url'] = image_url
+            article['author'] = author
+
+        return article
         
     def update_top_stories(self):
-        total = self.get_top_stories()
-        print('{} stories to be created'.format(len(total)))
-        for item in total:
-            print(item)
+        articles = self.get_top_stories()
+        article_info = []
+        for article in articles:
+            print('Updating article details for: {}'.format(article['article_url']))
+            try:
+                self.update_article_details(article)
+                if not Article.objects.filter(article_url=article['article_url']).exists():
+                    article_info.append(Article(title=article['title'],
+                                                article_url=article['article_url'],
+                                                article_image_url=article['article_image_url'],
+                                                author=article['author'],
+                                                publication_date=article['publication_date'],
+                                                summary=article['summary'],
+                                                news_source='EA'
+                                                ))
+
+            except Exception as e:
+                print('Error!!:{0} .. While getting {1}'.format(e, article))
+        
+        
+        try:
+            Article.objects.bulk_create(article_info)
             print('')
-        pass
+            print('Succesfully updated Latest East African Articles.{} new articles added'.format(
+                len(article_info)))
+        except Exception as e:
+            print('Error!!!{}'.format(e))
