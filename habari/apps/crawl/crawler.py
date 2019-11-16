@@ -421,3 +421,35 @@ class CTCrawler(AbstractBaseCrawler):
 
         except Exception as e:
             print('Error!!{} while getting rss feeds'.format(e))
+
+    def get_top_stories(self):
+        rss_feeds = self.get_rss_feed_links()
+        stories = []
+        for rss in rss_feeds:
+            try:
+                print('Getting top stories from {}'.format(rss))
+                request = requests.get(rss)
+                if request.status_code == 200:
+                    soup = BeautifulSoup(request.content, 'xml')
+                    articles = soup.find_all('item')
+
+                    for article in articles:
+                        title = article.title.get_text()
+                        summary = article.description.get_text()
+                        link = article.link.get_text()
+                        date = article.date.get_text()
+                        publication_date = datetime.strptime(date, '%Y-%m-%dT%H:%M:%SZ')
+
+                        article_details = {
+                            'title': title,
+                            'article_url': link,
+                            'publication_date': publication_date,
+                            'summary': summary,}
+
+                        if article_details not in stories:
+                            stories.append(article_details)
+
+            except Exception as e:
+                print('Error:{0} while getting stories from {1}'.format(e,rss))
+        return stories
+
