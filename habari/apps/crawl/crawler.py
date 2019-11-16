@@ -462,7 +462,22 @@ class CTCrawler(AbstractBaseCrawler):
                 soup.select('.story-view header img')[0].get('src'))
             author = [a.get_text() for a in soup.select(
                 '.story-view .author strong')][0].strip()[2:]
+
             article['article_image_url'] = image_url
             article['author'] = author
 
         return article
+
+    def update_top_stories(self):
+        articles = self.get_top_stories()
+        article_info = []
+
+        for article in articles:
+            try:
+                print(article['title'])
+                print(article['article_url'])
+
+            except Exception as e:
+                print('Error!!:{0} .. While getting {1}'.format(e, article))
+
+
