@@ -461,10 +461,20 @@ class CTCrawler(AbstractBaseCrawler):
 
         if request.status_code == 200:
             soup = BeautifulSoup(request.content, 'lxml')
-            image_url = self.make_relative_links_absolute(
+            try:
+                image_url = self.make_relative_links_absolute(
                 soup.select('.story-view header img')[0].get('src'))
-            author = [a.get_text() for a in soup.select(
+            except Exception as e:
+                print('Error:{} ....while getting image url.'.format(e))
+                raise
+            
+            try:
+                author = [a.get_text() for a in soup.select(
                 '.story-view .author strong')][0].strip()[2:]
+            except Exception as e:
+                print('Error:{} ....while getting author details.'.format(e))
+                raise
+
 
             article['article_image_url'] = image_url
             article['author'] = author
