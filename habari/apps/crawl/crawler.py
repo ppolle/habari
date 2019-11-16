@@ -487,11 +487,22 @@ class CTCrawler(AbstractBaseCrawler):
 
         for article in articles:
             try:
+                print('Updating article details for: {}'.format(article['article_url']))
+                self.update_article_details(article)
+                if not Article.objects.filter(article_url=article['article_url']).exists():
+                    article_info.append(Article(title=article['title'],
+                                                article_url=article['article_url'],
+                                                article_image_url=article['article_image_url'],
+                                                author=article['author'],
+                                                publication_date=article['publication_date'],
+                                                summary=article['summary'],
+                                                news_source='CT'
+                                                ))
                 print(article['title'])
-                print(article['article_url'])
-                print('')
+                print(article['article_image_url'])
+                print(article['author'])
 
             except Exception as e:
-                print('Error!!:{0} .. While getting {1}'.format(e, article))
+                print('Error!!:{0} .. While getting {1}'.format(e, article['article_url']))
 
         print('A total of {} articles found'.format(len(articles)))
