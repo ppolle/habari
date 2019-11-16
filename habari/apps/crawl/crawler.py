@@ -410,12 +410,15 @@ class CTCrawler(AbstractBaseCrawler):
                     category = self.make_relative_links_absolute(category.get('href'))
                     categories.append(category)
 
-            for catory in categories:
+            for category in categories:
                 request = requests.get(category)
                 if request.status_code == 200:
                     soup = BeautifulSoup(request.content, 'html.parser')
-                    rss = self.make_relative_links_absolute(soup.select('.social-networks a')[4].get('href'))
-                    rss_feeds.append(rss)
+                    social_links = soup.select('.social-networks a')
+                    for social_link in social_links:
+                        link = social_link.get('href')
+                        if link.endswith('.xml'):
+                            rss_feeds.append(self.make_relative_links_absolute(link))
 
             return rss_feeds
 
@@ -476,8 +479,9 @@ class CTCrawler(AbstractBaseCrawler):
             try:
                 print(article['title'])
                 print(article['article_url'])
+                print('')
 
             except Exception as e:
                 print('Error!!:{0} .. While getting {1}'.format(e, article))
 
-
+        print('A total of {} articles found'.format(len(articles)))
