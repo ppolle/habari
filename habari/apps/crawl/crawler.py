@@ -387,3 +387,34 @@ class EACrawler(AbstractBaseCrawler):
                 len(article_info)))
         except Exception as e:
             print('Error!!!{}'.format(e))
+
+class CTCrawler(AbstractBaseCrawler):
+    def __init__(self):
+        self.url = 'https://www.thecitizen.co.tz/'
+
+    def get_rss_feed_links(self):
+        print('Getting RSS feeds links')      
+        categories = [self.url, ]
+        rss_feeds = []
+
+        try:
+            get_categories = requests.get(self.url)
+            if get_categories.status_code == 200:
+                soup = BeautifulSoup(get_categories.content, 'html.parser')
+                all_categories = soup.select('.menu-vertical a')
+
+                for category in all_categories:
+                    category = self.make_relative_links_absolute(category.get('href'))
+                    categories.append(category)
+
+            for catory in categories:
+                request = requests.get(category)
+                if request.status_code == 200:
+                    soup = BeautifulSoup(request.content, 'html.parser')
+                    rss = self.make_relative_links_absolute(soup.select('.social-networks a')[4].get('href'))
+                    rss_feeds.append(rss)
+
+            return rss_feeds
+
+        except Exception as e:
+            print('Error!!{} while getting rss feeds'.format(e))
