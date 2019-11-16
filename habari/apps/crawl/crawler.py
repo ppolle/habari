@@ -452,4 +452,17 @@ class CTCrawler(AbstractBaseCrawler):
             except Exception as e:
                 print('Error:{0} while getting stories from {1}'.format(e,rss))
         return stories
+    
+    def update_article_details(self, article):
+        request = requests.get(article['article_url'])
 
+        if request.status_code == 200:
+            soup = BeautifulSoup(request.content, 'lxml')
+            image_url = self.make_relative_links_absolute(
+                soup.select('.story-view header img')[0].get('src'))
+            author = [a.get_text() for a in soup.select(
+                '.story-view .author strong')][0].strip()[2:]
+            article['article_image_url'] = image_url
+            article['author'] = author
+
+        return article
