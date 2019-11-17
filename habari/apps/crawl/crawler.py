@@ -469,8 +469,8 @@ class CTCrawler(AbstractBaseCrawler):
                 raise
             
             try:
-                author = [a.get_text() for a in soup.select(
-                '.story-view .author strong')][0].strip()[2:]
+                author = soup.select_one('section .author').get_text()
+                author  = re.sub(r'\w*@.*|(\w+[.|\w])*@(\w+[.])*\w+|More by this Author|By', '', author).strip()
             except Exception as e:
                 print('Error:{} ....while getting author details.'.format(e))
                 raise
@@ -489,18 +489,20 @@ class CTCrawler(AbstractBaseCrawler):
             try:
                 print('Updating article details for: {}'.format(article['article_url']))
                 self.update_article_details(article)
-                if not Article.objects.filter(article_url=article['article_url']).exists():
-                    article_info.append(Article(title=article['title'],
-                                                article_url=article['article_url'],
-                                                article_image_url=article['article_image_url'],
-                                                author=article['author'],
-                                                publication_date=article['publication_date'],
-                                                summary=article['summary'],
-                                                news_source='CT'
-                                                ))
+                # if not Article.objects.filter(article_url=article['article_url']).exists():
+                #     article_info.append(Article(title=article['title'],
+                #                                 article_url=article['article_url'],
+                #                                 article_image_url=article['article_image_url'],
+                #                                 author=article['author'],
+                #                                 publication_date=article['publication_date'],
+                #                                 summary=article['summary'],
+                #                                 news_source='CT'
+                #                                 ))
                 print(article['title'])
-                print(article['article_image_url'])
+                # print(article['article_image_url'])
                 print(article['author'])
+                print(article['article_image_url'])
+                print('')
 
             except Exception as e:
                 print('Error!!:{0} .. While getting {1}'.format(e, article['article_url']))
