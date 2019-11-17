@@ -463,7 +463,7 @@ class CTCrawler(AbstractBaseCrawler):
             soup = BeautifulSoup(request.content, 'lxml')
             try:
                 image_url = self.make_relative_links_absolute(
-                soup.select('.story-view header img')[0].get('src'))
+                soup.select_one('.story-view header img').get('src'))
             except Exception as e:
                 print('Error:{} ....while getting image url.'.format(e))
                 raise
@@ -489,22 +489,30 @@ class CTCrawler(AbstractBaseCrawler):
             try:
                 print('Updating article details for: {}'.format(article['article_url']))
                 self.update_article_details(article)
-                # if not Article.objects.filter(article_url=article['article_url']).exists():
-                #     article_info.append(Article(title=article['title'],
-                #                                 article_url=article['article_url'],
-                #                                 article_image_url=article['article_image_url'],
-                #                                 author=article['author'],
-                #                                 publication_date=article['publication_date'],
-                #                                 summary=article['summary'],
-                #                                 news_source='CT'
-                #                                 ))
-                print(article['title'])
+                if not Article.objects.filter(article_url=article['article_url']).exists():
+                    article_info.append(Article(title=article['title'],
+                                                article_url=article['article_url'],
+                                                article_image_url=article['article_image_url'],
+                                                author=article['author'],
+                                                publication_date=article['publication_date'],
+                                                summary=article['summary'],
+                                                news_source='CT'
+                                                ))
+                # print(article['title'])
+                # # print(article['article_image_url'])
+                # print(article['author'])
                 # print(article['article_image_url'])
-                print(article['author'])
-                print(article['article_image_url'])
-                print('')
+                # print('')
 
             except Exception as e:
                 print('Error!!:{0} .. While getting {1}'.format(e, article['article_url']))
+
+        try:
+            Article.objects.bulk_create(article_info)
+            print('')
+            print("Succesfully updated The Citizen's Articles.{} new articles added".format(
+                len(article_info)))
+        except Exception as e:
+            print('Error!!!{}'.format(e))
 
         print('A total of {} articles found'.format(len(articles)))
