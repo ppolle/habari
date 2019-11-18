@@ -464,16 +464,22 @@ class CTCrawler(AbstractBaseCrawler):
             try:
                 image_url = self.make_relative_links_absolute(
                 soup.select_one('.story-view header img').get('src'))
-            except Exception as e:
-                print('Error:{} ....while getting image url.'.format(e))
-                raise
+            except AttributeError:
+                try:
+                    image_url = soup.select_one('.videoContainer iframe').get('src')
+                except:
+                    image_url = 'None'
+                    print('Get Image Error: while getting ...{}.'.format(article['article_url']))
+                    raise
             
             try:
                 author = soup.select_one('section .author').get_text()
                 author  = re.sub(r'\w*@.*|(\w+[.|\w])*@(\w+[.])*\w+|More by this Author|By', '', author).strip()
-            except Exception as e:
-                print('Error:{} ....while getting author details.'.format(e))
-                raise
+            except AttributeError:
+                author = 'None'
+            except:
+                print('Error getting author details')
+                
 
 
             article['article_image_url'] = image_url
