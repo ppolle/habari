@@ -310,8 +310,11 @@ class EACrawler(AbstractBaseCrawler):
                 request = requests.get(category)
                 if request.status_code == 200:
                     soup = BeautifulSoup(request.content, 'html.parser')
-                    rss = self.make_relative_links_absolute(soup.select('.social-networks a')[4].get('href'))
-                    rss_feeds.append(rss)
+                    social_links = soup.select('.social-networks a')
+                    for social_link in social_links:
+                        link = social_link.get('href')
+                        if link.endswith('.xml'):
+                            rss_feeds.append(self.make_relative_links_absolute(link))
 
             return rss_feeds
         except Exception as e:
@@ -469,8 +472,6 @@ class CTCrawler(AbstractBaseCrawler):
                     image_url = soup.select_one('.videoContainer iframe').get('src')
                 except:
                     image_url = 'None'
-                    print('Get Image Error: while getting ...{}.'.format(article['article_url']))
-                    raise
             
             try:
                 author = soup.select_one('section .author').get_text()
@@ -480,8 +481,6 @@ class CTCrawler(AbstractBaseCrawler):
             except:
                 print('Error getting author details')
                 
-
-
             article['article_image_url'] = image_url
             article['author'] = author
 
