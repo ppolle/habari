@@ -138,6 +138,8 @@ class DNCrawler(AbstractBaseCrawler):
 
             try:
                 summary = soup.select_one('.summary div ul').get_text()
+            except AttributeError:
+                summary = ' '
 
             
         else:
@@ -147,21 +149,22 @@ class DNCrawler(AbstractBaseCrawler):
                 'image_url': image_url,
                 'article_title': title,
                 'publication_date': date,
-                'author': author}
+                'author': author,
+                'summary':summary}
 
     def get_newsplex_and_healthynation_story_details(self, link):
         story = requests.get(link)
 
         if story.status_code == 200:
             soup = BeautifulSoup(story.content, 'html.parser')
-            image_url = self.make_relative_links_absolute(
-                soup.select_one('.hero.hero-chart .figcap-box img').get('src'))
             title = soup.select_one('.hero.hero-chart').get_text()
             publication_date = soup.select_one('date').get_text()
             date = self.create_datetime_object_from_string(publication_date)
-            author = self.sanitize_author_string(soup.select_one(
-                '.byline figcaption h6').get_text())
-
+            author = [self.sanitize_author_string(a.get_text()) for a in soup.select('.byline figcaption h6')]
+            image_url = self.make_relative_links_absolute(
+                soup.select_one('.hero.hero-chart .figcap-box img').get('src'))
+            summary = soup.select_one('article.post header').get_text()
+            
         else:
             print('Failed to get {} details'. format(link))
 
@@ -169,8 +172,8 @@ class DNCrawler(AbstractBaseCrawler):
                 'image_url': image_url,
                 'article_title': title,
                 'publication_date': date,
-                'author': author
-                }
+                'author': author,
+                'summary':summary}
 
     def update_top_stories(self):
         top_articles = self.get_top_stories()
@@ -189,7 +192,7 @@ class DNCrawler(AbstractBaseCrawler):
                                                 article_image_url=story['image_url'],
                                                 author=story['author'],
                                                 publication_date=story['publication_date'],
-                                                summary='blah blah blah',
+                                                summary=story['summary'],
                                                 news_source='DN'
                                                 ))
 
