@@ -268,12 +268,17 @@ class BDCrawler(AbstractBaseCrawler):
             date = datetime.strptime(publication_date, '%A, %B %d, %Y %H:%M')
             author = self.sanitize_author_string(soup.select_one(
                 '.page-box-inner .mobileShow small.byline').get_text())
+            try:
+                summary = soup.select_one('.summary-list').get_text()
+            except AttributeError:
+                summary = ' '
 
         return {'article_url': link,
                 'image_url': image_url,
                 'article_title': title,
                 'publication_date': date,
-                'author': author
+                'author': author,
+                'summary':summary
                 }
 
     def update_top_stories(self):
@@ -289,7 +294,7 @@ class BDCrawler(AbstractBaseCrawler):
                                                 article_image_url=story['image_url'],
                                                 author=story['author'],
                                                 publication_date=story['publication_date'],
-                                                summary='blah blah blah',
+                                                summary=story[''],
                                                 news_source='BD'
                                                 ))
 
