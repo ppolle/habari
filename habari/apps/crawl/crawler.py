@@ -503,14 +503,9 @@ class CTCrawler(AbstractBaseCrawler):
                                                 summary=article['summary'],
                                                 news_source='CT'
                                                 ))
-                # print(article['title'])
-                # # print(article['article_image_url'])
-                # print(article['author'])
-                # print(article['article_image_url'])
-                # print('')
 
             except Exception as e:
-                print('Error!!:{0} .. While getting {1}'.format(e, article['article_url']))
+                print('Error!!:{0} While getting {1}'.format(e, article['article_url']))
 
         try:
             Article.objects.bulk_create(article_info)
@@ -519,5 +514,3 @@ class CTCrawler(AbstractBaseCrawler):
                 len(article_info)))
         except Exception as e:
             print('Error!!!{}'.format(e))
-
-        print('A total of {} articles found'.format(len(articles)))
