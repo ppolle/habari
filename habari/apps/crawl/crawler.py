@@ -55,6 +55,9 @@ class AbstractBaseCrawler:
         else:
             return False
 
+    def sanitize_author_string(self, author):
+        new_author = re.sub(r'\w*@.*|(\w+[.|\w])*@(\w+[.])*\w+|More by this Author|By', '', author).strip()
+        return new_author
 
 class DNCrawler(AbstractBaseCrawler):
     def __init__(self):
@@ -124,8 +127,8 @@ class DNCrawler(AbstractBaseCrawler):
             publication_date = [p.get_text()
                                 for p in soup.select('.story-view header h6')][0]
             date = datetime.strptime(publication_date, '%A %B %d %Y')
-            author = [a.get_text() for a in soup.select(
-                '.story-view .author strong')][0].strip()[2:]
+            author = self.sanitize_author_string(soup.select_one(
+                '.story-view .author').get_text())
         else:
             print('Failed to get {} details.'.format(link))
 
@@ -145,8 +148,8 @@ class DNCrawler(AbstractBaseCrawler):
             title = soup.select_one('.hero.hero-chart').get_text()
             publication_date = soup.select_one('date').get_text()
             date = self.create_datetime_object_from_string(publication_date)
-            author = soup.select_one(
-                '.byline figcaption h6').get_text().strip()[2:]
+            author = self.sanitize_author_string(soup.select_one(
+                '.byline figcaption h6').get_text())
 
         else:
             print('Failed to get {} details'. format(link))
@@ -249,8 +252,8 @@ class BDCrawler(AbstractBaseCrawler):
             publication_date = soup.select_one(
                 '.page-box-inner header small.byline').get_text()
             date = datetime.strptime(publication_date, '%A, %B %d, %Y %H:%M')
-            author = soup.select_one(
-                '.page-box-inner .mobileShow small.byline').get_text().strip()[2:]
+            author = self.sanitize_author_string(soup.select_one(
+                '.page-box-inner .mobileShow small.byline').get_text())
 
         return {'article_url': link,
                 'image_url': image_url,
@@ -358,8 +361,7 @@ class EACrawler(AbstractBaseCrawler):
             soup = BeautifulSoup(request.content, 'lxml')
             image_url = self.make_relative_links_absolute(
                 soup.select('.story-view header img')[0].get('src'))
-            author = [a.get_text() for a in soup.select(
-                '.story-view .author strong')][0].strip()[2:]
+            author = self.sanitize_author_string(soup.select_one('.story-view .author').get_text())
             article['article_image_url'] = image_url
             article['author'] = author
 
@@ -474,8 +476,8 @@ class CTCrawler(AbstractBaseCrawler):
                     image_url = 'None'
             
             try:
-                author = soup.select_one('section .author').get_text()
-                author  = re.sub(r'\w*@.*|(\w+[.|\w])*@(\w+[.])*\w+|More by this Author|By', '', author).strip()
+                author = self.sanitize_author_string(soup.select_one('section .author').get_text())
+    
             except AttributeError:
                 author = 'None'
             except:
