@@ -399,10 +399,22 @@ class EACrawler(AbstractBaseCrawler):
 
         if request.status_code == 200:
             soup = BeautifulSoup(request.content, 'lxml')
-            image_url = self.make_relative_links_absolute(
-                soup.select('.story-view header img')[0].get('src'))
-            author = self.sanitize_author_string(
+            try:
+                image_url = self.make_relative_links_absolute(
+                soup.select_one('.story-view header img').get('src'))
+            except AttributeError:
+                try:
+                    image_url = soup.select_one(
+                        '.videoContainer iframe').get('src')
+                except:
+                    image_url = 'None'
+                    
+            try:
+                author = self.sanitize_author_string(
                 soup.select_one('.story-view .author').get_text())
+            except AttributeError:
+                author = 'None'
+
             article['article_image_url'] = image_url
             article['author'] = author
 
