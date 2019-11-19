@@ -120,15 +120,26 @@ class DNCrawler(AbstractBaseCrawler):
 
         if story.status_code == 200:
             soup = BeautifulSoup(story.content, 'html.parser')
-            image_url = self.make_relative_links_absolute(
-                soup.select('.story-view header img')[0].get('src'))
             title = [t.get_text()
                      for t in soup.select('.story-view header h2')][0]
             publication_date = [p.get_text()
                                 for p in soup.select('.story-view header h6')][0]
             date = datetime.strptime(publication_date, '%A %B %d %Y')
-            author = self.sanitize_author_string(soup.select_one(
-                '.story-view .author').get_text())
+            author = [self.sanitize_author_string(a.get_text()) for a in soup.select('.story-view .author')]
+            
+            try:
+                image_url = self.make_relative_links_absolute(
+                soup.select_one('.story-view header img').get('src'))
+            except AttributeError:
+                try:
+                    image_url = soup.select_one('.videoContainer iframe').get('src')
+                except:
+                    image_url = 'None'
+
+            try:
+                summary = soup.select_one('.summary div ul').get_text()
+
+            
         else:
             print('Failed to get {} details.'.format(link))
 
