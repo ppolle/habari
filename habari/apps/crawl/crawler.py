@@ -21,7 +21,7 @@ class AbstractBaseCrawler:
 
     def create_datetime_object_from_string(self, date_string):
         date_pattern_1 = re.search(
-            r"(\d+ weeks?,? )?(\d+ days?,? )?(\d+ hours?,? )?(\d+ mins?,? )?(\d+ secs? )?ago", date_string)
+            r"(\d+ weeks?,? )?(\d+ days?,? )?(\d+ hours?,? )?(\d+ minutes?,? )?(\d+ seconds? )?ago", date_string)
         date_pattern_2 = re.search(
             r"^(0[1-9]|[12][0-9]|3[01])[- /.](0[1-9]|1[012])[- /.](19|20)\d\d$", date_string)
         date_pattern_3 = re.search(
