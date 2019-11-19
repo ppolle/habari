@@ -58,8 +58,10 @@ class AbstractBaseCrawler:
             return False
 
     def sanitize_author_string(self, author):
-        new_author = re.sub(r'\w*@.*|(\w+[.|\w])*@(\w+[.])*\w+|More by this Author|By', '', author).strip()
+        new_author = re.sub(
+            r'\w*@.*|(\w+[.|\w])*@(\w+[.])*\w+|More by this Author|By', '', author).strip()
         return new_author
+
 
 class DNCrawler(AbstractBaseCrawler):
     def __init__(self):
@@ -107,8 +109,9 @@ class DNCrawler(AbstractBaseCrawler):
                         stories = small_story_list + story_teaser + nation_prime + latest_news
 
                     for story in stories:
-                        story = self.make_relative_links_absolute(story.get('href'))
-                        if story not in story_links and self.check_for_top_level_domain(story):
+                        story = self.make_relative_links_absolute(
+                            story.get('href'))
+                        if not Article.objects.filter(article_url=story).exists() and story not in story_links and self.check_for_top_level_domain(story):
                             story_links.append(story)
 
             except Exception as e:
@@ -127,14 +130,16 @@ class DNCrawler(AbstractBaseCrawler):
             publication_date = [p.get_text()
                                 for p in soup.select('.story-view header h6')][0]
             date = datetime.strptime(publication_date, '%A %B %d %Y')
-            author = [self.sanitize_author_string(a.get_text()) for a in soup.select('.story-view .author')]
-            
+            author = [self.sanitize_author_string(
+                a.get_text()) for a in soup.select('.story-view .author')]
+
             try:
                 image_url = self.make_relative_links_absolute(
-                soup.select_one('.story-view header img').get('src'))
+                    soup.select_one('.story-view header img').get('src'))
             except AttributeError:
                 try:
-                    image_url = soup.select_one('.videoContainer iframe').get('src')
+                    image_url = soup.select_one(
+                        '.videoContainer iframe').get('src')
                 except AttributeError:
                     image_url = 'None'
 
@@ -143,7 +148,6 @@ class DNCrawler(AbstractBaseCrawler):
             except AttributeError:
                 summary = ' '
 
-            
         else:
             print('Failed to get {} details.'.format(link))
 
@@ -152,7 +156,7 @@ class DNCrawler(AbstractBaseCrawler):
                 'article_title': title,
                 'publication_date': date,
                 'author': author,
-                'summary':summary}
+                'summary': summary}
 
     def get_newsplex_and_healthynation_story_details(self, link):
         story = requests.get(link)
@@ -162,11 +166,12 @@ class DNCrawler(AbstractBaseCrawler):
             title = soup.select_one('.hero.hero-chart').get_text()
             publication_date = soup.select_one('date').get_text()
             date = self.create_datetime_object_from_string(publication_date)
-            author = [self.sanitize_author_string(a.get_text()) for a in soup.select('.byline figcaption h6')]
+            author = [self.sanitize_author_string(
+                a.get_text()) for a in soup.select('.byline figcaption h6')]
             image_url = self.make_relative_links_absolute(
                 soup.select_one('.hero.hero-chart .figcap-box img').get('src'))
             summary = soup.select_one('article.post header').get_text()
-            
+
         else:
             print('Failed to get {} details'. format(link))
 
@@ -175,7 +180,7 @@ class DNCrawler(AbstractBaseCrawler):
                 'article_title': title,
                 'publication_date': date,
                 'author': author,
-                'summary':summary}
+                'summary': summary}
 
     def update_top_stories(self):
         top_articles = self.get_top_stories()
@@ -188,15 +193,15 @@ class DNCrawler(AbstractBaseCrawler):
                         article)
                 else:
                     story = self.get_main_story_details(article)
-                if not Article.objects.filter(article_url=article).exists():
-                    article_info.append(Article(title=story['article_title'],
-                                                article_url=story['article_url'],
-                                                article_image_url=story['image_url'],
-                                                author=story['author'],
-                                                publication_date=story['publication_date'],
-                                                summary=story['summary'],
-                                                news_source='DN'
-                                                ))
+
+                article_info.append(Article(title=story['article_title'],
+                                            article_url=story['article_url'],
+                                            article_image_url=story['image_url'],
+                                            author=story['author'],
+                                            publication_date=story['publication_date'],
+                                            summary=story['summary'],
+                                            news_source='DN'
+                                            ))
 
             except Exception as e:
                 print('{0} error while getting {1}'.format(e, article))
@@ -248,7 +253,7 @@ class BDCrawler(AbstractBaseCrawler):
                     for article in articles:
                         article = self.make_relative_links_absolute(
                             article.get('href'))
-                        if article not in story_links and self.check_for_top_level_domain(article):
+                        if not Article.objects.filter(article_url=article).exists() and article not in story_links and self.check_for_top_level_domain(article):
                             story_links.append(article)
 
             except Exception as e:
@@ -266,17 +271,18 @@ class BDCrawler(AbstractBaseCrawler):
             publication_date = soup.select_one(
                 '.page-box-inner header small.byline').get_text()
             date = datetime.strptime(publication_date, '%A, %B %d, %Y %H:%M')
-            author = [self.sanitize_author_string(a.get_text()) for a in soup.select(' article.article.article-summary header.article-meta-summary ')]
+            author = [self.sanitize_author_string(a.get_text()) for a in soup.select(
+                ' article.article.article-summary header.article-meta-summary ')]
 
             try:
                 image_url = self.make_relative_links_absolute(
-                soup.select_one('.article-img-story img.photo_article').get('src'))
+                    soup.select_one('.article-img-story img.photo_article').get('src'))
             except AttributeError:
                 try:
-                    image_url = soup.select_one('.article-img-story.fluidMedia iframe').get('src')
+                    image_url = soup.select_one(
+                        '.article-img-story.fluidMedia iframe').get('src')
                 except AttributeError:
                     image_url = 'None'
-
 
             try:
                 summary = soup.select_one('.summary-list').get_text()
@@ -288,7 +294,7 @@ class BDCrawler(AbstractBaseCrawler):
                 'article_title': title,
                 'publication_date': date,
                 'author': author,
-                'summary':summary
+                'summary': summary
                 }
 
     def update_top_stories(self):
@@ -298,15 +304,15 @@ class BDCrawler(AbstractBaseCrawler):
             try:
                 print('Updating story content for ' + article)
                 story = self.get_story_details(article)
-                if not Article.objects.filter(article_url=article).exists():
-                    article_info.append(Article(title=story['article_title'],
-                                                article_url=story['article_url'],
-                                                article_image_url=story['image_url'],
-                                                author=story['author'],
-                                                publication_date=story['publication_date'],
-                                                summary=story['summary'],
-                                                news_source='BD'
-                                                ))
+                
+                article_info.append(Article(title=story['article_title'],
+                                            article_url=story['article_url'],
+                                            article_image_url=story['image_url'],
+                                            author=story['author'],
+                                            publication_date=story['publication_date'],
+                                            summary=story['summary'],
+                                            news_source='BD'
+                                            ))
 
             except Exception as e:
                 print('{0} error while getting {1}'.format(e, article))
@@ -319,6 +325,7 @@ class BDCrawler(AbstractBaseCrawler):
         except Exception as e:
             print('Error!!!{}'.format(e))
 
+
 class EACrawler(AbstractBaseCrawler):
     def __init__(self):
         self.url = 'https://www.theeastafrican.co.ke/'
@@ -329,13 +336,14 @@ class EACrawler(AbstractBaseCrawler):
         rss_feeds = []
 
         try:
-            get_categories= requests.get(self.url)
+            get_categories = requests.get(self.url)
             if get_categories.status_code == 200:
                 soup = BeautifulSoup(get_categories.content, 'html.parser')
                 all_categories = soup.select('.menu-vertical a')
 
                 for category in all_categories:
-                    category = self.make_relative_links_absolute(category.get('href'))
+                    category = self.make_relative_links_absolute(
+                        category.get('href'))
                     categories.append(category)
 
             for category in categories:
@@ -346,7 +354,8 @@ class EACrawler(AbstractBaseCrawler):
                     for social_link in social_links:
                         link = social_link.get('href')
                         if link.endswith('.xml'):
-                            rss_feeds.append(self.make_relative_links_absolute(link))
+                            rss_feeds.append(
+                                self.make_relative_links_absolute(link))
 
             return rss_feeds
         except Exception as e:
@@ -368,19 +377,21 @@ class EACrawler(AbstractBaseCrawler):
                         summary = article.description.get_text()
                         link = article.link.get_text()
                         date = article.date.get_text()
-                        publication_date = datetime.strptime(date, '%Y-%m-%dT%H:%M:%SZ')
+                        publication_date = datetime.strptime(
+                            date, '%Y-%m-%dT%H:%M:%SZ')
 
                         article_details = {
                             'title': title,
                             'article_url': link,
                             'publication_date': publication_date,
-                            'summary': summary,}
+                            'summary': summary, }
 
-                        if article_details not in stories:
+                        if article_details not in stories and not Article.objects.filter(article_url=article_details['article_url']).exists():
                             stories.append(article_details)
 
             except Exception as e:
-                print('Error:{0} while getting stories from {1}'.format(e,rss))
+                print(
+                    'Error:{0} while getting stories from {1}'.format(e, rss))
         return stories
 
     def update_article_details(self, article):
@@ -390,7 +401,8 @@ class EACrawler(AbstractBaseCrawler):
             soup = BeautifulSoup(request.content, 'lxml')
             image_url = self.make_relative_links_absolute(
                 soup.select('.story-view header img')[0].get('src'))
-            author = self.sanitize_author_string(soup.select_one('.story-view .author').get_text())
+            author = self.sanitize_author_string(
+                soup.select_one('.story-view .author').get_text())
             article['article_image_url'] = image_url
             article['author'] = author
 
@@ -401,21 +413,20 @@ class EACrawler(AbstractBaseCrawler):
         article_info = []
         for article in articles:
             try:
-                print('Updating article details for: {}'.format(article['article_url']))
+                print('Updating article details for: {}'.format(
+                    article['article_url']))
                 self.update_article_details(article)
-                if not Article.objects.filter(article_url=article['article_url']).exists():
-                    article_info.append(Article(title=article['title'],
-                                                article_url=article['article_url'],
-                                                article_image_url=article['article_image_url'],
-                                                author=article['author'],
-                                                publication_date=article['publication_date'],
-                                                summary=article['summary'],
-                                                news_source='EA'
-                                                ))
+                article_info.append(Article(title=article['title'],
+                                            article_url=article['article_url'],
+                                            article_image_url=article['article_image_url'],
+                                            author=article['author'],
+                                            publication_date=article['publication_date'],
+                                            summary=article['summary'],
+                                            news_source='EA'
+                                            ))
 
             except Exception as e:
-                print('Error!!:{0} .. While getting {1}'.format(e, article))
-
+                print('Error!!:{0} .. While getting {1}'.format(e, article['article_url']))
 
         try:
             Article.objects.bulk_create(article_info)
@@ -425,12 +436,13 @@ class EACrawler(AbstractBaseCrawler):
         except Exception as e:
             print('Error!!!{}'.format(e))
 
+
 class CTCrawler(AbstractBaseCrawler):
     def __init__(self):
         self.url = 'https://www.thecitizen.co.tz/'
 
     def get_rss_feed_links(self):
-        print('Getting RSS feeds links')      
+        print('Getting RSS feeds links')
         categories = [self.url, ]
         rss_feeds = []
 
@@ -441,7 +453,8 @@ class CTCrawler(AbstractBaseCrawler):
                 all_categories = soup.select('.menu-vertical a')
 
                 for category in all_categories:
-                    category = self.make_relative_links_absolute(category.get('href'))
+                    category = self.make_relative_links_absolute(
+                        category.get('href'))
                     categories.append(category)
 
             for category in categories:
@@ -452,7 +465,8 @@ class CTCrawler(AbstractBaseCrawler):
                     for social_link in social_links:
                         link = social_link.get('href')
                         if link.endswith('.xml'):
-                            rss_feeds.append(self.make_relative_links_absolute(link))
+                            rss_feeds.append(
+                                self.make_relative_links_absolute(link))
 
             return rss_feeds
 
@@ -475,21 +489,23 @@ class CTCrawler(AbstractBaseCrawler):
                         summary = article.description.get_text()
                         link = article.link.get_text()
                         date = article.date.get_text()
-                        publication_date = datetime.strptime(date, '%Y-%m-%dT%H:%M:%SZ')
+                        publication_date = datetime.strptime(
+                            date, '%Y-%m-%dT%H:%M:%SZ')
 
                         article_details = {
                             'title': title,
                             'article_url': link,
                             'publication_date': publication_date,
-                            'summary': summary,}
+                            'summary': summary, }
 
-                        if article_details not in stories:
+                        if article_details not in stories and not Article.objects.filter(article_url=article_details['article_url']).exists():
                             stories.append(article_details)
 
             except Exception as e:
-                print('Error:{0} while getting stories from {1}'.format(e,rss))
+                print(
+                    'Error:{0} while getting stories from {1}'.format(e, rss))
         return stories
-    
+
     def update_article_details(self, article):
         request = requests.get(article['article_url'])
 
@@ -497,21 +513,23 @@ class CTCrawler(AbstractBaseCrawler):
             soup = BeautifulSoup(request.content, 'lxml')
             try:
                 image_url = self.make_relative_links_absolute(
-                soup.select_one('.story-view header img').get('src'))
+                    soup.select_one('.story-view header img').get('src'))
             except AttributeError:
                 try:
-                    image_url = soup.select_one('.videoContainer iframe').get('src')
+                    image_url = soup.select_one(
+                        '.videoContainer iframe').get('src')
                 except:
                     image_url = 'None'
-            
+
             try:
-                author = self.sanitize_author_string(soup.select_one('section .author').get_text())
-    
+                author = self.sanitize_author_string(
+                    soup.select_one('section .author').get_text())
+
             except AttributeError:
                 author = 'None'
             except:
                 print('Error getting author details')
-                
+
             article['article_image_url'] = image_url
             article['author'] = author
 
@@ -523,20 +541,21 @@ class CTCrawler(AbstractBaseCrawler):
 
         for article in articles:
             try:
-                print('Updating article details for: {}'.format(article['article_url']))
+                print('Updating article details for: {}'.format(
+                    article['article_url']))
                 self.update_article_details(article)
-                if not Article.objects.filter(article_url=article['article_url']).exists():
-                    article_info.append(Article(title=article['title'],
-                                                article_url=article['article_url'],
-                                                article_image_url=article['article_image_url'],
-                                                author=article['author'],
-                                                publication_date=article['publication_date'],
-                                                summary=article['summary'],
-                                                news_source='CT'
-                                                ))
+                article_info.append(Article(title=article['title'],
+                                            article_url=article['article_url'],
+                                            article_image_url=article['article_image_url'],
+                                            author=article['author'],
+                                            publication_date=article['publication_date'],
+                                            summary=article['summary'],
+                                            news_source='CT'
+                                            ))
 
             except Exception as e:
-                print('Error!!:{0} While getting {1}'.format(e, article['article_url']))
+                print('Error!!:{0} While getting {1}'.format(
+                    e, article['article_url']))
 
         try:
             Article.objects.bulk_create(article_info)
