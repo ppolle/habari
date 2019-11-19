@@ -133,7 +133,7 @@ class DNCrawler(AbstractBaseCrawler):
             except AttributeError:
                 try:
                     image_url = soup.select_one('.videoContainer iframe').get('src')
-                except:
+                except AttributeError:
                     image_url = 'None'
 
             try:
@@ -261,13 +261,21 @@ class BDCrawler(AbstractBaseCrawler):
             soup = BeautifulSoup(story.content, 'html.parser')
 
             title = soup.find(class_='article-title').get_text()
-            image_url = self.make_relative_links_absolute(
-                soup.select_one('.article-img-story img.photo_article').get('src'))
             publication_date = soup.select_one(
                 '.page-box-inner header small.byline').get_text()
             date = datetime.strptime(publication_date, '%A, %B %d, %Y %H:%M')
             author = [self.sanitize_author_string(a.get_text()) for a in soup.select(' article.article.article-summary header.article-meta-summary ')]
-            
+
+            try:
+                image_url = self.make_relative_links_absolute(
+                soup.select_one('.article-img-story img.photo_article').get('src'))
+            except AttributeError:
+                try:
+                    image_url = soup.select_one('.article-img-story.fluidMedia iframe').get('src')
+                except AttributeError:
+                    image_url = 'None'
+
+
             try:
                 summary = soup.select_one('.summary-list').get_text()
             except AttributeError:
