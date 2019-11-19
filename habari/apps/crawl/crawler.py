@@ -410,10 +410,10 @@ class EACrawler(AbstractBaseCrawler):
                     image_url = 'None'
                     
             try:
-                author = self.sanitize_author_string(
-                soup.select_one('.story-view .author').get_text())
+                author = [self.sanitize_author_string(
+                a.get_text()) for a in soup.select('.story-view .author')]
             except AttributeError:
-                author = 'None'
+                author = []
 
             article['article_image_url'] = image_url
             article['author'] = author
@@ -533,12 +533,10 @@ class CTCrawler(AbstractBaseCrawler):
                 except:
                     image_url = 'None'
 
-            try:
-                author = self.sanitize_author_string(
-                    soup.select_one('section .author').get_text())
-
+            try:[self.sanitize_author_string(
+                a.get_text()) for a in soup.select('.section .author')]
             except AttributeError:
-                author = 'None'
+                author = []
             except:
                 print('Error getting author details')
 
