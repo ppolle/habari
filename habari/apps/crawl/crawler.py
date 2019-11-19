@@ -34,11 +34,13 @@ class AbstractBaseCrawler:
             dt = timedelta(**time_dict)
             return datetime.now() - dt
 
-        if date_pattern_2:
+        elif date_pattern_2:
             return datetime.strptime(date_string, '%d/%m/%Y')
 
-        if date_pattern_3:
+        elif date_pattern_3:
             return datetime.strptime(date_string, '%a %b %d %H:%M:%S %Z %Y')
+        else:
+            return datetime.now()
 
     def check_for_top_level_domain(self, link):
         '''
