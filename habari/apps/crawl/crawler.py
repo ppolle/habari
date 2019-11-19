@@ -266,8 +266,8 @@ class BDCrawler(AbstractBaseCrawler):
             publication_date = soup.select_one(
                 '.page-box-inner header small.byline').get_text()
             date = datetime.strptime(publication_date, '%A, %B %d, %Y %H:%M')
-            author = self.sanitize_author_string(soup.select_one(
-                '.page-box-inner .mobileShow small.byline').get_text())
+            author = [self.sanitize_author_string(a.get_text()) for a in soup.select(' article.article.article-summary header.article-meta-summary ')]
+            
             try:
                 summary = soup.select_one('.summary-list').get_text()
             except AttributeError:
@@ -294,7 +294,7 @@ class BDCrawler(AbstractBaseCrawler):
                                                 article_image_url=story['image_url'],
                                                 author=story['author'],
                                                 publication_date=story['publication_date'],
-                                                summary=story[''],
+                                                summary=story['summary'],
                                                 news_source='BD'
                                                 ))
 
