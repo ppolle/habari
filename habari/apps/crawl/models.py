@@ -5,8 +5,10 @@ from django.db import models
 class Article(models.Model):
 	'''Model that saves crawled articles'''
 	NEWS_SOURCE_CHOICES = (
-			('DN', 'DAILY NATION'),
-			('BD', 'BUSINESS DAILY'),
+			('DN', 'THE DAILY NATION'),
+			('BD', 'THE BUSINESS DAILY'),
+			('EA', 'THE EAST AFRICAN'),
+			('CT', 'THE CITIZEN')
 		)
 
 	title = models.CharField(max_length=500)
