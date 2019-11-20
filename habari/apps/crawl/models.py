@@ -7,7 +7,8 @@ class Article(models.Model):
 	NEWS_SOURCE_CHOICES = (
 			('DN', 'THE DAILY NATION'),
 			('BD', 'THE BUSINESS DAILY'),
-			('EA', 'THE EAST AFRICAN')
+			('EA', 'THE EAST AFRICAN'),
+			('CT', 'THE CITIZEN')
 		)
 
 	title = models.CharField(max_length=500)

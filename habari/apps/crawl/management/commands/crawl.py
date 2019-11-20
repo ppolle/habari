@@ -12,6 +12,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         source = kwargs['sources']
+        if source == 'CT':
+            ct_crawler = crawler.CTCrawler()
+            crawl = ct_crawler.update_top_stories()
+            self.stdout.write(self.style.SUCCESS(
+                'Succesfully updated The Citizen Latest Articles.'))
         
         if source == 'EA':
             ea_crawler = crawler.EACrawler()
