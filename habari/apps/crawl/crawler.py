@@ -131,12 +131,8 @@ class DNCrawler(AbstractBaseCrawler):
             soup = BeautifulSoup(story.content, 'html.parser')
             title = [t.get_text()
                      for t in soup.select('.story-view header h2')][0]
-            author = [a.get_text() for a in soup.select(
-                '.story-view .author strong')][0].strip()[2:]
             publication_date = [p.get_text()
                                 for p in soup.select('.story-view header h6')][0]
-            image_url = self.make_relative_links_absolute(
-                soup.select('.story-view header img')[0].get('src'))
             date = datetime.strptime(publication_date, '%A %B %d %Y')
             author = [self.sanitize_author_string(
                 a.get_text()) for a in soup.select('.story-view .author')]
