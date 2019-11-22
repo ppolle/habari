@@ -584,3 +584,58 @@ class CTCrawler(AbstractBaseCrawler):
                 len(article_info)))
         except Exception as e:
             logger.exception('Error!!!{}'.format(e))
+
+class SMCrawler(AbstractBaseCrawler):
+    def __init__(self):
+        self.url = 'https://www.standardmedia.co.ke/'
+    
+    def get_top_stories(self):
+        rss_feeds = [
+        'https://www.standardmedia.co.ke/rss/headlines.php',
+        'https://www.standardmedia.co.ke/rss/kenya.php',
+        'https://www.standardmedia.co.ke/rss/world.php',
+        'https://www.standardmedia.co.ke/rss/politics.php',
+        'https://www.standardmedia.co.ke/rss/opinion.php',
+        'https://www.standardmedia.co.ke/rss/sports.php',
+        'https://www.standardmedia.co.ke/rss/business.php',
+        'https://www.standardmedia.co.ke/rss/columnists.php',
+        'https://www.standardmedia.co.ke/rss/magazines.php',
+        'https://www.standardmedia.co.ke/rss/agriculture.php'
+        ]
+
+        # Look at the rss links that I have left out. They are about 
+        stories = []
+
+        for rss in rss_feeds:
+            try:
+                pass
+            except Exception as e:
+                logger.info('Getting top stories from {}'.format(rss))
+                request = requests.get(rss)
+                if request.status_code == 200:
+                    soup = BeautifulSoup(request.content, 'xml')
+                    articles = soup.find_all('item')
+
+                    for article in articles:
+                        title = article.title.get_text()
+                        summary = article.description.get_text()
+                        link = article.link.get_text()
+                        date = article.date.get_text()
+                        publication_date = datetime.strptime(
+                            date, '%Y-%m-%dT%H:%M:%SZ')
+
+                        article_details = {
+                            'title': title,
+                            'article_url': link,
+                            'publication_date': publication_date,
+                            'summary': summary, }
+
+                        if article_details not in stories and not Article.objects.filter(article_url=article_details['article_url']).exists():
+                            stories.append(article_details)
+                logger.exception(
+                    'Error:{0} while getting stories from {1}'.format(e, rss))
+    def update_article_details(self):
+        pass
+
+    def update_top_stories(self):
+        pass
