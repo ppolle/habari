@@ -611,7 +611,7 @@ class SMCrawler(AbstractBaseCrawler):
                 logger.info('Getting top stories from {}'.format(rss))
                 request = requests.get(rss)
                 if request.status_code == 200:
-                    soup = BeautifulSoup(request.content, 'xml')
+                    soup = BeautifulSoup(request.content, 'html.parser')
                     articles = soup.find_all('item')
 
                     for article in articles:
@@ -642,4 +642,11 @@ class SMCrawler(AbstractBaseCrawler):
         pass
 
     def update_top_stories(self):
-        pass
+        articles = self.get_top_stories()
+        article_info = []
+
+        try:
+            for article in articles:
+                print(article)
+        except Exception as e:
+            print('Error getting top stories for {}'.format(e))
