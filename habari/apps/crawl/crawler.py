@@ -620,7 +620,7 @@ class SMCrawler(AbstractBaseCrawler):
                         link = article.link.get_text()
                         date = article.pubDate.get_text()
                         publication_date = datetime.strptime(
-                            date, '%Y-%m-%dT%H:%M:%SZ')
+                            date, '%Y-%m-%d %H:%M:%S')
                         author = article.author.get_text()
 
                         article_details = {
@@ -633,7 +633,7 @@ class SMCrawler(AbstractBaseCrawler):
                         if article_details not in stories and not Article.objects.filter(article_url=article_details['article_url']).exists():
                             stories.append(article_details)
                 else:
-                    logger.exception('Failed to get top stories from: {}.'.format(link))
+                    logger.exception('Failed to get top stories from: {}.'.format(rss))
 
             except Exception as e:
                 logger.exception(
