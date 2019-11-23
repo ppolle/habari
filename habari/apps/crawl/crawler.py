@@ -608,8 +608,6 @@ class SMCrawler(AbstractBaseCrawler):
 
         for rss in rss_feeds:
             try:
-                pass
-            except Exception as e:
                 logger.info('Getting top stories from {}'.format(rss))
                 request = requests.get(rss)
                 if request.status_code == 200:
@@ -620,18 +618,24 @@ class SMCrawler(AbstractBaseCrawler):
                         title = article.title.get_text()
                         summary = article.description.get_text()
                         link = article.link.get_text()
-                        date = article.date.get_text()
+                        date = article.pubDate.get_text()
                         publication_date = datetime.strptime(
                             date, '%Y-%m-%dT%H:%M:%SZ')
+                        author = article.author.get_text()
 
                         article_details = {
                             'title': title,
                             'article_url': link,
                             'publication_date': publication_date,
-                            'summary': summary, }
+                            'summary': summary,
+                            'author': author }
 
                         if article_details not in stories and not Article.objects.filter(article_url=article_details['article_url']).exists():
                             stories.append(article_details)
+                else:
+                    logger.exception('Failed to get top stories from: {}.'.format(link))
+
+            except Exception as e:
                 logger.exception(
                     'Error:{0} while getting stories from {1}'.format(e, rss))
     def update_article_details(self):
