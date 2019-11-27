@@ -70,6 +70,16 @@ class DNCrawler(AbstractBaseCrawler):
     def __init__(self):
         self.url = 'https://www.nation.co.ke/'
 
+    def links_to_ignore(self, url):
+        links = ['https://www.nation.co.ke/photo/',
+        'https://www.nation.co.ke/video/']
+
+        for link in links:
+            if link in url:
+                return True
+            else:
+                return False
+
     def get_category_links(self):
         logger.info('Getting links to all categories and sub-categories')
         get_categories = requests.get(self.url)
@@ -83,7 +93,7 @@ class DNCrawler(AbstractBaseCrawler):
             for category in all_categories:
                 cat = self.make_relative_links_absolute(category.get('href'))
 
-                if cat.startswith('https://www.nation.co.ke/photo/') or cat.startswith('https://www.nation.co.ke/video/'):
+                if self.links_to_ignore(:
                     pass
                 else:
                     categories.append(cat)
