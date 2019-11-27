@@ -31,13 +31,3 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.SUCCESS('Succesfully updates {} Latest Articles'.format(type(crawler).__name__)))
             else:
                 self.stdout.write(self.style.WARNING('Crawler with slug {} not found'.format(source)))
-
-
-        # for source in sources:
-        #     crawler_class = self.get_crawler_class(source)
-        #     if crawler_class is not None:
-        #         crawler = crawler_class()
-        #         crawl = crawler.update_top_stories()
-        #         self.stdout.write(self.style.SUCCESS('Succesfully updates {} Latest Articles'.format(type(crawler).__name__)))
-        #     else:
-        #         self.stdout.write(self.style.WARNING('Crawler with slug {} not found.'.format(source))
