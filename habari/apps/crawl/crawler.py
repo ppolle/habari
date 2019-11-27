@@ -71,8 +71,8 @@ class DNCrawler(AbstractBaseCrawler):
         self.url = 'https://www.nation.co.ke/'
 
     def links_to_ignore(self, url):
-        links = ['https://www.nation.co.ke/photo/',
-        'https://www.nation.co.ke/video/']
+        links = ['https://www.nation.co.ke/photo',
+        'https://www.nation.co.ke/video']
 
         for link in links:
             if link in url:
@@ -124,7 +124,7 @@ class DNCrawler(AbstractBaseCrawler):
                     for story in stories:
                         story = self.make_relative_links_absolute(
                             story.get('href'))
-                        if not Article.objects.filter(article_url=story).exists() and story not in story_links and self.check_for_top_level_domain(story):
+                        if not Article.objects.filter(article_url=story).exists() and story not in story_links and self.check_for_top_level_domain(story) and not self.links_to_ignore(story):
                             story_links.append(story)
 
             except Exception as e:
@@ -237,6 +237,17 @@ class BDCrawler(AbstractBaseCrawler):
     def __init__(self):
         self.url = 'https://www.businessdailyafrica.com/'
 
+    def links_to_ignore(self, url):
+        links = ['https://www.businessdailyafrica.com/author-profile/',
+        'https://www.businessdailyafrica.com/videos/',
+        'https://www.businessdailyafrica.com/datahub/']
+
+        for link in links:
+            if link in url:
+                return True
+            else:
+                return False
+
     def get_category_links(self):
         logger.info('Getting links to all categories and sub-categories')
         get_categories = requests.get(self.url)
@@ -249,7 +260,7 @@ class BDCrawler(AbstractBaseCrawler):
             for category in all_categories:
                 cat = self.make_relative_links_absolute(category.get('href'))
 
-                if cat.startswith('https://www.businessdailyafrica.com/videos/') or cat.startswith('https://www.businessdailyafrica.com/datahub/'):
+                if self.links_to_ignore(cat):
                     pass
                 else:
                     categories.append(cat)
@@ -270,7 +281,7 @@ class BDCrawler(AbstractBaseCrawler):
                     for article in articles:
                         article = self.make_relative_links_absolute(
                             article.get('href'))
-                        if not Article.objects.filter(article_url=article).exists() and article not in story_links and self.check_for_top_level_domain(article):
+                        if not Article.objects.filter(article_url=article).exists() and article not in story_links and self.check_for_top_level_domain(article) and not self.links_to_ignore(article):
                             story_links.append(article)
 
             except Exception as e:
