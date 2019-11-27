@@ -203,7 +203,7 @@ class DNCrawler(AbstractBaseCrawler):
         for article in top_articles:
             try:
                 logger.info('Updating story content for ' + article)
-                if article.startswith('https://www.nation.co.ke/health') or article.startswith('https://www.nation.co.ke/newsplex'):
+                if article.startswith('https://www.nation.co.ke/health') or article.startswith('https://www.nation.co.ke/newsplex') or article.startswith('https://www.nation.co.ke/brandbook'):
                     story = self.get_newsplex_and_healthynation_story_details(
                         article)
                 else:
