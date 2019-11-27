@@ -93,7 +93,7 @@ class DNCrawler(AbstractBaseCrawler):
             for category in all_categories:
                 cat = self.make_relative_links_absolute(category.get('href'))
 
-                if self.links_to_ignore(:
+                if self.links_to_ignore(cat):
                     pass
                 else:
                     categories.append(cat)
