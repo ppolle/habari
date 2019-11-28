@@ -642,7 +642,7 @@ class SMCrawler(AbstractBaseCrawler):
                         date = article.pubDate.get_text()
                         publication_date = datetime.strptime(
                             date, '%Y-%m-%d %H:%M:%S')
-                        author = article.author.get_text().strip().split('and')
+                        author = [a.strip() for a in article.author.get_text().split(' and ')]
 
                         article_details = {
                             'title': title,
@@ -669,19 +669,27 @@ class SMCrawler(AbstractBaseCrawler):
             soup = BeautifulSoup(request.content, 'lxml')
             
             if article['title'] == '':
-                title = soup.select_one('.article-title').get_text()
+                try:
+                    title = soup.select_one('.article-title').get_text().strip()
+                except AttributeError:
+                    title = soup.select_one('h1.mb-4').get_text().strip()
                 article['title'] = title
 
-            if  article['author'] == '':
-                author = soup.select_one('')
+            if  article['author'] == ['']:
+                author = [a.strip() for a in soup.select_one('.article-meta a').get_text().split(' and ')]
                 article['author'] = author
+            
             try:
                 article_image_url = self.make_relative_links_absolute(soup.select_one('.article-body img').get('src'))
             except AttributeError:
                 try:
-                    article_image_url = soup.select_one('iframe').get('src')
+                    article_image_url = self.make_relative_links_absolute(soup.select_one('figure img').get('src'))
                 except AttributeError:
-                    article_image_url = 'None'
+                    try:
+                        article_image_url = soup.select_one('iframe').get('src') 
+                    except AttributeError:
+                        article_image_url = 'None'
+
             article['article_image_url'] = article_image_url
         else:
             logger.exception('{} Error while updating article details for {}'.format(request.status_code, article['article_url']))
@@ -709,4 +717,4 @@ class SMCrawler(AbstractBaseCrawler):
                 print('*'*20)
                 print('')
             except Exception as e:
-                logger.exception('Error {}: udating article details for {}'.format(e, article['article_url']))
+                logger.exception('Error {}: updating article details for {}'.format(e, article['article_url']))
