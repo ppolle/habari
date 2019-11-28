@@ -632,17 +632,17 @@ class SMCrawler(AbstractBaseCrawler):
                 logger.info('Getting top stories from {}'.format(rss))
                 request = requests.get(rss)
                 if request.status_code == 200:
-                    soup = BeautifulSoup(request.content, 'html.parser')
+                    soup = BeautifulSoup(request.content, 'xml')
                     articles = soup.find_all('item')
 
                     for article in articles:
-                        title = article.title.get_text()
-                        summary = article.description.get_text()
-                        link = article.link.get_text()
+                        title = article.title.get_text().strip()
+                        summary = article.description.get_text().strip()
+                        link = article.link.get_text().strip()
                         date = article.pubDate.get_text()
                         publication_date = datetime.strptime(
                             date, '%Y-%m-%d %H:%M:%S')
-                        author = article.author.get_text()
+                        author = article.author.get_text().strip()
 
                         article_details = {
                             'title': title,
@@ -659,6 +659,9 @@ class SMCrawler(AbstractBaseCrawler):
             except Exception as e:
                 logger.exception(
                     'Error:{0} while getting stories from {1}'.format(e, rss))
+
+        return stories
+
     def update_article_details(self):
         pass
 
@@ -670,4 +673,4 @@ class SMCrawler(AbstractBaseCrawler):
             for article in articles:
                 print(article)
         except Exception as e:
-            print('Error getting top stories for {}'.format(e))
+            logger.exception('Error getting top stories for {}'.format(e))
