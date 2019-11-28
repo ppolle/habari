@@ -12,6 +12,7 @@ class Command(BaseCommand):
         'BD': crawler.BDCrawler,
         'EA': crawler.EACrawler,
         'CT':crawler.CTCrawler,
+        'SM':crawler.SMCrawler,
         }
 
         return crawler_classes.get(slug)
