@@ -642,14 +642,14 @@ class SMCrawler(AbstractBaseCrawler):
                         date = article.pubDate.get_text()
                         publication_date = datetime.strptime(
                             date, '%Y-%m-%d %H:%M:%S')
-                        author = article.author.get_text().strip()
+                        author = article.author.get_text().strip().split('and')
 
                         article_details = {
                             'title': title,
                             'article_url': link,
                             'publication_date': publication_date,
                             'summary': summary,
-                            'author': author }
+                            'author': author}
 
                         if article_details not in stories and not Article.objects.filter(article_url=article_details['article_url']).exists():
                             stories.append(article_details)
@@ -662,15 +662,51 @@ class SMCrawler(AbstractBaseCrawler):
 
         return stories
 
-    def update_article_details(self):
-        pass
+    def update_article_details(self, article):
+        request = requests.get(article['article_url'])
+
+        if request.status_code == 200:
+            soup = BeautifulSoup(request.content, 'lxml')
+            
+            if article['title'] == '':
+                title = soup.select_one('.article-title').get_text()
+                article['title'] = title
+
+            if  article['author'] == '':
+                author = soup.select_one('')
+                article['author'] = author
+            try:
+                article_image_url = self.make_relative_links_absolute(soup.select_one('.article-body img').get('src'))
+            except AttributeError:
+                try:
+                    article_image_url = soup.select_one('iframe').get('src')
+                except AttributeError:
+                    article_image_url = 'None'
+            article['article_image_url'] = article_image_url
+        else:
+            logger.exception('{} Error while updating article details for {}'.format(request.status_code, article['article_url']))
+
+        return article
 
     def update_top_stories(self):
         articles = self.get_top_stories()
         article_info = []
 
-        try:
-            for article in articles:
-                print(article)
-        except Exception as e:
-            logger.exception('Error getting top stories for {}'.format(e))
+        
+        for article in articles:
+            try:
+                logger.info('Updating article details for: {}'.format(
+                    article['article_url']))
+                self.update_article_details(article)
+
+                print('*'*20)
+                print('Title: '+article['title'])
+                print('Author: '+str(article['author']))
+                print('Summary: '+article['summary'])
+                print('Date: '+str(article['publication_date']))
+                print('Article Url: '+article['article_url'])
+                print('Article Image Url: '+article['article_image_url'])
+                print('*'*20)
+                print('')
+            except Exception as e:
+                logger.exception('Error {}: udating article details for {}'.format(e, article['article_url']))
