@@ -621,7 +621,7 @@ class SMCrawler(AbstractBaseCrawler):
         'https://www.standardmedia.co.ke/rss/business.php',
         'https://www.standardmedia.co.ke/rss/columnists.php',
         'https://www.standardmedia.co.ke/rss/magazines.php',
-        'https://www.standardmedia.co.ke/rss/agriculture.php'
+        # 'https://www.standardmedia.co.ke/rss/agriculture.php'
         ]
 
         # Look at the rss links that I have left out. They are about 
