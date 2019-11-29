@@ -699,22 +699,27 @@ class SMCrawler(AbstractBaseCrawler):
     def update_top_stories(self):
         articles = self.get_top_stories()
         article_info = []
-
         
         for article in articles:
             try:
                 logger.info('Updating article details for: {}'.format(
                     article['article_url']))
                 self.update_article_details(article)
-
-                print('*'*20)
-                print('Title: '+article['title'])
-                print('Author: '+str(article['author']))
-                print('Summary: '+article['summary'])
-                print('Date: '+str(article['publication_date']))
-                print('Article Url: '+article['article_url'])
-                print('Article Image Url: '+article['article_image_url'])
-                print('*'*20)
-                print('')
+                article_info.append(Article(title=article['title'],
+                                            article_url=article['article_url'],
+                                            article_image_url=article['article_image_url'],
+                                            author=article['author'],
+                                            publication_date=article['publication_date'],
+                                            summary=article['summary'],
+                                            news_source='SM'
+                                            ))
             except Exception as e:
                 logger.exception('Error {}: updating article details for {}'.format(e, article['article_url']))
+
+        try:
+            Article.objects.bulk_create(article_info)
+            logger.info('')
+            logger.info("Succesfully updated The Daily Standard's Articles.{} new articles added".format(
+                len(article_info)))
+        except Exception as e:
+            logger.exception('Error!!!{}'.format(e))
