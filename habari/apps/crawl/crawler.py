@@ -183,8 +183,12 @@ class DNCrawler(AbstractBaseCrawler):
             date = self.create_datetime_object_from_string(publication_date)
             author = [self.sanitize_author_string(
                 a.get_text()) for a in soup.select('.byline figcaption h6')]
-            image_url = self.make_relative_links_absolute(
+            try:
+                image_url = self.make_relative_links_absolute(
                 soup.select_one('.hero.hero-chart .figcap-box img').get('src'))
+            except AttributeError:
+                image_url = self.make_relative_links_absolute(
+                    soup.select_one('.hero.hero-chart .figcap-box iframe').get('src'))
             summary = soup.select_one('article.post header').get_text()
 
         else:
@@ -654,7 +658,7 @@ class SMCrawler(AbstractBaseCrawler):
                         if article_details not in stories and not Article.objects.filter(article_url=article_details['article_url']).exists():
                             stories.append(article_details)
                 else:
-                    logger.exception('Failed to get top stories from: {}.'.format(rss))
+                    logger.exception('{0} error!!Failed to get top stories from: {1}.'.format(request.status_code,rss))
 
             except Exception as e:
                 logger.exception(
