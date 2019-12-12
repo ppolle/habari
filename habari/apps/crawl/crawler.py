@@ -625,6 +625,7 @@ class SMCrawler(AbstractBaseCrawler):
         'https://www.standardmedia.co.ke/rss/business.php',
         'https://www.standardmedia.co.ke/rss/columnists.php',
         'https://www.standardmedia.co.ke/rss/magazines.php',
+        'https://www.standardmedia.co.ke/rss/evewoman.php'
         # 'https://www.standardmedia.co.ke/rss/agriculture.php'
         ]
 
@@ -644,9 +645,16 @@ class SMCrawler(AbstractBaseCrawler):
                         summary = article.description.get_text().strip()
                         link = article.link.get_text().strip()
                         date = article.pubDate.get_text()
-                        publication_date = datetime.strptime(
+                        try:
+                            publication_date = datetime.strptime(
                             date, '%Y-%m-%d %H:%M:%S')
-                        author = [a.strip() for a in article.author.get_text().split(' and ')]
+                        except ValueError:
+                            publication_date = datetime.strptime(
+                                date, '%a, %d %b %Y %H:%M:%S %z')
+                        try:
+                            author = [a.strip() for a in article.author.get_text().split(' and ')]
+                        except AttributeError:
+                            author = ['']
 
                         article_details = {
                             'title': title,
@@ -680,7 +688,10 @@ class SMCrawler(AbstractBaseCrawler):
                 article['title'] = title
 
             if  article['author'] == ['']:
-                author = [a.strip() for a in soup.select_one('.article-meta a').get_text().split(' and ')]
+                try:
+                    author = [a.strip() for a in soup.select_one('.article-meta a').get_text().split(' and ')]
+                except AttributeError:
+                    author = [soup.select_one('div .io-hidden-author').get_text()]
                 article['author'] = author
             
             try:
