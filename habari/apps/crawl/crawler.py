@@ -738,3 +738,47 @@ class SMCrawler(AbstractBaseCrawler):
                 len(article_info)))
         except Exception as e:
             logger.exception('Error!!!{}'.format(e))
+
+
+class DMCrawler(AbstractBaseCrawler):
+    def __init__(self):
+        self.url = 'https://www.monitor.co.ug/'
+
+    def get_rss_feed_links(self):
+        logger.info('Getting RSS feeds links')
+        categories = [self.url, ]
+        rss_feeds = []
+
+        try:
+            get_categories = requests.get(self.url)
+            if get_categories.status_code == 200:
+                soup = BeautifulSoup(get_categories.content, 'html.parser')
+                all_categories = soup.select('.menu-vertical a')
+
+                for category in all_categories:
+                    category = self.make_relative_links_absolute(
+                        category.get('href'))
+                    categories.append(category)
+
+            for category in categories:
+                request = requests.get(category)
+                if request.status_code == 200:
+                    soup = BeautifulSoup(request.content, 'html.parser')
+                    social_links = soup.select('.social-networks a')
+                    for social_link in social_links:
+                        link = social_link.get('href')
+                        if link.endswith('.xml'):
+                            rss_feeds.append(
+                                self.make_relative_links_absolute(link))
+
+            return rss_feeds
+        except Exception as e:
+            logger.exception('Error!! {}while getting rss feeds'.format(e))
+        pass
+    def get_top_stories(self):
+        pass
+    def update_article_details(self):
+        pass
+    def update_top_stories(self):
+        pass
+
