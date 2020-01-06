@@ -62,7 +62,7 @@ class AbstractBaseCrawler:
 
     def sanitize_author_string(self, author):
         new_author = re.sub(
-            r'\w*@.*|(\w+[.|\w])*@(\w+[.])*\w+|More by this Author|By', '', author).strip()
+            r'\w*@.*|(\w+[.|\w])*@(\w+[.])*\w+|More by this Author|By', '', author).strip().upper()
         return new_author
 
 
@@ -817,17 +817,17 @@ class DMCrawler(AbstractBaseCrawler):
                 image_url = self.make_relative_links_absolute(
                 soup.select_one('.story-view header img').get('src'))
             except AttributeError:
-                try:
-                    image_url = soup.select_one(
+            #     try:
+                image_url = soup.select_one(
                         '.videoContainer iframe').get('src')
-                except:
-                    image_url = 'None'
+            #     except:
+            #         image_url = 'None'
 
-            try:
-                author = [self.sanitize_author_string(
+            # try:
+            author = [self.sanitize_author_string(
                 a.get_text()) for a in soup.select('.story-view .author')]
-            except AttributeError:
-                author = []
+            # except AttributeError:
+            #     author = []
 
             article['article_image_url'] = image_url
             article['author'] = author
@@ -838,22 +838,22 @@ class DMCrawler(AbstractBaseCrawler):
         articles = self.get_top_stories()
         article_info = []
         for article in articles:
-            print(article)
-        #     try:
-        #         logger.info('Updating article details for: {}'.format(
-        #             article['article_url']))
-        #         self.update_article_details(article)
-        #         article_info.append(Article(title=article['title'],
-        #                                     article_url=article['article_url'],
-        #                                     article_image_url=article['article_image_url'],
-        #                                     author=article['author'],
-        #                                     publication_date=article['publication_date'],
-        #                                     summary=article['summary'],
-        #                                     news_source='DM'
-        #                                     ))
+            try:
+                logger.info('Updating article details for: {}'.format(
+                    article['article_url']))
+                self.update_article_details(article)
+                article_info.append(Article(title=article['title'],
+                                            article_url=article['article_url'],
+                                            article_image_url=article['article_image_url'],
+                                            author=article['author'],
+                                            publication_date=article['publication_date'],
+                                            summary=article['summary'],
+                                            news_source='DM'
+                                            ))
 
-        #     except Exception as e:
-        #         logger.exception('Error!!:{0} .. While getting {1}'.format(e, article['article_url']))
+            except Exception as e:
+                logger.exception('Error!!:{0} .. While getting {1}'.format(e, article['article_url']))
+            print(article)
 
         # try:
         #     Article.objects.bulk_create(article_info)
