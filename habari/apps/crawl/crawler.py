@@ -236,7 +236,6 @@ class DNCrawler(AbstractBaseCrawler):
 
         return article_info
 
-
 class BDCrawler(AbstractBaseCrawler):
     def __init__(self):
         self.url = 'https://www.businessdailyafrica.com/'
@@ -359,7 +358,6 @@ class BDCrawler(AbstractBaseCrawler):
         except Exception as e:
             logger.exception('Error!!!{}'.format(e))
 
-
 class EACrawler(AbstractBaseCrawler):
     def __init__(self):
         self.url = 'https://www.theeastafrican.co.ke/'
@@ -481,7 +479,6 @@ class EACrawler(AbstractBaseCrawler):
                 len(article_info)))
         except Exception as e:
             logger.exception('Error!!!{}'.format(e))
-
 
 class CTCrawler(AbstractBaseCrawler):
     def __init__(self):
