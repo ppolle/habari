@@ -65,7 +65,6 @@ class AbstractBaseCrawler:
             r'\w*@.*|(\w+[.|\w])*@(\w+[.])*\w+|More by this Author|By', '', author).strip().upper()
         return new_author
 
-
 class DNCrawler(AbstractBaseCrawler):
     def __init__(self):
         self.url = 'https://www.nation.co.ke/'
@@ -735,7 +734,6 @@ class SMCrawler(AbstractBaseCrawler):
                 len(article_info)))
         except Exception as e:
             logger.exception('Error!!!{}'.format(e))
-
 
 class DMCrawler(AbstractBaseCrawler):
     def __init__(self):
