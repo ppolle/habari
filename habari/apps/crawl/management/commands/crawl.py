@@ -13,6 +13,7 @@ class Command(BaseCommand):
         'EA': crawler.EACrawler,
         'CT':crawler.CTCrawler,
         'SM':crawler.SMCrawler,
+        'DM':crawler.DMCrawler,
         }
 
         return crawler_classes.get(slug)
