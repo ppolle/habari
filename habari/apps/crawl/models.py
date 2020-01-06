@@ -9,7 +9,8 @@ class Article(models.Model):
 			('BD', 'THE BUSINESS DAILY'),
 			('EA', 'THE EAST AFRICAN'),
 			('CT', 'THE CITIZEN'),
-			('SM', 'THE DAILY STANDARD')
+			('SM', 'THE DAILY STANDARD'),
+			('DM', 'THE DAILY MONITOR')
 		)
 
 	title = models.CharField(max_length=500)
