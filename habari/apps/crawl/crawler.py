@@ -852,7 +852,7 @@ class DMCrawler(AbstractBaseCrawler):
         try:
             Article.objects.bulk_create(article_info)
             logger.info('')
-            logger.info('Succesfully updated Latest East African Articles.{} new articles added'.format(
+            logger.info('Succesfully updated Latest The Daily Monitor Articles.{} new articles added'.format(
                 len(article_info)))
         except Exception as e:
             logger.exception('Error!!!{}'.format(e))
