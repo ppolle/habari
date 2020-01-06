@@ -815,19 +815,19 @@ class DMCrawler(AbstractBaseCrawler):
             soup = BeautifulSoup(request.content, 'lxml')
             try:
                 image_url = self.make_relative_links_absolute(
-                soup.select_one('.story-view header img').get('src'))
+                    soup.select_one('.story-view header img').get('src'))
             except AttributeError:
-            #     try:
-                image_url = soup.select_one(
+                try:
+                    image_url = soup.select_one(
                         '.videoContainer iframe').get('src')
-            #     except:
-            #         image_url = 'None'
+                except:
+                    image_url = 'None'
 
-            # try:
-            author = [self.sanitize_author_string(
-                a.get_text()) for a in soup.select('.story-view .author')]
-            # except AttributeError:
-            #     author = []
+            try:
+                author = [self.sanitize_author_string(
+                    a.get_text()) for a in soup.select('.story-view .author')]
+            except AttributeError:
+                author = []
 
             article['article_image_url'] = image_url
             article['author'] = author
@@ -853,14 +853,13 @@ class DMCrawler(AbstractBaseCrawler):
 
             except Exception as e:
                 logger.exception('Error!!:{0} .. While getting {1}'.format(e, article['article_url']))
-            print(article)
 
-        # try:
-        #     Article.objects.bulk_create(article_info)
-        #     logger.info('')
-        #     logger.info('Succesfully updated Latest East African Articles.{} new articles added'.format(
-        #         len(article_info)))
-        # except Exception as e:
-        #     logger.exception('Error!!!{}'.format(e))
+        try:
+            Article.objects.bulk_create(article_info)
+            logger.info('')
+            logger.info('Succesfully updated Latest East African Articles.{} new articles added'.format(
+                len(article_info)))
+        except Exception as e:
+            logger.exception('Error!!!{}'.format(e))
 
 
