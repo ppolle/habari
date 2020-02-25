@@ -157,7 +157,7 @@ class DNCrawler(AbstractBaseCrawler):
                     image_url = 'None'
 
             try:
-                summary = soup.select_one('.summary div ul').get_text()
+                summary = soup.select_one('.summary div ul').get_text()[:3000]
             except AttributeError:
                 summary = ' '
 
@@ -188,7 +188,7 @@ class DNCrawler(AbstractBaseCrawler):
             except AttributeError:
                 image_url = self.make_relative_links_absolute(
                     soup.select_one('.hero.hero-chart .figcap-box iframe').get('src'))
-            summary = soup.select_one('article.post header').get_text()
+            summary = soup.select_one('article.post header').get_text()[:3000]
 
         else:
             logger.exception('Failed to get {} details'. format(link))
@@ -316,7 +316,7 @@ class BDCrawler(AbstractBaseCrawler):
                     image_url = 'None'
 
             try:
-                summary = soup.select_one('.summary-list').get_text()
+                summary = soup.select_one('.summary-list').get_text()[:3000]
             except AttributeError:
                 summary = ' '
 
@@ -405,7 +405,7 @@ class EACrawler(AbstractBaseCrawler):
 
                     for article in articles:
                         title = article.title.get_text()
-                        summary = article.description.get_text()
+                        summary = article.description.get_text()[:3000]
                         link = article.link.get_text()
                         date = article.date.get_text()
                         publication_date = datetime.strptime(
@@ -528,7 +528,7 @@ class CTCrawler(AbstractBaseCrawler):
 
                     for article in articles:
                         title = article.title.get_text()
-                        summary = article.description.get_text()
+                        summary = article.description.get_text()[:3000]
                         link = article.link.get_text()
                         date = article.date.get_text()
                         publication_date = datetime.strptime(
@@ -638,7 +638,7 @@ class SMCrawler(AbstractBaseCrawler):
 
                     for article in articles:
                         title = article.title.get_text().strip()
-                        summary = article.description.get_text().strip()
+                        summary = article.description.get_text().strip()[:3000]
                         link = article.link.get_text().strip()
                         date = article.pubDate.get_text()
                         try:
@@ -783,7 +783,7 @@ class DMCrawler(AbstractBaseCrawler):
 
                     for article in articles:
                         title = article.title.get_text()
-                        summary = article.description.get_text()
+                        summary = article.description.get_text()[:3000]
                         link = article.link.get_text()
                         date = article.date.get_text()
                         publication_date = datetime.strptime(
