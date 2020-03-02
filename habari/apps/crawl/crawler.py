@@ -423,7 +423,7 @@ class EACrawler(AbstractBaseCrawler):
             except Exception as e:
                 logger.exception(
                     'Error:{0} while getting stories from {1}'.format(e, rss))
-        return stories
+        return {story['article_url']:story for story in stories}.values()
 
     def update_article_details(self, article):
         request = requests.get(article['article_url'])
@@ -546,7 +546,7 @@ class CTCrawler(AbstractBaseCrawler):
             except Exception as e:
                 logger.exception(
                     'Error:{0} while getting stories from {1}'.format(e, rss))
-        return stories
+        return {story['article_url']:story for story in stories}.values()
 
     def update_article_details(self, article):
         request = requests.get(article['article_url'])
@@ -668,7 +668,7 @@ class SMCrawler(AbstractBaseCrawler):
                 logger.exception(
                     'Error:{0} while getting stories from {1}'.format(e, rss))
 
-        return stories
+        return {story['article_url']:story for story in stories}.values()
 
     def update_article_details(self, article):
         request = requests.get(article['article_url'])
@@ -801,7 +801,7 @@ class DMCrawler(AbstractBaseCrawler):
             except Exception as e:
                 logger.exception(
                     'Error:{0} while getting stories from {1}'.format(e, rss))
-        return stories
+        return {story['article_url']:story for story in stories}.values()
 
     def update_article_details(self, article):
         request = requests.get(article['article_url'])
