@@ -70,14 +70,13 @@ class DNCrawler(AbstractBaseCrawler):
         self.url = 'https://www.nation.co.ke/'
 
     def links_to_ignore(self, url):
-        links = ['https://www.nation.co.ke/photo',
-        'https://www.nation.co.ke/video']
+        links = ('https://www.nation.co.ke/photo',
+        'https://www.nation.co.ke/video')
 
-        for link in links:
-            if link in url:
-                return True
-            else:
-                return False
+        if url.startswith(links):
+            return True
+        else:
+            return False
 
     def get_category_links(self):
         logger.info('Getting links to all categories and sub-categories')
@@ -203,10 +202,17 @@ class DNCrawler(AbstractBaseCrawler):
     def update_top_stories(self):
         top_articles = self.get_top_stories()
         article_info = []
+        startswith_newsplex = ('https://www.nation.co.ke/health',
+          'https://www.nation.co.ke/newsplex',
+          'https://www.nation.co.ke/brandbook', 
+          'https://www.nation.co.ke/gender', 
+          'https://www.nation.co.ke/nationprime'
+          )
+
         for article in top_articles:
             try:
                 logger.info('Updating story content for ' + article)
-                if article.startswith('https://www.nation.co.ke/health') or article.startswith('https://www.nation.co.ke/newsplex') or article.startswith('https://www.nation.co.ke/brandbook'):
+                if article.startswith(startswith_newsplex):
                     story = self.get_newsplex_and_healthynation_story_details(
                         article)
                 else:
@@ -240,15 +246,14 @@ class BDCrawler(AbstractBaseCrawler):
         self.url = 'https://www.businessdailyafrica.com/'
 
     def links_to_ignore(self, url):
-        links = ['https://www.businessdailyafrica.com/author-profile/',
+        links = ('https://www.businessdailyafrica.com/author-profile/',
         'https://www.businessdailyafrica.com/videos/',
-        'https://www.businessdailyafrica.com/datahub/']
+        'https://www.businessdailyafrica.com/datahub/')
 
-        for link in links:
-            if link in url:
-                return True
-            else:
-                return False
+        if url.startswith(links):
+            return True
+        else:
+            return False
 
     def get_category_links(self):
         logger.info('Getting links to all categories and sub-categories')
