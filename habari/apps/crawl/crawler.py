@@ -69,7 +69,7 @@ class DNCrawler(AbstractBaseCrawler):
     def __init__(self):
         self.url = 'https://www.nation.co.ke/'
 
-    def links_to_ignore(self, url):
+    def partial_links_to_ignore(self, url):
         links = ('https://www.nation.co.ke/photo',
         'https://www.nation.co.ke/video')
 
@@ -77,6 +77,31 @@ class DNCrawler(AbstractBaseCrawler):
             return True
         else:
             return False
+
+    def full_links_to_ignore(self, url):
+        links = [
+        'https://www.nation.co.ke/1148-1148-hfsx23z/index.html',
+        'https://www.nation.co.ke/healthynation',
+        'https://www.nation.co.ke/sports/1090-5483350-pktdq7z/index.html',
+        'https://www.nation.co.ke/sports/1090-1090-iqcgwe/index.html',
+        'https://www.nation.co.ke/sports/football/1102-1102-5p3gunz/index.html'
+        'https://www.nation.co.ke/sports/golf/1104-1104-hjqyif/index.html',
+        'https://www.nation.co.ke/news/1056-1056-u6geog/index.html',
+        'https://www.nation.co.ke/news/politics/1064-1064-4f88toz/index.html',
+        'https://www.nation.co.ke/news/africa/1066-1066-oo1nedz/index.html',
+        'https://www.nation.co.ke/health/3476990-3476990-kickm3z/index.html',
+        'https://www.nation.co.ke/health/3476990-5485696-da2r6w/index.html',
+        'https://www.nation.co.ke/newsplex/2718262-2718262-3vbltsz/index.html',
+        'https://www.nation.co.ke/newsplex/deadly-force-database/2718262-3402136-ms1o0nz/index.html',
+        'https://www.nation.co.ke/newsplex/murder-at-home-database/2718262-5444980-1109o1r/index.html',
+        'https://www.nation.co.ke/counties/nairobi/1954174-1954174-swx4nez/index.html',
+        'https://www.nation.co.ke/business/996-3063336-my4epsz/index.html'
+        ]
+
+        if url in links:
+            return False
+        else:
+            return True
 
     def get_category_links(self):
         logger.info('Getting links to all categories and sub-categories')
@@ -91,7 +116,7 @@ class DNCrawler(AbstractBaseCrawler):
             for category in all_categories:
                 cat = self.make_relative_links_absolute(category.get('href'))
 
-                if self.links_to_ignore(cat):
+                if self.partial_links_to_ignore(cat):
                     pass
                 else:
                     categories.append(cat)
@@ -122,7 +147,7 @@ class DNCrawler(AbstractBaseCrawler):
                     for story in stories:
                         story = self.make_relative_links_absolute(
                             story.get('href'))
-                        if not Article.objects.filter(article_url=story).exists() and story not in story_links and self.check_for_top_level_domain(story) and not self.links_to_ignore(story):
+                        if not Article.objects.filter(article_url=story).exists() and story not in story_links and self.check_for_top_level_domain(story) and not self.partial_links_to_ignore(story):
                             story_links.append(story)
 
             except Exception as e:
@@ -130,7 +155,7 @@ class DNCrawler(AbstractBaseCrawler):
                     '{0} error while getting top stories for {1}'.format(e, stories))
 
 
-        return story_links
+        return filter(self.full_links_to_ignore, story_links)
 
     def get_main_story_details(self, link):
         story = requests.get(link)
