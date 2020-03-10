@@ -245,7 +245,7 @@ class BDCrawler(AbstractBaseCrawler):
     def __init__(self):
         self.url = 'https://www.businessdailyafrica.com/'
 
-    def links_to_ignore(self, url):
+    def partial_links_to_ignore(self, url):
         links = ('https://www.businessdailyafrica.com/author-profile/',
         'https://www.businessdailyafrica.com/videos/',
         'https://www.businessdailyafrica.com/datahub/')
@@ -254,6 +254,51 @@ class BDCrawler(AbstractBaseCrawler):
             return True
         else:
             return False
+
+    def full_links_to_ignore(self, url):
+        links = ['https://www.businessdailyafrica.com/markets/marketnews/3815534-3815534-dq0pjkz/index.html',
+        'https://www.businessdailyafrica.com/markets/global/3815526-3815526-fvi69yz/index.html',
+        'https://www.businessdailyafrica.com/markets/currencies/3815522-3815522-c11ndp/index.html',
+        'https://www.businessdailyafrica.com/markets/capital/4259442-4259442-ynvoy8/index.html',
+        'https://www.businessdailyafrica.com/markets/capital/4259442-4259442-ynvoy8/index.html'
+        'https://www.businessdailyafrica.com/markets/commodities/3815530-3815530-1p0qxaz/index.html',
+        'https://www.businessdailyafrica.com/markets/commodities/3815530-3815530-1p0qxaz/index.html',
+        'https://www.businessdailyafrica.com/analysis/letters/4307714-4307714-hw64kt/index.html',
+        'https://www.businessdailyafrica.com/analysis/editorials/4259378-4259378-c37ttr/index.html',
+        'https://www.businessdailyafrica.com/analysis/ideas/4259414-4259414-51v7t8/index.html',
+        'https://www.businessdailyafrica.com/analysis/columnists/4259356-4259356-s8r4nw/index.html',
+        'https://www.businessdailyafrica.com/lifestyle/books/4307736-4307736-kpc3ei/index.html',
+        'https://www.businessdailyafrica.com/lifestyle/travel/3815716-3815716-6wp8wt/index.html',
+        'https://www.businessdailyafrica.com/lifestyle/profiles/4258438-4258438-gpsg36z/index.html',
+        'https://www.businessdailyafrica.com/lifestyle/pfinance/4258410-4258410-10rrrxl/index.html',
+        'https://www.businessdailyafrica.com/lifestyle/music/3815720-3815720-fhoinu/index.html',
+        'https://www.businessdailyafrica.com/lifestyle/man/4258398-4258398-13f2ppn/index.html',
+        'https://www.businessdailyafrica.com/lifestyle/fitness/4258372-4258372-6pv2sa/index.html',
+        'https://www.businessdailyafrica.com/lifestyle/food/4258338-4258338-vbd46tz/index.html',
+        'https://www.businessdailyafrica.com/lifestyle/design/4258320-4258320-jn9hu2/index.html',
+        'https://www.businessdailyafrica.com/lifestyle/fashion/3815724-3815724-ti408tz/index.html',
+        'https://www.businessdailyafrica.com/lifestyle/art/3815712-3815712-45f388z/index.html',
+        'https://www.businessdailyafrica.com/lifestyle/society/3405664-3405664-mup6g5z/index.html',
+        'https://www.businessdailyafrica.com/lifestyle/gardening/4273292-4273292-j0bycl/index.html',
+        'https://www.businessdailyafrica.com/corporate/539550-539550-75xmgez/index.html',
+        'https://www.businessdailyafrica.com/corporate/tech/4258474-4258474-o2lonyz/index.html',
+        'https://www.businessdailyafrica.com/corporate/shipping/4003122-4003122-11dhl3y/index.html',
+        'https://www.businessdailyafrica.com/corporate/marketplace/4003114-4003114-11321f2z/index.html',
+        'https://www.businessdailyafrica.com/corporate/industry/4003110-4003110-bhijc3/index.html',
+        'https://www.businessdailyafrica.com/corporate/health/4258458-4258458-8vs9oqz/index.html',
+        'https://www.businessdailyafrica.com/corporate/enterprise/4003126-4003126-ygl350/index.html',
+        'https://www.businessdailyafrica.com/corporate/companies/4003102-4003102-8hsf32z/index.html',
+        'https://www.businessdailyafrica.com/news/539546-539546-nl9y6s/index.html',
+        'https://www.businessdailyafrica.com/news/world/4259366-4259366-o287x4z/index.html',
+        'https://www.businessdailyafrica.com/economy/3946234-3946234-65o5j7/index.html',
+        'https://www.businessdailyafrica.com/news/counties/4003142-4003142-iy9jln/index.html',
+        'https://www.businessdailyafrica.com/news/ea/uganda/4003148-4003148-h4a2tx/index.html'
+        ]
+
+        if url in links:
+            return False
+        else:
+            return True
 
     def get_category_links(self):
         logger.info('Getting links to all categories and sub-categories')
@@ -267,7 +312,7 @@ class BDCrawler(AbstractBaseCrawler):
             for category in all_categories:
                 cat = self.make_relative_links_absolute(category.get('href'))
 
-                if self.links_to_ignore(cat):
+                if self.partial_links_to_ignore(cat):
                     pass
                 else:
                     categories.append(cat)
@@ -288,7 +333,7 @@ class BDCrawler(AbstractBaseCrawler):
                     for article in articles:
                         article = self.make_relative_links_absolute(
                             article.get('href'))
-                        if not Article.objects.filter(article_url=article).exists() and article not in story_links and self.check_for_top_level_domain(article) and not self.links_to_ignore(article):
+                        if not Article.objects.filter(article_url=article).exists() and article not in story_links and self.check_for_top_level_domain(article) and not self.partial_links_to_ignore(article):
                             story_links.append(article)
 
             except Exception as e:
@@ -296,7 +341,7 @@ class BDCrawler(AbstractBaseCrawler):
                     'Crawl Error: {0} ,while getting top stories for: {1}'.format(e, stories))
 
 
-        return story_links
+        return filter(self.full_links_to_ignore, story_links)
 
     def get_story_details(self, link):
         story = requests.get(link)
