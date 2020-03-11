@@ -245,7 +245,7 @@ class DNCrawler(AbstractBaseCrawler):
             publication_date = soup.select_one('.date').get_text().strip()
             date = datetime.strptime(publication_date, '%A %B %d %Y')
             author = [self.sanitize_author_string(
-                a.get_text()) for a in soup.select('h6.name')]
+                a.get_text()) for a in soup.select('.article-content h6.name')]
             image = cssutils.parseStyle(soup.select_one('.hero-image').get('style'))['background-image']
             image_url = image.replace('url(', '').replace(')', '')
             summary = 'None'
