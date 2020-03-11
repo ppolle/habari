@@ -80,13 +80,18 @@ class DNCrawler(AbstractBaseCrawler):
             return False
 
     def full_links_to_ignore(self, url):
-        links = [
+        links5 = [
         'https://www.nation.co.ke/1148-1148-hfsx23z/index.html',
         'https://www.nation.co.ke/healthynation',
         'https://www.nation.co.ke/sports/1090-5483350-pktdq7z/index.html',
         'https://www.nation.co.ke/sports/1090-1090-iqcgwe/index.html',
         'https://www.nation.co.ke/sports/football/1102-1102-5p3gunz/index.html',
         'https://www.nation.co.ke/sports/golf/1104-1104-hjqyif/index.html',
+        'https://www.nation.co.ke/sports/athletics/1100-1100-g06rtez/index.html',
+        'https://www.nation.co.ke/sports/talkup/441392-441392-wkoe7h/index.html',
+        'https://www.nation.co.ke/sports/othersports/1951306-1951306-fy284lz/index.html',
+        'https://www.nation.co.ke/sports/rugby/1106-1106-g0i5l0z/index.html',
+        'https://www.nation.co.ke/sports/motorsport/464918-464918-kp3pdaz/index.html',
         'https://www.nation.co.ke/news/1056-1056-u6geog/index.html',
         'https://www.nation.co.ke/news/politics/1064-1064-4f88toz/index.html',
         'https://www.nation.co.ke/news/africa/1066-1066-oo1nedz/index.html',
@@ -94,14 +99,19 @@ class DNCrawler(AbstractBaseCrawler):
         'https://www.nation.co.ke/health/3476990-3476990-kickm3z/index.html',
         'https://www.nation.co.ke/health/3476990-5485696-da2r6w/index.html',
         'https://www.nation.co.ke/newsplex',
+        'https://www.nation.co.ke/business/996-996-x0uutpz/index.html',
         'https://www.nation.co.ke/newsplex/2718262-2718262-3vbltsz/index.html',
         'https://www.nation.co.ke/newsplex/deadly-force-database/2718262-3402136-ms1o0nz/index.html',
         'https://www.nation.co.ke/newsplex/murder-at-home-database/2718262-5444980-1109o1r/index.html',
         'https://www.nation.co.ke/counties/nairobi/1954174-1954174-swx4nez/index.html',
-        'https://www.nation.co.ke/business/996-3063336-my4epsz/index.html'
-        ]
+        'https://www.nation.co.ke/business/996-3063336-my4epsz/index.html',
+        'https://www.nation.co.ke/nationprime/5279428-5279428-12vka87z/index.html',
+        'https://www.nation.co.ke/lifestyle/dn2/957860-957860-ssj9fqz/index.html',
 
-        if url in links:
+        ]
+        links = self.get_category_links()
+
+        if url in links5:
             return False
         else:
             return True
@@ -123,7 +133,6 @@ class DNCrawler(AbstractBaseCrawler):
                     pass
                 else:
                     categories.append(cat)
-
         return categories
 
     def get_top_stories(self):
@@ -157,8 +166,8 @@ class DNCrawler(AbstractBaseCrawler):
                 logger.exception(
                     '{0} error while getting top stories for {1}'.format(e, stories))
 
-
-        return filter(self.full_links_to_ignore, story_links)
+        links_to_ignore = self.get_category_links()
+        return filter(lambda x:x not in links_to_ignore, story_links)
 
     def get_main_story_details(self, link):
         story = requests.get(link)
@@ -233,13 +242,16 @@ class DNCrawler(AbstractBaseCrawler):
         if story.status_code == 200:
             soup = BeautifulSoup(story.content, 'html.parser')
             title = soup.select_one('.page-title').get_text()
-            publication_date = soup.select_one('.date .far.fa-clock').get_text()
+            publication_date = soup.select_one('.date').get_text().strip()
             date = datetime.strptime(publication_date, '%A %B %d %Y')
             author = [self.sanitize_author_string(
                 a.get_text()) for a in soup.select('h6.name')]
             image = cssutils.parseStyle(soup.select_one('.hero-image').get('style'))['background-image']
             image_url = image.replace('url(', '').replace(')', '')
             summary = 'None'
+            print('Date is '+publication_date)
+            print('Author is '+str(author))
+            print('Image URl '+image_url)
         else:
             logger.exception('Failed to get {} details'. format(link))
 
