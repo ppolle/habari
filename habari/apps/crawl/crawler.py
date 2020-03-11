@@ -404,8 +404,8 @@ class BDCrawler(AbstractBaseCrawler):
                 logger.exception(
                     'Crawl Error: {0} ,while getting top stories for: {1}'.format(e, stories))
 
-
-        return filter(self.full_links_to_ignore, story_links)
+        links_to_ignore = self.get_category_links()
+        return filter(lambda x: x not in links_to_ignore, story_links)
 
     def get_story_details(self, link):
         story = requests.get(link)
