@@ -1,6 +1,7 @@
 import re
 import logging
 import requests
+import cssutils
 import tldextract
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
@@ -84,13 +85,15 @@ class DNCrawler(AbstractBaseCrawler):
         'https://www.nation.co.ke/healthynation',
         'https://www.nation.co.ke/sports/1090-5483350-pktdq7z/index.html',
         'https://www.nation.co.ke/sports/1090-1090-iqcgwe/index.html',
-        'https://www.nation.co.ke/sports/football/1102-1102-5p3gunz/index.html'
+        'https://www.nation.co.ke/sports/football/1102-1102-5p3gunz/index.html',
         'https://www.nation.co.ke/sports/golf/1104-1104-hjqyif/index.html',
         'https://www.nation.co.ke/news/1056-1056-u6geog/index.html',
         'https://www.nation.co.ke/news/politics/1064-1064-4f88toz/index.html',
         'https://www.nation.co.ke/news/africa/1066-1066-oo1nedz/index.html',
+        'https://www.nation.co.ke/news/world/1068-1068-y0kl4cz/index.html',
         'https://www.nation.co.ke/health/3476990-3476990-kickm3z/index.html',
         'https://www.nation.co.ke/health/3476990-5485696-da2r6w/index.html',
+        'https://www.nation.co.ke/newsplex',
         'https://www.nation.co.ke/newsplex/2718262-2718262-3vbltsz/index.html',
         'https://www.nation.co.ke/newsplex/deadly-force-database/2718262-3402136-ms1o0nz/index.html',
         'https://www.nation.co.ke/newsplex/murder-at-home-database/2718262-5444980-1109o1r/index.html',
@@ -224,6 +227,29 @@ class DNCrawler(AbstractBaseCrawler):
                 'author': author,
                 'summary': summary}
 
+    def get_nationprime_story_details(self, link):
+        story = requests.get(link)
+
+        if story.status_code == 200:
+            soup = BeautifulSoup(story.content, 'html.parser')
+            title = soup.select_one('.page-title').get_text()
+            publication_date = soup.select_one('.date .far.fa-clock').get_text()
+            date = datetime.strptime(publication_date, '%A %B %d %Y')
+            author = [self.sanitize_author_string(
+                a.get_text()) for a in soup.select('h6.name')]
+            image = cssutils.parseStyle(soup.select_one('.hero-image').get('style'))['background-image']
+            image_url = image.replace('url(', '').replace(')', '')
+            summary = 'None'
+        else:
+            logger.exception('Failed to get {} details'. format(link))
+
+        return {'article_url': link,
+                'image_url': image_url,
+                'article_title': title,
+                'publication_date': date,
+                'author': author,
+                'summary': summary}
+
     def update_top_stories(self):
         top_articles = self.get_top_stories()
         article_info = []
@@ -231,7 +257,6 @@ class DNCrawler(AbstractBaseCrawler):
           'https://www.nation.co.ke/newsplex',
           'https://www.nation.co.ke/brandbook', 
           'https://www.nation.co.ke/gender', 
-          'https://www.nation.co.ke/nationprime'
           )
 
         for article in top_articles:
@@ -240,6 +265,8 @@ class DNCrawler(AbstractBaseCrawler):
                 if article.startswith(startswith_newsplex):
                     story = self.get_newsplex_and_healthynation_story_details(
                         article)
+                elif article.startswith('https://www.nation.co.ke/nationprime/'):
+                    story = self.get_nationprime_story_details(article)
                 else:
                     story = self.get_main_story_details(article)
 
