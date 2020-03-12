@@ -249,9 +249,6 @@ class DNCrawler(AbstractBaseCrawler):
             image = cssutils.parseStyle(soup.select_one('.hero-image').get('style'))['background-image']
             image_url = image.replace('url(', '').replace(')', '')
             summary = 'None'
-            print('Date is '+publication_date)
-            print('Author is '+str(author))
-            print('Image URl '+image_url)
         else:
             logger.exception('Failed to get {} details'. format(link))
 
