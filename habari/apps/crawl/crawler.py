@@ -69,6 +69,7 @@ class AbstractBaseCrawler:
 class DNCrawler(AbstractBaseCrawler):
     def __init__(self):
         self.url = 'https://www.nation.co.ke/'
+        self.categories = self.get_category_links()
 
     def partial_links_to_ignore(self, url):
         links = ('https://www.nation.co.ke/photo',
@@ -123,22 +124,19 @@ class DNCrawler(AbstractBaseCrawler):
 
         if get_categories.status_code == 200:
             soup = BeautifulSoup(get_categories.content, 'html.parser')
-            all_categories = soup.select(
-                '.menu-vertical a') + soup.select('.hot-topics a')
+            all_categories = soup.select('.menu-vertical a') + soup.select('.hot-topics a')
 
             for category in all_categories:
                 cat = self.make_relative_links_absolute(category.get('href'))
-
-                if self.partial_links_to_ignore(cat):
-                    pass
-                else:
+                if not self.partial_links_to_ignore(cat):
                     categories.append(cat)
+                    
         return categories
 
     def get_top_stories(self):
         logger.info('Getting the latest stories')
         story_links = []
-        for stories in self.get_category_links():
+        for stories in self.categories:
             try:
                 top_stories = requests.get(stories)
                 if top_stories.status_code == 200:
@@ -166,8 +164,7 @@ class DNCrawler(AbstractBaseCrawler):
                 logger.exception(
                     '{0} error while getting top stories for {1}'.format(e, stories))
 
-        links_to_ignore = self.get_category_links()
-        return filter(lambda x:x not in links_to_ignore, story_links)
+        return filter(lambda x:x not in self.categories, story_links)
 
     def get_main_story_details(self, link):
         story = requests.get(link)
