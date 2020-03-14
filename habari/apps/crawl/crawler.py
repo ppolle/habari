@@ -1,6 +1,7 @@
 import re
 import logging
 import requests
+import cssutils
 import tldextract
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
@@ -68,16 +69,53 @@ class AbstractBaseCrawler:
 class DNCrawler(AbstractBaseCrawler):
     def __init__(self):
         self.url = 'https://www.nation.co.ke/'
+        self.categories = self.get_category_links()
 
-    def links_to_ignore(self, url):
-        links = ['https://www.nation.co.ke/photo',
-        'https://www.nation.co.ke/video']
+    def partial_links_to_ignore(self, url):
+        links = ('https://www.nation.co.ke/photo',
+        'https://www.nation.co.ke/video')
 
-        for link in links:
-            if link in url:
-                return True
-            else:
-                return False
+        if url.startswith(links):
+            return True
+        else:
+            return False
+
+    def full_links_to_ignore(self, url):
+        links5 = [
+        'https://www.nation.co.ke/1148-1148-hfsx23z/index.html',
+        'https://www.nation.co.ke/healthynation',
+        'https://www.nation.co.ke/sports/1090-5483350-pktdq7z/index.html',
+        'https://www.nation.co.ke/sports/1090-1090-iqcgwe/index.html',
+        'https://www.nation.co.ke/sports/football/1102-1102-5p3gunz/index.html',
+        'https://www.nation.co.ke/sports/golf/1104-1104-hjqyif/index.html',
+        'https://www.nation.co.ke/sports/athletics/1100-1100-g06rtez/index.html',
+        'https://www.nation.co.ke/sports/talkup/441392-441392-wkoe7h/index.html',
+        'https://www.nation.co.ke/sports/othersports/1951306-1951306-fy284lz/index.html',
+        'https://www.nation.co.ke/sports/rugby/1106-1106-g0i5l0z/index.html',
+        'https://www.nation.co.ke/sports/motorsport/464918-464918-kp3pdaz/index.html',
+        'https://www.nation.co.ke/news/1056-1056-u6geog/index.html',
+        'https://www.nation.co.ke/news/politics/1064-1064-4f88toz/index.html',
+        'https://www.nation.co.ke/news/africa/1066-1066-oo1nedz/index.html',
+        'https://www.nation.co.ke/news/world/1068-1068-y0kl4cz/index.html',
+        'https://www.nation.co.ke/health/3476990-3476990-kickm3z/index.html',
+        'https://www.nation.co.ke/health/3476990-5485696-da2r6w/index.html',
+        'https://www.nation.co.ke/newsplex',
+        'https://www.nation.co.ke/business/996-996-x0uutpz/index.html',
+        'https://www.nation.co.ke/newsplex/2718262-2718262-3vbltsz/index.html',
+        'https://www.nation.co.ke/newsplex/deadly-force-database/2718262-3402136-ms1o0nz/index.html',
+        'https://www.nation.co.ke/newsplex/murder-at-home-database/2718262-5444980-1109o1r/index.html',
+        'https://www.nation.co.ke/counties/nairobi/1954174-1954174-swx4nez/index.html',
+        'https://www.nation.co.ke/business/996-3063336-my4epsz/index.html',
+        'https://www.nation.co.ke/nationprime/5279428-5279428-12vka87z/index.html',
+        'https://www.nation.co.ke/lifestyle/dn2/957860-957860-ssj9fqz/index.html',
+
+        ]
+        links = self.get_category_links()
+
+        if url in links5:
+            return False
+        else:
+            return True
 
     def get_category_links(self):
         logger.info('Getting links to all categories and sub-categories')
@@ -86,23 +124,19 @@ class DNCrawler(AbstractBaseCrawler):
 
         if get_categories.status_code == 200:
             soup = BeautifulSoup(get_categories.content, 'html.parser')
-            all_categories = soup.select(
-                '.menu-vertical a') + soup.select('.hot-topics a')
+            all_categories = soup.select('.menu-vertical a') + soup.select('.hot-topics a')
 
             for category in all_categories:
                 cat = self.make_relative_links_absolute(category.get('href'))
-
-                if self.links_to_ignore(cat):
-                    pass
-                else:
+                if not self.partial_links_to_ignore(cat):
                     categories.append(cat)
-
+                    
         return categories
 
     def get_top_stories(self):
         logger.info('Getting the latest stories')
         story_links = []
-        for stories in self.get_category_links():
+        for stories in self.categories:
             try:
                 top_stories = requests.get(stories)
                 if top_stories.status_code == 200:
@@ -123,15 +157,14 @@ class DNCrawler(AbstractBaseCrawler):
                     for story in stories:
                         story = self.make_relative_links_absolute(
                             story.get('href'))
-                        if not Article.objects.filter(article_url=story).exists() and story not in story_links and self.check_for_top_level_domain(story) and not self.links_to_ignore(story):
+                        if not Article.objects.filter(article_url=story).exists() and story not in story_links and self.check_for_top_level_domain(story) and not self.partial_links_to_ignore(story):
                             story_links.append(story)
 
             except Exception as e:
                 logger.exception(
                     '{0} error while getting top stories for {1}'.format(e, stories))
 
-
-        return story_links
+        return filter(lambda x:x not in self.categories, story_links)
 
     def get_main_story_details(self, link):
         story = requests.get(link)
@@ -157,7 +190,7 @@ class DNCrawler(AbstractBaseCrawler):
                     image_url = 'None'
 
             try:
-                summary = soup.select_one('.summary div ul').get_text()
+                summary = soup.select_one('.summary div ul').get_text()[:3000]
             except AttributeError:
                 summary = ' '
 
@@ -188,8 +221,31 @@ class DNCrawler(AbstractBaseCrawler):
             except AttributeError:
                 image_url = self.make_relative_links_absolute(
                     soup.select_one('.hero.hero-chart .figcap-box iframe').get('src'))
-            summary = soup.select_one('article.post header').get_text()
+            summary = soup.select_one('article.post header').get_text()[:3000]
 
+        else:
+            logger.exception('Failed to get {} details'. format(link))
+
+        return {'article_url': link,
+                'image_url': image_url,
+                'article_title': title,
+                'publication_date': date,
+                'author': author,
+                'summary': summary}
+
+    def get_nationprime_story_details(self, link):
+        story = requests.get(link)
+
+        if story.status_code == 200:
+            soup = BeautifulSoup(story.content, 'html.parser')
+            title = soup.select_one('.page-title').get_text()
+            publication_date = soup.select_one('.date').get_text().strip()
+            date = datetime.strptime(publication_date, '%A %B %d %Y')
+            author = [self.sanitize_author_string(
+                a.get_text()) for a in soup.select('.article-content h6.name')]
+            image = cssutils.parseStyle(soup.select_one('.hero-image').get('style'))['background-image']
+            image_url = image.replace('url(', '').replace(')', '')
+            summary = 'None'
         else:
             logger.exception('Failed to get {} details'. format(link))
 
@@ -203,12 +259,20 @@ class DNCrawler(AbstractBaseCrawler):
     def update_top_stories(self):
         top_articles = self.get_top_stories()
         article_info = []
+        startswith_newsplex = ('https://www.nation.co.ke/health',
+          'https://www.nation.co.ke/newsplex',
+          'https://www.nation.co.ke/brandbook', 
+          'https://www.nation.co.ke/gender', 
+          )
+
         for article in top_articles:
             try:
                 logger.info('Updating story content for ' + article)
-                if article.startswith('https://www.nation.co.ke/health') or article.startswith('https://www.nation.co.ke/newsplex') or article.startswith('https://www.nation.co.ke/brandbook'):
+                if article.startswith(startswith_newsplex):
                     story = self.get_newsplex_and_healthynation_story_details(
                         article)
+                elif article.startswith('https://www.nation.co.ke/nationprime/'):
+                    story = self.get_nationprime_story_details(article)
                 else:
                     story = self.get_main_story_details(article)
 
@@ -238,17 +302,17 @@ class DNCrawler(AbstractBaseCrawler):
 class BDCrawler(AbstractBaseCrawler):
     def __init__(self):
         self.url = 'https://www.businessdailyafrica.com/'
+        self.categories = self.get_category_links()
 
-    def links_to_ignore(self, url):
-        links = ['https://www.businessdailyafrica.com/author-profile/',
+    def partial_links_to_ignore(self, url):
+        links = ('https://www.businessdailyafrica.com/author-profile/',
         'https://www.businessdailyafrica.com/videos/',
-        'https://www.businessdailyafrica.com/datahub/']
+        'https://www.businessdailyafrica.com/datahub/')
 
-        for link in links:
-            if link in url:
-                return True
-            else:
-                return False
+        if url.startswith(links):
+            return True
+        else:
+            return False
 
     def get_category_links(self):
         logger.info('Getting links to all categories and sub-categories')
@@ -262,10 +326,20 @@ class BDCrawler(AbstractBaseCrawler):
             for category in all_categories:
                 cat = self.make_relative_links_absolute(category.get('href'))
 
-                if self.links_to_ignore(cat):
+                if self.partial_links_to_ignore(cat):
                     pass
                 else:
                     categories.append(cat)
+
+        for category in categories:
+            get_all_categories = requests.get(category)
+            if get_all_categories.status_code == 200:
+                soup = BeautifulSoup(get_all_categories.content, 'html.parser')
+                additional_cat = soup.select('article.article.article-list-featured header h5 a')
+                for new_cat in additional_cat:
+                    cat = self.make_relative_links_absolute(new_cat.get('href'))
+                    if not self.partial_links_to_ignore(cat) and cat not in categories:
+                        categories.append(cat)
 
         return categories
 
@@ -273,7 +347,7 @@ class BDCrawler(AbstractBaseCrawler):
         logger.info('Getting top stories')
         story_links = []
 
-        for stories in self.get_category_links():
+        for stories in self.categories:
             try:
                 top_stories = requests.get(stories)
                 if top_stories.status_code == 200:
@@ -283,15 +357,14 @@ class BDCrawler(AbstractBaseCrawler):
                     for article in articles:
                         article = self.make_relative_links_absolute(
                             article.get('href'))
-                        if not Article.objects.filter(article_url=article).exists() and article not in story_links and self.check_for_top_level_domain(article) and not self.links_to_ignore(article):
+                        if not Article.objects.filter(article_url=article).exists() and article not in story_links and self.check_for_top_level_domain(article) and not self.partial_links_to_ignore(article):
                             story_links.append(article)
 
             except Exception as e:
                 logger.exception(
                     'Crawl Error: {0} ,while getting top stories for: {1}'.format(e, stories))
 
-
-        return story_links
+        return filter(lambda x: x not in self.categories, story_links)
 
     def get_story_details(self, link):
         story = requests.get(link)
@@ -316,7 +389,7 @@ class BDCrawler(AbstractBaseCrawler):
                     image_url = 'None'
 
             try:
-                summary = soup.select_one('.summary-list').get_text()
+                summary = soup.select_one('.summary-list').get_text()[:3000]
             except AttributeError:
                 summary = ' '
 
@@ -405,7 +478,7 @@ class EACrawler(AbstractBaseCrawler):
 
                     for article in articles:
                         title = article.title.get_text()
-                        summary = article.description.get_text()
+                        summary = article.description.get_text()[:3000]
                         link = article.link.get_text()
                         date = article.date.get_text()
                         publication_date = datetime.strptime(
@@ -423,7 +496,7 @@ class EACrawler(AbstractBaseCrawler):
             except Exception as e:
                 logger.exception(
                     'Error:{0} while getting stories from {1}'.format(e, rss))
-        return stories
+        return {story['article_url']:story for story in stories}.values()
 
     def update_article_details(self, article):
         request = requests.get(article['article_url'])
@@ -528,7 +601,7 @@ class CTCrawler(AbstractBaseCrawler):
 
                     for article in articles:
                         title = article.title.get_text()
-                        summary = article.description.get_text()
+                        summary = article.description.get_text()[:3000]
                         link = article.link.get_text()
                         date = article.date.get_text()
                         publication_date = datetime.strptime(
@@ -546,7 +619,7 @@ class CTCrawler(AbstractBaseCrawler):
             except Exception as e:
                 logger.exception(
                     'Error:{0} while getting stories from {1}'.format(e, rss))
-        return stories
+        return {story['article_url']:story for story in stories}.values()
 
     def update_article_details(self, article):
         request = requests.get(article['article_url'])
@@ -638,7 +711,7 @@ class SMCrawler(AbstractBaseCrawler):
 
                     for article in articles:
                         title = article.title.get_text().strip()
-                        summary = article.description.get_text().strip()
+                        summary = article.description.get_text().strip()[:3000]
                         link = article.link.get_text().strip()
                         date = article.pubDate.get_text()
                         try:
@@ -668,7 +741,7 @@ class SMCrawler(AbstractBaseCrawler):
                 logger.exception(
                     'Error:{0} while getting stories from {1}'.format(e, rss))
 
-        return stories
+        return {story['article_url']:story for story in stories}.values()
 
     def update_article_details(self, article):
         request = requests.get(article['article_url'])
@@ -783,7 +856,7 @@ class DMCrawler(AbstractBaseCrawler):
 
                     for article in articles:
                         title = article.title.get_text()
-                        summary = article.description.get_text()
+                        summary = article.description.get_text()[:3000]
                         link = article.link.get_text()
                         date = article.date.get_text()
                         publication_date = datetime.strptime(
@@ -801,7 +874,7 @@ class DMCrawler(AbstractBaseCrawler):
             except Exception as e:
                 logger.exception(
                     'Error:{0} while getting stories from {1}'.format(e, rss))
-        return stories
+        return {story['article_url']:story for story in stories}.values()
 
     def update_article_details(self, article):
         request = requests.get(article['article_url'])
@@ -852,7 +925,7 @@ class DMCrawler(AbstractBaseCrawler):
         try:
             Article.objects.bulk_create(article_info)
             logger.info('')
-            logger.info('Succesfully updated Latest East African Articles.{} new articles added'.format(
+            logger.info('Succesfully updated Latest The Daily Monitor Articles.{} new articles added'.format(
                 len(article_info)))
         except Exception as e:
             logger.exception('Error!!!{}'.format(e))

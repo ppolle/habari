@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     #Third party Apps
     #habari apps
     'habari.apps.crawl',
+    'habari.apps.core',
 ]
 
 MIDDLEWARE_CLASSES = [
