@@ -88,6 +88,18 @@ class DNCrawler(AbstractBaseCrawler):
         if get_categories.status_code == 200:
             soup = BeautifulSoup(get_categories.content, 'html.parser')
             all_categories = soup.select('.menu-vertical a') + soup.select('.hot-topics a')
+            extra_categories = soup.select('li.story-teaser.tiny-teaser')
+            # extra_categories = soup.select('li.story-teaser.tiny-teaser')
+
+            # logger.info('Getting links to all extra categories')
+            # for cat in extra_categories:
+            #     print('Extra link')
+            #     print('-'*80)
+            #     print(cat.a)
+            #     all_categories.append(cat.a)
+            #     # print(str(cat.string)+': '+ str(cat['href']))
+            #     print('*'*80)
+            # map(lambda x:print(x),extra_categories)
 
             for category in all_categories:
                 cat = self.make_relative_links_absolute(category.get('href'))
@@ -289,11 +301,9 @@ class BDCrawler(AbstractBaseCrawler):
             for category in all_categories:
                 cat = self.make_relative_links_absolute(category.get('href'))
 
-                if self.partial_links_to_ignore(cat):
-                    pass
-                else:
+                if not self.partial_links_to_ignore(cat):
                     categories.append(cat)
-
+   
         for category in categories:
             get_all_categories = requests.get(category)
             if get_all_categories.status_code == 200:
