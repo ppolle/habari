@@ -893,4 +893,18 @@ class DMCrawler(AbstractBaseCrawler):
         except Exception as e:
             logger.exception('Error!!!{}'.format(e))
 
+class TSCrawler(AbstractBaseCrawler):
+    def __init__(self):
+        self.url = 'https://www.the-star.co.ke/'
 
+    def get_category_links(self):
+        pass
+
+    def get_top_stories(self):
+        pass
+
+    def get_story_details(self):
+        pass
+
+    def update_top_stories(self):
+        pass
