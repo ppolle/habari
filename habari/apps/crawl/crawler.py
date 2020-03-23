@@ -917,7 +917,7 @@ class TSCrawler(AbstractBaseCrawler):
 
             for category in all_categories:
                 cat = self.make_relative_links_absolute(category.get('href'))
-                if cat not in categories and self.check_for_top_level_domain(cat) and not self.partial_links_to_ignore(cat):
+                if cat not in categories and self.check_for_top_level_domain(cat) and not self.partial_links_to_ignore(cat) and cat is not None:
                     categories.append(cat)
         
         return categories
