@@ -897,6 +897,15 @@ class TSCrawler(AbstractBaseCrawler):
     def __init__(self):
         self.url = 'https://www.the-star.co.ke/'
 
+    def partial_links_to_ignore(self, url):
+        links = ('https://www.the-star.co.ke/video/',
+            'https://www.the-star.co.ke/classifieds/')
+
+        if url.startswith(links):
+            return True
+        else:
+            return False
+
     def get_category_links(self):
         logger.info('Getting links to all categories and subcategories')
         get_categories = requests.get(self.url)
@@ -908,7 +917,7 @@ class TSCrawler(AbstractBaseCrawler):
 
             for category in all_categories:
                 cat = self.make_relative_links_absolute(category.get('href'))
-                if cat not in categories and self.check_for_top_level_domain(cat):
+                if cat not in categories and self.check_for_top_level_domain(cat) and not self.partial_links_to_ignore(cat):
                     categories.append(cat)
         
         return categories
