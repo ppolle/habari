@@ -899,7 +899,8 @@ class TSCrawler(AbstractBaseCrawler):
 
     def partial_links_to_ignore(self, url):
         links = ('https://www.the-star.co.ke/video/',
-            'https://www.the-star.co.ke/classifieds/')
+            'https://www.the-star.co.ke/classifieds/',
+            'https://www.the-star.co.ke/cartoon/')
 
         if url.startswith(links):
             return True
@@ -923,13 +924,33 @@ class TSCrawler(AbstractBaseCrawler):
         return categories
         
     def get_top_stories(self):
-        pass
+        logger.info('Getting top stories')
+        story_links = []
+        
+        for category in self.get_category_links():
+            try:
+                top_stories = requests.get(category)
+                if top_stories.status_code == 200:
+                    soup = BeautifulSoup(top_stories.content, 'html.parser')
+                    articles = soup.select('.article-body a')
+
+                    for article in articles:
+                        article = self.make_relative_links_absolute(article.get('href'))
+                        if not Article.objects.filter(article_url=article).exists() and article not in story_links and self.check_for_top_level_domain(article) and not self.partial_links_to_ignore(article):
+                            story_links.append(article)
+            except Exception as e:
+                logger.exception(
+                    'Crawl Error: {0} , while getting top stories for: {1}'.format(e, category))
+
+        return story_links
 
     def get_story_details(self):
         pass
 
     def update_top_stories(self):
-        categories = self.get_category_links()
+        categories = self.get_top_stories()
         for cat in categories:
-            print('Category: '+ cat)
+            print('Links: '+ cat)
+
+        print('There has been a total of {} new links'.format(len(categories)))
         
