@@ -898,8 +898,21 @@ class TSCrawler(AbstractBaseCrawler):
         self.url = 'https://www.the-star.co.ke/'
 
     def get_category_links(self):
-        pass
+        logger.info('Getting links to all categories and subcategories')
+        get_categories = requests.get(self.url)
+        categories = [self.url,]
 
+        if get_categories.status_code == 200:
+            soup = BeautifulSoup(get_categories.content, 'html.parser')
+            all_categories = soup.select('.sidebar .nav-sidebar li a')
+
+            for category in all_categories:
+                cat = self.make_relative_links_absolute(category.get('href'))
+                if cat not in categories and self.check_for_top_level_domain(cat):
+                    categories.append(cat)
+        
+        return categories
+        
     def get_top_stories(self):
         pass
 
@@ -907,4 +920,7 @@ class TSCrawler(AbstractBaseCrawler):
         pass
 
     def update_top_stories(self):
-        pass
+        categories = self.get_category_links()
+        for cat in categories:
+            print('Category: '+ cat)
+        
