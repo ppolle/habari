@@ -63,7 +63,7 @@ class AbstractBaseCrawler:
 
     def sanitize_author_string(self, author):
         new_author = re.sub(
-            r'\w*@.*|(\w+[.|\w])*@(\w+[.])*\w+|More by this Author|By', '', author).strip().upper()
+            r'\w*@.*|(\w+[.|\w])*@(\w+[.])*\w+|More by this Author|By|BY ', '', author).strip().upper()
         return new_author
 
 class DNCrawler(AbstractBaseCrawler):
@@ -951,8 +951,11 @@ class TSCrawler(AbstractBaseCrawler):
             title = soup.select_one('.header-primary-title .article-title').get_text().strip()
             publication_date = soup.select_one('.article-body .article-published').get_text().strip()
             date = datetime.strptime(publication_date, '%d %B %Y - %H:%M')
-            author = [self.sanitize_author_string(a.get_text()) for a in soup.select(
-                '.article-body .author-name span')]
+            try:
+                author = [self.sanitize_author_string(a.strip()) for a in soup.select_one(
+                '.article-body .mobile-display .author-name span').get_text().split(' AND')]
+            except AttributeError:
+                author = []
 
             try:
                 image_url = soup.select_one('.article-widgets .wrap img').get('src').strip().lstrip(' //')
@@ -963,7 +966,7 @@ class TSCrawler(AbstractBaseCrawler):
                     image_url ='None'
 
             try:
-                summary = soup.select('.article-intro').get_text()
+                summary = re.sub(r'•', '', soup.select_one('.article-intro').get_text()).strip()
             except AttributeError:
                 summary = ' '
 
@@ -983,30 +986,38 @@ class TSCrawler(AbstractBaseCrawler):
             try:
                 logger.info('Updating story content for: {}'.format(article))
                 story = self.get_article_details(article)
-                article_info.append(story)
+
+                article_info.append(Article(title=story['article_title'],
+                                            article_url=story['article_url'],
+                                            article_image_url=story['image_url'],
+                                            author=story['author'],
+                                            publication_date=story['publication_date'],
+                                            summary=story['summary'],
+                                            news_source='TS'
+                                            ))
 
             except Exception as e:
                 logger.exception('Crawling Error: {0} while getting data from: {1}'.format(e, article))
 
-        # try:
-        #     Article.objects.bulk_create(article_info)
-        #     logger.info('')
-        #     logger.info('Succesfully updated Latest The Star Articles.{} new articles added'.format(
-        #         len(article_info)))
-        # except Exception as e:
-        #     logger.exception('Error Populating the database{}'.format(e))
+        try:
+            Article.objects.bulk_create(article_info)
+            logger.info('')
+            logger.info('Succesfully updated Latest The Star Articles.{} new articles added'.format(
+                len(article_info)))
+        except Exception as e:
+            logger.exception('Error Populating the database{}'.format(e))
 
-        for s in article_info:
-            print('Title: {}'.format(s['article_title']))
-            print('Author: {}'.format(str(s['author'])))
-            print('Publication Date: {}'.format(str(s['publication_date'])))
-            print('Article Url: {}'.format(s['article_url']))
-            print('Image Url:{}'.format(s['image_url']))
-            print('Summary: {}'.format(s['summary']))
-            print('')
-            print('*'*40)
+        # for s in article_info:
+        #     print('Title: {}'.format(s['article_title']))
+        #     print('Author: {}'.format(str(s['author'])))
+        #     print('Publication Date: {}'.format(str(s['publication_date'])))
+        #     print('Article Url: {}'.format(s['article_url']))
+        #     print('Image Url:{}'.format(s['image_url']))
+        #     print('Summary: {}'.format(s['summary']))
+        #     print('')
+        #     print('*'*40)
 
 
-        print('There has been a total of {} new links'.format(len(stories)))
-        print('There has been a total of {} articles'.format(len(article_info)))
+        # print('There has been a total of {} new links'.format(len(stories)))
+        # print('There has been a total of {} articles'.format(len(article_info)))
         
