@@ -913,7 +913,7 @@ class TSCrawler(AbstractBaseCrawler):
         categories = [self.url,]
 
         if get_categories.status_code == 200:
-            soup = BeautifulSoup(get_categories.content, 'html.parser')
+            soup = BeautifulSoup(get_categories.content, 'lxml')
             all_categories = soup.select('.sidebar .nav-sidebar li a')
 
             for category in all_categories:
@@ -931,7 +931,7 @@ class TSCrawler(AbstractBaseCrawler):
             try:
                 top_stories = requests.get(category)
                 if top_stories.status_code == 200:
-                    soup = BeautifulSoup(top_stories.content, 'html.parser')
+                    soup = BeautifulSoup(top_stories.content, 'lxml')
                     articles = soup.select('.article-body a')
 
                     for article in articles:
@@ -944,13 +944,69 @@ class TSCrawler(AbstractBaseCrawler):
 
         return story_links
 
-    def get_story_details(self):
-        pass
+    def get_article_details(self, link):
+        story = requests.get(link)
+        if story.status_code == 200:
+            soup = BeautifulSoup(story.content, 'lxml')
+            title = soup.select_one('.header-primary-title .article-title').get_text().strip()
+            publication_date = soup.select_one('.article-body .article-published').get_text().strip()
+            date = datetime.strptime(publication_date, '%d %B %Y - %H:%M')
+            author = [self.sanitize_author_string(a.get_text()) for a in soup.select(
+                '.article-body .author-name span')]
+
+            try:
+                image_url = soup.select_one('.article-widgets .wrap img').get('src').strip().lstrip(' //')
+            except AttributeError:
+                try:
+                    image_url = soup.select_one('.youtube-wrap iframe').get('src').strip().lstrip('//')
+                except AttributeError:
+                    image_url ='None'
+
+            try:
+                summary = soup.select('.article-intro').get_text()
+            except AttributeError:
+                summary = ' '
+
+        return {'article_url': link,
+                'image_url': image_url,
+                'article_title': title,
+                'publication_date': date,
+                'author': author,
+                'summary': summary
+                }
 
     def update_top_stories(self):
-        categories = self.get_top_stories()
-        for cat in categories:
-            print('Links: '+ cat)
+        stories = self.get_top_stories()
+        article_info = []
 
-        print('There has been a total of {} new links'.format(len(categories)))
+        for article in stories:
+            try:
+                logger.info('Updating story content for: {}'.format(article))
+                story = self.get_article_details(article)
+                article_info.append(story)
+
+            except Exception as e:
+                logger.exception('Crawling Error: {0} while getting data from: {1}'.format(e, article))
+
+        # try:
+        #     Article.objects.bulk_create(article_info)
+        #     logger.info('')
+        #     logger.info('Succesfully updated Latest The Star Articles.{} new articles added'.format(
+        #         len(article_info)))
+        # except Exception as e:
+        #     logger.exception('Error Populating the database{}'.format(e))
+
+        for s in article_info:
+            print('Title: {}'.format(s['article_title']))
+            print('Author: {}'.format(str(s['author'])))
+            print('Publication Date: {}'.format(str(s['publication_date'])))
+            print('Article Url: {}'.format(s['article_url']))
+            print('Image Url:{}'.format(s['image_url']))
+            print('Summary: {}'.format(s['summary']))
+            print('')
+            print('*'*40)
+
+
+        print('There has been a total of {} new links'.format(len(stories)))
+        print('There has been a total of {} articles'.format(len(article_info)))
         
