@@ -384,7 +384,6 @@ class BDCrawler(AbstractBaseCrawler):
             except Exception as e:
                 logger.exception('Crawling Error: {0} while getting data from: {1}'.format(e, article))
 
-
         try:
             Article.objects.bulk_create(article_info)
             logging.info('')
@@ -926,6 +925,7 @@ class TSCrawler(AbstractBaseCrawler):
     def get_top_stories(self):
         logger.info('Getting top stories')
         story_links = []
+        ignore_links = ['https://www.the-star.co.ke/news/2020-03-09-photos-filthy-city-markets-raise-health-worries/',]
         
         for category in self.get_category_links():
             try:
@@ -942,7 +942,7 @@ class TSCrawler(AbstractBaseCrawler):
                 logger.exception(
                     'Crawl Error: {0} , while getting top stories for: {1}'.format(e, category))
 
-        return story_links
+        return filter(lambda x:x not in ignore_links, story_links)
 
     def get_article_details(self, link):
         story = requests.get(link)
