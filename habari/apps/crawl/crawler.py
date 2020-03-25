@@ -952,7 +952,7 @@ class TSCrawler(AbstractBaseCrawler):
             publication_date = soup.select_one('.article-body .article-published').get_text().strip()
             date = datetime.strptime(publication_date, '%d %B %Y - %H:%M')
             try:
-                author = [self.sanitize_author_string(a.strip()) for a in soup.select_one(
+                author = [self.sanitize_author_string(a.strip(' /')) for a in soup.select_one(
                 '.article-body .mobile-display .author-name span').get_text().split(' AND')]
             except AttributeError:
                 author = []
@@ -966,7 +966,7 @@ class TSCrawler(AbstractBaseCrawler):
                     image_url ='None'
 
             try:
-                summary = re.sub(r'•', '', soup.select_one('.article-intro').get_text()).strip()
+                summary = re.sub(r'•|\n', '', soup.select_one('.article-intro').get_text()).strip()
             except AttributeError:
                 summary = ' '
 
@@ -986,6 +986,7 @@ class TSCrawler(AbstractBaseCrawler):
             try:
                 logger.info('Updating story content for: {}'.format(article))
                 story = self.get_article_details(article)
+                # article_info.append(story)
 
                 article_info.append(Article(title=story['article_title'],
                                             article_url=story['article_url'],
@@ -1018,6 +1019,6 @@ class TSCrawler(AbstractBaseCrawler):
         #     print('*'*40)
 
 
-        # print('There has been a total of {} new links'.format(len(stories)))
+        # print('There has been a total of {} new links'.format(len(list(stories))))
         # print('There has been a total of {} articles'.format(len(article_info)))
         
