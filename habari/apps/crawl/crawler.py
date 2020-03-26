@@ -958,10 +958,10 @@ class TSCrawler(AbstractBaseCrawler):
                 author = []
 
             try:
-                image_url = soup.select_one('.article-widgets .wrap img').get('src').strip().lstrip(' //')
+                image_url = soup.select_one('.article-widgets .wrap img').get('src').lstrip(' /')
             except AttributeError:
                 try:
-                    image_url = soup.select_one('.youtube-wrap iframe').get('src').strip().lstrip('//')
+                    image_url = soup.select_one('.youtube-wrap iframe').get('src').lstrip(' /')
                 except AttributeError:
                     image_url ='None'
 
@@ -986,8 +986,7 @@ class TSCrawler(AbstractBaseCrawler):
             try:
                 logger.info('Updating story content for: {}'.format(article))
                 story = self.get_article_details(article)
-                # article_info.append(story)
-
+ 
                 article_info.append(Article(title=story['article_title'],
                                             article_url=story['article_url'],
                                             article_image_url=story['image_url'],
@@ -1007,18 +1006,4 @@ class TSCrawler(AbstractBaseCrawler):
                 len(article_info)))
         except Exception as e:
             logger.exception('Error Populating the database{}'.format(e))
-
-        # for s in article_info:
-        #     print('Title: {}'.format(s['article_title']))
-        #     print('Author: {}'.format(str(s['author'])))
-        #     print('Publication Date: {}'.format(str(s['publication_date'])))
-        #     print('Article Url: {}'.format(s['article_url']))
-        #     print('Image Url:{}'.format(s['image_url']))
-        #     print('Summary: {}'.format(s['summary']))
-        #     print('')
-        #     print('*'*40)
-
-
-        # print('There has been a total of {} new links'.format(len(list(stories))))
-        # print('There has been a total of {} articles'.format(len(article_info)))
         
