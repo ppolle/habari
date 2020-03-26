@@ -11,7 +11,7 @@ class Article(models.Model):
 			('CT', 'THE CITIZEN'),
 			('SM', 'THE DAILY STANDARD'),
 			('DM', 'THE DAILY MONITOR'),
-			('TS', 'TH STAR KENYA')
+			('TS', 'THE STAR KENYA')
 		)
 
 	title = models.CharField(max_length=500)
