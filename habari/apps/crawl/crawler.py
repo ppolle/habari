@@ -935,9 +935,12 @@ class TSCrawler(AbstractBaseCrawler):
                     articles = soup.select('.article-body a')
 
                     for article in articles:
-                        article = self.make_relative_links_absolute(article.get('href'))
-                        if not Article.objects.filter(article_url=article).exists() and article not in story_links and self.check_for_top_level_domain(article) and not self.partial_links_to_ignore(article):
-                            story_links.append(article)
+                        try:
+                            article = self.make_relative_links_absolute(article.get('href'))
+                            if not Article.objects.filter(article_url=article).exists() and article not in story_links and self.check_for_top_level_domain(article) and not self.partial_links_to_ignore(article):
+                                story_links.append(article)
+                        except Exception as e:
+                            logger.exception('Error: {}, while trying to sanitize link'.format(e))
             except Exception as e:
                 logger.exception(
                     'Crawl Error: {0} , while getting top stories for: {1}'.format(e, category))
