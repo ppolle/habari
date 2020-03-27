@@ -425,6 +425,9 @@ class EACrawler(AbstractBaseCrawler):
                     category = self.make_relative_links_absolute(
                         category.get('href'))
                     categories.append(category)
+            else:
+                logger.exception(
+                    '{0} error while getting rss links from: {1}'.format(get_categories.status_code, self.url))
 
             for category in categories:
                 request = requests.get(category)
@@ -436,6 +439,9 @@ class EACrawler(AbstractBaseCrawler):
                         if link.endswith('.xml'):
                             rss_feeds.append(
                                 self.make_relative_links_absolute(link))
+                else:
+                    logger.exception(
+                    '{0} error while getting categories and sub-categories for {1}'.format(request.status_code, category))
 
             return rss_feeds
         except Exception as e:
@@ -468,6 +474,9 @@ class EACrawler(AbstractBaseCrawler):
 
                         if article_details not in stories and not Article.objects.filter(article_url=article_details['article_url']).exists():
                             stories.append(article_details)
+                else:
+                    logger.exception(
+                    '{0} error while getting top categories for: {1}'.format(request.status_code, rss))
 
             except Exception as e:
                 logger.exception(
