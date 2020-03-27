@@ -93,6 +93,9 @@ class DNCrawler(AbstractBaseCrawler):
                 cat = self.make_relative_links_absolute(category.get('href'))
                 if not self.partial_links_to_ignore(cat):
                     categories.append(cat)
+        else:
+            logger.exception(
+                    '{0} error while getting categories and sub-categories for {1}'.format(e, self.url))
                     
         return categories
 
@@ -118,10 +121,14 @@ class DNCrawler(AbstractBaseCrawler):
                         stories = small_story_list + story_teaser + nation_prime + latest_news
 
                     for story in stories:
-                        story = self.make_relative_links_absolute(
-                            story.get('href'))
-                        if not Article.objects.filter(article_url=story).exists() and story not in story_links and self.check_for_top_level_domain(story) and not self.partial_links_to_ignore(story):
-                            story_links.append(story)
+                        try:
+                            story = self.make_relative_links_absolute(
+                                story.get('href'))
+                            if not Article.objects.filter(article_url=story).exists() and story not in story_links and self.check_for_top_level_domain(story) and not self.partial_links_to_ignore(story):
+                                story_links.append(story)
+                        except Exception as e:
+                            logger.exception(
+                    '{0} error while sanitizing {1}'.format(e, story))
 
             except Exception as e:
                 logger.exception(
