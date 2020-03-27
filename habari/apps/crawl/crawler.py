@@ -95,7 +95,7 @@ class DNCrawler(AbstractBaseCrawler):
                     categories.append(cat)
         else:
             logger.exception(
-                    '{0} error while getting categories and sub-categories for {1}'.format(e, self.url))
+                    '{0} error while getting categories and sub-categories for {1}'.format(get_categories.status_code, self.url))
                     
         return categories
 
@@ -128,7 +128,7 @@ class DNCrawler(AbstractBaseCrawler):
                                 story_links.append(story)
                         except Exception as e:
                             logger.exception(
-                    '{0} error while sanitizing {1}'.format(e, story))
+                    '{0} error while sanitizing {1} and getting top stories from:'.format(e, story.get('href'), stories))
 
             except Exception as e:
                 logger.exception(
@@ -295,11 +295,11 @@ class BDCrawler(AbstractBaseCrawler):
 
             for category in all_categories:
                 cat = self.make_relative_links_absolute(category.get('href'))
-
-                if self.partial_links_to_ignore(cat):
-                    pass
-                else:
+                if not self.partial_links_to_ignore(cat):
                     categories.append(cat)
+        else:
+            logger.exception(
+                    '{0} error while getting categories and sub-categories for {1}'.format(get_categories.status_code, self.url))
 
         for category in categories:
             get_all_categories = requests.get(category)
@@ -310,6 +310,9 @@ class BDCrawler(AbstractBaseCrawler):
                     cat = self.make_relative_links_absolute(new_cat.get('href'))
                     if not self.partial_links_to_ignore(cat) and cat not in categories:
                         categories.append(cat)
+            else:
+                logger.exception(
+                    '{0} error while getting categories and sub-categories for {1}'.format(get_all_categories.status_code, category))
 
         return categories
 
@@ -325,10 +328,13 @@ class BDCrawler(AbstractBaseCrawler):
                     articles = soup.select('.article a')
 
                     for article in articles:
-                        article = self.make_relative_links_absolute(
-                            article.get('href'))
-                        if not Article.objects.filter(article_url=article).exists() and article not in story_links and self.check_for_top_level_domain(article) and not self.partial_links_to_ignore(article):
-                            story_links.append(article)
+                        try:
+                            article = self.make_relative_links_absolute(
+                                article.get('href'))
+                            if not Article.objects.filter(article_url=article).exists() and article not in story_links and self.check_for_top_level_domain(article) and not self.partial_links_to_ignore(article):
+                                story_links.append(article)
+                        except Exception as e:
+                            logger.exception('{} error while sanitizing {} and getting stories from {}'.format(e, article.get('href'), stories))
 
             except Exception as e:
                 logger.exception(
