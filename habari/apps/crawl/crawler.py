@@ -93,6 +93,9 @@ class DNCrawler(AbstractBaseCrawler):
                 cat = self.make_relative_links_absolute(category.get('href'))
                 if not self.partial_links_to_ignore(cat):
                     categories.append(cat)
+        else:
+            logger.exception(
+                    '{0} error while getting categories and sub-categories for {1}'.format(get_categories.status_code, self.url))
                     
         return categories
 
@@ -118,10 +121,14 @@ class DNCrawler(AbstractBaseCrawler):
                         stories = small_story_list + story_teaser + nation_prime + latest_news
 
                     for story in stories:
-                        story = self.make_relative_links_absolute(
-                            story.get('href'))
-                        if not Article.objects.filter(article_url=story).exists() and story not in story_links and self.check_for_top_level_domain(story) and not self.partial_links_to_ignore(story):
-                            story_links.append(story)
+                        try:
+                            story = self.make_relative_links_absolute(
+                                story.get('href'))
+                            if not Article.objects.filter(article_url=story).exists() and story not in story_links and self.check_for_top_level_domain(story) and not self.partial_links_to_ignore(story):
+                                story_links.append(story)
+                        except Exception as e:
+                            logger.exception(
+                    '{0} error while sanitizing {1} and getting top stories from:'.format(e, story.get('href'), stories))
 
             except Exception as e:
                 logger.exception(
@@ -288,11 +295,11 @@ class BDCrawler(AbstractBaseCrawler):
 
             for category in all_categories:
                 cat = self.make_relative_links_absolute(category.get('href'))
-
-                if self.partial_links_to_ignore(cat):
-                    pass
-                else:
+                if not self.partial_links_to_ignore(cat):
                     categories.append(cat)
+        else:
+            logger.exception(
+                    '{0} error while getting categories and sub-categories for {1}'.format(get_categories.status_code, self.url))
 
         for category in categories:
             get_all_categories = requests.get(category)
@@ -303,6 +310,9 @@ class BDCrawler(AbstractBaseCrawler):
                     cat = self.make_relative_links_absolute(new_cat.get('href'))
                     if not self.partial_links_to_ignore(cat) and cat not in categories:
                         categories.append(cat)
+            else:
+                logger.exception(
+                    '{0} error while getting categories and sub-categories for {1}'.format(get_all_categories.status_code, category))
 
         return categories
 
@@ -318,10 +328,13 @@ class BDCrawler(AbstractBaseCrawler):
                     articles = soup.select('.article a')
 
                     for article in articles:
-                        article = self.make_relative_links_absolute(
-                            article.get('href'))
-                        if not Article.objects.filter(article_url=article).exists() and article not in story_links and self.check_for_top_level_domain(article) and not self.partial_links_to_ignore(article):
-                            story_links.append(article)
+                        try:
+                            article = self.make_relative_links_absolute(
+                                article.get('href'))
+                            if not Article.objects.filter(article_url=article).exists() and article not in story_links and self.check_for_top_level_domain(article) and not self.partial_links_to_ignore(article):
+                                story_links.append(article)
+                        except Exception as e:
+                            logger.exception('{} error while sanitizing {} and getting stories from {}'.format(e, article.get('href'), stories))
 
             except Exception as e:
                 logger.exception(
@@ -411,6 +424,9 @@ class EACrawler(AbstractBaseCrawler):
                     category = self.make_relative_links_absolute(
                         category.get('href'))
                     categories.append(category)
+            else:
+                logger.exception(
+                    '{0} error while getting rss links from: {1}'.format(get_categories.status_code, self.url))
 
             for category in categories:
                 request = requests.get(category)
@@ -422,6 +438,9 @@ class EACrawler(AbstractBaseCrawler):
                         if link.endswith('.xml'):
                             rss_feeds.append(
                                 self.make_relative_links_absolute(link))
+                else:
+                    logger.exception(
+                    '{0} error while getting categories and sub-categories for {1}'.format(request.status_code, category))
 
             return rss_feeds
         except Exception as e:
@@ -439,21 +458,28 @@ class EACrawler(AbstractBaseCrawler):
                     articles = soup.find_all('item')
 
                     for article in articles:
-                        title = article.title.get_text()
-                        summary = article.description.get_text()[:3000]
-                        link = article.link.get_text()
-                        date = article.date.get_text()
-                        publication_date = datetime.strptime(
-                            date, '%Y-%m-%dT%H:%M:%SZ')
+                        try:
+                            title = article.title.get_text()
+                            summary = article.description.get_text()[:3000]
+                            link = article.link.get_text()
+                            date = article.date.get_text()
+                            publication_date = datetime.strptime(
+                                date, '%Y-%m-%dT%H:%M:%SZ')
 
-                        article_details = {
-                            'title': title,
-                            'article_url': link,
-                            'publication_date': publication_date,
-                            'summary': summary, }
+                            article_details = {
+                                'title': title,
+                                'article_url': link,
+                                'publication_date': publication_date,
+                                'summary': summary, }
 
-                        if article_details not in stories and not Article.objects.filter(article_url=article_details['article_url']).exists():
-                            stories.append(article_details)
+                            if article_details not in stories and not Article.objects.filter(article_url=article_details['article_url']).exists():
+                                stories.append(article_details)
+                        except Exception as e:
+                            logger.exception('{} error while getting story details for:{}'.format(e, article.link.get_text()))
+
+                else:
+                    logger.exception(
+                    '{0} error while getting top categories for: {1}'.format(request.status_code, rss))
 
             except Exception as e:
                 logger.exception(
@@ -533,6 +559,9 @@ class CTCrawler(AbstractBaseCrawler):
                     category = self.make_relative_links_absolute(
                         category.get('href'))
                     categories.append(category)
+            else:
+                logger.exception(
+                    '{0} error while getting rss links from: {1}'.format(get_categories.status_code, self.url))
 
             for category in categories:
                 request = requests.get(category)
@@ -544,6 +573,9 @@ class CTCrawler(AbstractBaseCrawler):
                         if link.endswith('.xml'):
                             rss_feeds.append(
                                 self.make_relative_links_absolute(link))
+                else:
+                    logger.exception(
+                    '{0} error while getting rss links from: {1}'.format(request.status_code, category))
 
             return rss_feeds
 
@@ -562,21 +594,27 @@ class CTCrawler(AbstractBaseCrawler):
                     articles = soup.find_all('item')
 
                     for article in articles:
-                        title = article.title.get_text()
-                        summary = article.description.get_text()[:3000]
-                        link = article.link.get_text()
-                        date = article.date.get_text()
-                        publication_date = datetime.strptime(
-                            date, '%Y-%m-%dT%H:%M:%SZ')
+                        try:
+                            title = article.title.get_text()
+                            summary = article.description.get_text()[:3000]
+                            link = article.link.get_text()
+                            date = article.date.get_text()
+                            publication_date = datetime.strptime(
+                                date, '%Y-%m-%dT%H:%M:%SZ')
 
-                        article_details = {
-                            'title': title,
-                            'article_url': link,
-                            'publication_date': publication_date,
-                            'summary': summary, }
+                            article_details = {
+                                'title': title,
+                                'article_url': link,
+                                'publication_date': publication_date,
+                                'summary': summary, }
 
-                        if article_details not in stories and not Article.objects.filter(article_url=article_details['article_url']).exists():
-                            stories.append(article_details)
+                            if article_details not in stories and not Article.objects.filter(article_url=article_details['article_url']).exists():
+                                stories.append(article_details)
+                        except Exception as e:
+                            logger.exception('{} error while getting details for: {}'.format(e, article.link.get_text()))
+                else:
+                    logger.exception(
+                    '{0} error while getting rss links from: {1}'.format(request.status_code, rss))
 
             except Exception as e:
                 logger.exception(
@@ -789,6 +827,9 @@ class DMCrawler(AbstractBaseCrawler):
                     category = self.make_relative_links_absolute(
                         category.get('href'))
                     categories.append(category)
+            else:
+                logger.exception(
+                    '{0} error while getting rss links from: {1}'.format(get_categories.status_code, self.url))
 
             for category in categories:
                 request = requests.get(category)
@@ -800,6 +841,9 @@ class DMCrawler(AbstractBaseCrawler):
                         if link.endswith('.xml'):
                             rss_feeds.append(
                                 self.make_relative_links_absolute(link))
+                else:
+                    logger.exception(
+                    '{0} error while getting rss links from: {1}'.format(request.status_code, category))
 
             return rss_feeds
         except Exception as e:
@@ -832,6 +876,9 @@ class DMCrawler(AbstractBaseCrawler):
 
                         if article_details not in stories and not Article.objects.filter(article_url=article_details['article_url']).exists():
                             stories.append(article_details)
+                else:
+                    logger.exception(
+                    '{0} error while getting rss details from: {1}'.format(get_categories.status_code, rss))
 
             except Exception as e:
                 logger.exception(
