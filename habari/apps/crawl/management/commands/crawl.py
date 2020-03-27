@@ -14,6 +14,7 @@ class Command(BaseCommand):
         'CT':crawler.CTCrawler,
         'SM':crawler.SMCrawler,
         'DM':crawler.DMCrawler,
+        'TS':crawler.TSCrawler
         }
 
         return crawler_classes.get(slug)
