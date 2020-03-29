@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     #Third party Apps
+    'bootstrap3',
     #habari apps
     'habari.apps.crawl',
     'habari.apps.core',
