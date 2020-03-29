@@ -760,7 +760,10 @@ class SMCrawler(AbstractBaseCrawler):
                 try:
                     author = [a.strip() for a in soup.select_one('.article-meta a').get_text().split(' and ')]
                 except AttributeError:
-                    author = [soup.select_one('div .io-hidden-author').get_text()]
+                    try:
+                        author = [soup.select_one('div .io-hidden-author').get_text()]
+                    except AttributeError:
+                        author = ['']
                 article['author'] = author
             
             try:
