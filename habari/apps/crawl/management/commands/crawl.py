@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
+from habari.apps.crawl.crawler import (dncrawler)
 from habari.apps.crawl import crawler
 
 
@@ -8,7 +9,7 @@ class Command(BaseCommand):
 
     def get_crawler_class(self, slug):
         crawler_classes = {
-        'DN': crawler.DNCrawler,
+        'DN': dncrawler.DNCrawler,
         'BD': crawler.BDCrawler,
         'EA': crawler.EACrawler,
         'CT':crawler.CTCrawler,

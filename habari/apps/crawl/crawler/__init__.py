@@ -647,7 +647,7 @@ class CTCrawler(AbstractBaseCrawler):
                     image_url = 'None'
 
             try:
-            	author = [self.sanitize_author_string(
+                author = [self.sanitize_author_string(
                 a.get_text()) for a in soup.select('section.author')]
             except AttributeError:
                 author = []
