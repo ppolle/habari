@@ -1,20 +1,20 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from habari.apps.crawl import crawler
-
+from habari.apps.crawl.crawlers import (dncrawler, eacrawler, bdcrawler, ctcrawler, dmcrawler,
+    smcrawler, tscrawler)
 
 class Command(BaseCommand):
     help = 'Crawl News Sources for New Articles'
 
     def get_crawler_class(self, slug):
         crawler_classes = {
-        'DN': crawler.DNCrawler,
-        'BD': crawler.BDCrawler,
-        'EA': crawler.EACrawler,
-        'CT':crawler.CTCrawler,
-        'SM':crawler.SMCrawler,
-        'DM':crawler.DMCrawler,
-        'TS':crawler.TSCrawler
+        'DN': dncrawler.DNCrawler,
+        'BD': bdcrawler.BDCrawler,
+        'EA': eacrawler.EACrawler,
+        'CT': ctcrawler.CTCrawler,
+        'SM': smcrawler.SMCrawler,
+        'DM': dmcrawler.DMCrawler,
+        'TS': tscrawler.TSCrawler
         }
 
         return crawler_classes.get(slug)
