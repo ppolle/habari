@@ -544,6 +544,17 @@ class CTCrawler(AbstractBaseCrawler):
     def __init__(self):
         self.url = 'https://www.thecitizen.co.tz/'
 
+    def partial_links_to_ignore(self, url):
+        links = ('https://www.thecitizen.co.tz/jobs',
+            'https://www.thecitizen.co.tz/photo',
+            'https://www.thecitizen.co.tz/Video',
+            'https://www.thecitizen.co.tz/notices')
+
+        if url.startswith(links):
+            return False
+        else:
+            return True
+
     def get_rss_feed_links(self):
         logger.info('Getting RSS feeds links')
         categories = [self.url, ]
@@ -569,10 +580,9 @@ class CTCrawler(AbstractBaseCrawler):
                     soup = BeautifulSoup(request.content, 'html.parser')
                     social_links = soup.select('.social-networks a')
                     for social_link in social_links:
-                        link = social_link.get('href')
-                        if link.endswith('.xml'):
-                            rss_feeds.append(
-                                self.make_relative_links_absolute(link))
+                        link = self.make_relative_links_absolute(social_link.get('href'))
+                        if self.partial_links_to_ignore(link) and link.endswith('.xml'):
+                            rss_feeds.append(link)
                 else:
                     logger.exception(
                     '{0} error while getting rss links from: {1}'.format(request.status_code, category))
