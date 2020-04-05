@@ -4,7 +4,7 @@ import cssutils
 from datetime import datetime
 from bs4 import BeautifulSoup
 from habari.apps.crawl.models import Article
-from habari.apps.crawl.crawler import AbstractBaseCrawler
+from habari.apps.crawl.crawlers import AbstractBaseCrawler
 
 logger = logging.getLogger(__name__)
 

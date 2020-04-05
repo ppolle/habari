@@ -1,14 +1,10 @@
 import re
 import logging
-import requests
-import cssutils
 import tldextract
-from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 from habari.apps.crawl.models import Article
 
 logger = logging.getLogger(__name__)
-
 
 class AbstractBaseCrawler:
     def make_relative_links_absolute(self, link):

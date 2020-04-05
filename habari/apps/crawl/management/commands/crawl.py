@@ -1,9 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from habari.apps.crawl.crawler import (dncrawler, eacrawler, bdcrawler, ctcrawler, dmcrawler,
+from habari.apps.crawl.crawlers import (dncrawler, eacrawler, bdcrawler, ctcrawler, dmcrawler,
     smcrawler, tscrawler)
-from habari.apps.crawl import crawler
-
 
 class Command(BaseCommand):
     help = 'Crawl News Sources for New Articles'

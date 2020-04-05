@@ -3,24 +3,13 @@ import requests
 from datetime import datetime
 from bs4 import BeautifulSoup
 from habari.apps.crawl.models import Article
-from habari.apps.crawl.crawler import AbstractBaseCrawler
+from habari.apps.crawl.crawlers import AbstractBaseCrawler
 
 logger = logging.getLogger(__name__)
 
-class CTCrawler(AbstractBaseCrawler):
+class EACrawler(AbstractBaseCrawler):
     def __init__(self):
-        self.url = 'https://www.thecitizen.co.tz/'
-
-    def partial_links_to_ignore(self, url):
-        links = ('https://www.thecitizen.co.tz/jobs',
-            'https://www.thecitizen.co.tz/photo',
-            'https://www.thecitizen.co.tz/Video',
-            'https://www.thecitizen.co.tz/notices')
-
-        if url.startswith(links):
-            return False
-        else:
-            return True
+        self.url = 'https://www.theeastafrican.co.ke/'
 
     def get_rss_feed_links(self):
         logger.info('Getting RSS feeds links')
@@ -47,15 +36,15 @@ class CTCrawler(AbstractBaseCrawler):
                     soup = BeautifulSoup(request.content, 'html.parser')
                     social_links = soup.select('.social-networks a')
                     for social_link in social_links:
-                        if social_link.get('href').endswith('.xml'):
-                            link = self.make_relative_links_absolute(social_link.get('href'))
-                            if self.partial_links_to_ignore(link): rss_feeds.append(link)
+                        link = social_link.get('href')
+                        if link.endswith('.xml'):
+                            rss_feeds.append(
+                                self.make_relative_links_absolute(link))
                 else:
                     logger.exception(
-                    '{0} error while getting rss links from: {1}'.format(request.status_code, category))
+                    '{0} error while getting categories and sub-categories for {1}'.format(request.status_code, category))
 
             return rss_feeds
-
         except Exception as e:
             logger.exception('Error!!{} while getting rss feeds'.format(e))
 
@@ -88,10 +77,11 @@ class CTCrawler(AbstractBaseCrawler):
                             if article_details not in stories and not Article.objects.filter(article_url=article_details['article_url']).exists():
                                 stories.append(article_details)
                         except Exception as e:
-                            logger.exception('{} error while getting details for: {}'.format(e, article.link.get_text()))
+                            logger.exception('{} error while getting story details for:{}'.format(e, article.link.get_text()))
+
                 else:
                     logger.exception(
-                    '{0} error while getting rss links from: {1}'.format(request.status_code, rss))
+                    '{0} error while getting top categories for: {1}'.format(request.status_code, rss))
 
             except Exception as e:
                 logger.exception(
@@ -105,7 +95,7 @@ class CTCrawler(AbstractBaseCrawler):
             soup = BeautifulSoup(request.content, 'lxml')
             try:
                 image_url = self.make_relative_links_absolute(
-                    soup.select_one('.story-view header img').get('src'))
+                soup.select_one('.story-view header img').get('src'))
             except AttributeError:
                 try:
                     image_url = soup.select_one(
@@ -115,11 +105,9 @@ class CTCrawler(AbstractBaseCrawler):
 
             try:
                 author = [self.sanitize_author_string(
-                a.get_text()) for a in soup.select('section.author')]
+                a.get_text()) for a in soup.select('.story-view .author')]
             except AttributeError:
                 author = []
-            except:
-                logger.exception('Error getting author details')
 
             article['article_image_url'] = image_url
             article['author'] = author
@@ -129,7 +117,6 @@ class CTCrawler(AbstractBaseCrawler):
     def update_top_stories(self):
         articles = self.get_top_stories()
         article_info = []
-
         for article in articles:
             try:
                 logger.info('Updating article details for: {}'.format(
@@ -141,17 +128,16 @@ class CTCrawler(AbstractBaseCrawler):
                                             author=article['author'],
                                             publication_date=article['publication_date'],
                                             summary=article['summary'],
-                                            news_source='CT'
+                                            news_source='EA'
                                             ))
 
             except Exception as e:
-                logger.exception('Error!!:{0} While getting {1}'.format(
-                    e, article['article_url']))
+                logger.exception('Error!!:{0} .. While getting {1}'.format(e, article['article_url']))
 
         try:
             Article.objects.bulk_create(article_info)
             logger.info('')
-            logger.info("Succesfully updated The Citizen's Articles.{} new articles added".format(
+            logger.info('Succesfully updated Latest East African Articles.{} new articles added'.format(
                 len(article_info)))
         except Exception as e:
             logger.exception('Error!!!{}'.format(e))
