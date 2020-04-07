@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class DNCrawler(AbstractBaseCrawler):
     def __init__(self):
-        super.__init__('DN')
+        super().__init__('DN')
         self.url = self.news_source.url
         self.categories = self.get_category_links()
 
