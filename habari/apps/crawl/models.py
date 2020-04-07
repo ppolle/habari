@@ -4,16 +4,6 @@ from django.db import models
 # Create your models here.
 class Article(models.Model):
 	'''Model that saves crawled articles'''
-	NEWS_SOURCE_CHOICES = (
-			('DN', 'THE DAILY NATION'),
-			('BD', 'THE BUSINESS DAILY'),
-			('EA', 'THE EAST AFRICAN'),
-			('CT', 'THE CITIZEN'),
-			('SM', 'THE DAILY STANDARD'),
-			('DM', 'THE DAILY MONITOR'),
-			('TS', 'THE STAR KENYA')
-		)
-
 	title = models.CharField(max_length=500)
 	article_url = models.URLField(max_length=500, unique=True)
 	article_image_url = models.URLField(max_length=500)
