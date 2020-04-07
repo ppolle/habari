@@ -86,25 +86,25 @@ class BDCrawler(AbstractBaseCrawler):
         if story.status_code == 200:
             soup = BeautifulSoup(story.content, 'html.parser')
 
-            title = soup.find(class_='article-title').get_text()
+            title = soup.find(class_='article-title').get_text().strip()
             publication_date = soup.select_one(
-                '.page-box-inner header small.byline').get_text()
+                '.page-box-inner header small.byline').get_text().strip()
             date = datetime.strptime(publication_date, '%A, %B %d, %Y %H:%M')
             author = [self.sanitize_author_string(a.get_text()) for a in soup.select(
                 ' article.article.article-summary header.article-meta-summary ')]
 
             try:
                 image_url = self.make_relative_links_absolute(
-                    soup.select_one('.article-img-story img.photo_article').get('src'))
+                    soup.select_one('.article-img-story img.photo_article').get('src').strip())
             except AttributeError:
                 try:
                     image_url = soup.select_one(
-                        '.article-img-story.fluidMedia iframe').get('src')
+                        '.article-img-story.fluidMedia iframe').get('src').strip()
                 except AttributeError:
                     image_url = 'None'
 
             try:
-                summary = soup.select_one('.summary-list').get_text()[:3000]
+                summary = soup.select_one('.summary-list').get_text().strip()[:3000]
             except AttributeError:
                 summary = ' '
 

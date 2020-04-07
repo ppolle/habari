@@ -84,13 +84,13 @@ class DNCrawler(AbstractBaseCrawler):
 
         if story.status_code == 200:
             soup = BeautifulSoup(story.content, 'html.parser')
-            title = [t.get_text()
+            title = [t.get_text().strip()
                      for t in soup.select('.story-view header h2')][0]
-            publication_date = [p.get_text()
+            publication_date = [p.get_text().strip()
                                 for p in soup.select('.story-view header h6')][0]
             date = datetime.strptime(publication_date, '%A %B %d %Y')
             author = [self.sanitize_author_string(
-                a.get_text()) for a in soup.select('.story-view .author')]
+                a.get_text().strip()) for a in soup.select('.story-view .author')]
 
             try:
                 image_url = self.make_relative_links_absolute(
@@ -103,7 +103,7 @@ class DNCrawler(AbstractBaseCrawler):
                     image_url = 'None'
 
             try:
-                summary = soup.select_one('.summary div ul').get_text()[:3000]
+                summary = soup.select_one('.summary div ul').get_text().strip()[:3000]
             except AttributeError:
                 summary = ' '
 
@@ -123,18 +123,18 @@ class DNCrawler(AbstractBaseCrawler):
 
         if story.status_code == 200:
             soup = BeautifulSoup(story.content, 'html.parser')
-            title = soup.select_one('.hero.hero-chart').get_text()
-            publication_date = soup.select('date')[0].get_text()
+            title = soup.select_one('.hero.hero-chart').get_text().strip()
+            publication_date = soup.select('date')[0].get_text().strip()
             date = self.create_datetime_object_from_string(publication_date)
             author = [self.sanitize_author_string(
-                a.get_text()) for a in soup.select('.byline figcaption h6')]
+                a.get_text().strip()) for a in soup.select('.byline figcaption h6')]
             try:
                 image_url = self.make_relative_links_absolute(
                 soup.select_one('.hero.hero-chart .figcap-box img').get('src'))
             except AttributeError:
                 image_url = self.make_relative_links_absolute(
                     soup.select_one('.hero.hero-chart .figcap-box iframe').get('src'))
-            summary = soup.select_one('article.post header').get_text()[:3000]
+            summary = soup.select_one('article.post header').get_text().strip()[:3000]
 
         else:
             logger.exception('Failed to get {} details'. format(link))
@@ -151,11 +151,11 @@ class DNCrawler(AbstractBaseCrawler):
 
         if story.status_code == 200:
             soup = BeautifulSoup(story.content, 'html.parser')
-            title = soup.select_one('.page-title').get_text()
+            title = soup.select_one('.page-title').get_text().strip()
             publication_date = soup.select_one('.date').get_text().strip()
             date = datetime.strptime(publication_date, '%A %B %d %Y')
             author = [self.sanitize_author_string(
-                a.get_text()) for a in soup.select('.article-content h6.name')]
+                a.get_text().strip()) for a in soup.select('.article-content h6.name')]
             image = cssutils.parseStyle(soup.select_one('.hero-image').get('style'))['background-image']
             image_url = image.replace('url(', '').replace(')', '')
             summary = 'None'
@@ -208,6 +208,3 @@ class DNCrawler(AbstractBaseCrawler):
                 len(article_info)))
         except Exception as e:
             logger.exception('Error!!!{}'.format(e))
-
-
-        return article_info
