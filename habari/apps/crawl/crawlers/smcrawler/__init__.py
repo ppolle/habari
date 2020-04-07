@@ -9,7 +9,8 @@ logger = logging.getLogger(__name__)
 
 class SMCrawler(AbstractBaseCrawler):
     def __init__(self):
-        self.url = 'https://www.standardmedia.co.ke/'
+        super().__init__('SM')
+        self.url = self.news_source.url
     
     def get_top_stories(self):
         rss_feeds = [
@@ -41,7 +42,7 @@ class SMCrawler(AbstractBaseCrawler):
                         title = article.title.get_text().strip()
                         summary = article.description.get_text().strip()[:3000]
                         link = article.link.get_text().strip()
-                        date = article.pubDate.get_text()
+                        date = article.pubDate.get_text().strip()
                         try:
                             publication_date = datetime.strptime(
                             date, '%Y-%m-%d %H:%M:%S')
@@ -89,7 +90,7 @@ class SMCrawler(AbstractBaseCrawler):
                     author = [a.strip() for a in soup.select_one('.article-meta a').get_text().split(' and ')]
                 except AttributeError:
                     try:
-                        author = [soup.select_one('div .io-hidden-author').get_text()]
+                        author = [soup.select_one('div .io-hidden-author').get_text().strip()]
                     except AttributeError:
                         author = ['']
                 article['author'] = author
@@ -126,7 +127,7 @@ class SMCrawler(AbstractBaseCrawler):
                                             author=article['author'],
                                             publication_date=article['publication_date'],
                                             summary=article['summary'],
-                                            news_source='SM'
+                                            news_source=self.news_source
                                             ))
             except Exception as e:
                 logger.exception('Error {}: updating article details for {}'.format(e, article['article_url']))

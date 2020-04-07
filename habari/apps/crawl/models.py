@@ -20,7 +20,7 @@ class Article(models.Model):
 	author = models.CharField(max_length=500)
 	publication_date = models.DateField()
 	summary = models.CharField(max_length=3000)
-	news_source = models.CharField(max_length=100, choices=NEWS_SOURCE_CHOICES)
+	news_source = models.ForeignKey('NewsSource', null=True, on_delete=models.SET_NULL)
 	slug = AutoSlugField(blank=False, populate_from='title')
 	timestamp = models.DateTimeField(auto_now_add=True)
 
@@ -29,3 +29,15 @@ class Article(models.Model):
 
 	class Meta:
 		ordering = ['-publication_date']
+
+class NewsSource(models.Model):
+	'''Model that saves details about a news source'''
+	name = models.CharField(max_length=300)
+	slug = models.CharField(max_length=5)
+	url = models.URLField()
+
+	def __str__(self):
+		return self.name
+
+	class Meta:
+		ordering = ['name']

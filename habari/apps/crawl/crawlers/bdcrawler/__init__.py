@@ -9,7 +9,8 @@ logger = logging.getLogger(__name__)
 
 class BDCrawler(AbstractBaseCrawler):
     def __init__(self):
-        self.url = 'https://www.businessdailyafrica.com/'
+        super().__init__('BD')
+        self.url = self.news_source.url
         self.categories = self.get_category_links()
 
     def partial_links_to_ignore(self, url):
@@ -85,25 +86,25 @@ class BDCrawler(AbstractBaseCrawler):
         if story.status_code == 200:
             soup = BeautifulSoup(story.content, 'html.parser')
 
-            title = soup.find(class_='article-title').get_text()
+            title = soup.find(class_='article-title').get_text().strip()
             publication_date = soup.select_one(
-                '.page-box-inner header small.byline').get_text()
+                '.page-box-inner header small.byline').get_text().strip()
             date = datetime.strptime(publication_date, '%A, %B %d, %Y %H:%M')
             author = [self.sanitize_author_string(a.get_text()) for a in soup.select(
                 ' article.article.article-summary header.article-meta-summary ')]
 
             try:
                 image_url = self.make_relative_links_absolute(
-                    soup.select_one('.article-img-story img.photo_article').get('src'))
+                    soup.select_one('.article-img-story img.photo_article').get('src').strip())
             except AttributeError:
                 try:
                     image_url = soup.select_one(
-                        '.article-img-story.fluidMedia iframe').get('src')
+                        '.article-img-story.fluidMedia iframe').get('src').strip()
                 except AttributeError:
                     image_url = 'None'
 
             try:
-                summary = soup.select_one('.summary-list').get_text()[:3000]
+                summary = soup.select_one('.summary-list').get_text().strip()[:3000]
             except AttributeError:
                 summary = ' '
 
@@ -129,7 +130,7 @@ class BDCrawler(AbstractBaseCrawler):
                                             author=story['author'],
                                             publication_date=story['publication_date'],
                                             summary=story['summary'],
-                                            news_source='BD'
+                                            news_source=self.news_source
                                             ))
 
             except Exception as e:

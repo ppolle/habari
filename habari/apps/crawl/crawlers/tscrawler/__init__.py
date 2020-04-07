@@ -10,7 +10,8 @@ logger = logging.getLogger(__name__)
 
 class TSCrawler(AbstractBaseCrawler):
     def __init__(self):
-        self.url = 'https://www.the-star.co.ke/'
+        super().__init__('TS')
+        self.url = self.news_source.url
 
     def partial_links_to_ignore(self, url):
         links = ('https://www.the-star.co.ke/video/',
@@ -112,7 +113,7 @@ class TSCrawler(AbstractBaseCrawler):
                                             author=story['author'],
                                             publication_date=story['publication_date'],
                                             summary=story['summary'],
-                                            news_source='TS'
+                                            news_source=self.news_source
                                             ))
 
             except Exception as e:

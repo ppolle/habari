@@ -9,7 +9,8 @@ logger = logging.getLogger(__name__)
 
 class DMCrawler(AbstractBaseCrawler):
     def __init__(self):
-        self.url = 'https://www.monitor.co.ug/'
+        super().__init__('DM')
+        self.url = self.news_source.url
 
     def get_rss_feed_links(self):
         logger.info('Getting RSS feeds links')
@@ -60,10 +61,10 @@ class DMCrawler(AbstractBaseCrawler):
                     articles = soup.find_all('item')
 
                     for article in articles:
-                        title = article.title.get_text()
-                        summary = article.description.get_text()[:3000]
-                        link = article.link.get_text()
-                        date = article.date.get_text()
+                        title = article.title.get_text().strip()
+                        summary = article.description.get_text().strip()[:3000]
+                        link = article.link.get_text().strip()
+                        date = article.date.get_text().strip()
                         publication_date = datetime.strptime(
                             date, '%Y-%m-%dT%H:%M:%SZ')
 
@@ -124,7 +125,7 @@ class DMCrawler(AbstractBaseCrawler):
                                             author=article['author'],
                                             publication_date=article['publication_date'],
                                             summary=article['summary'],
-                                            news_source='DM'
+                                            news_source=self.news_source
                                             ))
 
             except Exception as e:
