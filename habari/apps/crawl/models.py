@@ -20,7 +20,7 @@ class Article(models.Model):
 	author = models.CharField(max_length=500)
 	publication_date = models.DateField()
 	summary = models.CharField(max_length=3000)
-	news_source = models.CharField(max_length=100, choices=NEWS_SOURCE_CHOICES)
+	news_source = models.ForeignKey('NewsSource', null=True, on_delete=models.SET_NULL)
 	slug = AutoSlugField(blank=False, populate_from='title')
 	timestamp = models.DateTimeField(auto_now_add=True)
 
