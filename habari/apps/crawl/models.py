@@ -29,3 +29,15 @@ class Article(models.Model):
 
 	class Meta:
 		ordering = ['-publication_date']
+
+class NewsSource(models.Model):
+	'''Model that saves details about a news source'''
+	name = models.CharField(max_length=300)
+	slug = models.CharField(max_length=5)
+	url = models.URLField()
+
+	def __str__(self):
+		return self.name
+
+	class Meta:
+		ordering = ['name']
