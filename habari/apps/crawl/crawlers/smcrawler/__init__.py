@@ -9,7 +9,8 @@ logger = logging.getLogger(__name__)
 
 class SMCrawler(AbstractBaseCrawler):
     def __init__(self):
-        self.url = 'https://www.standardmedia.co.ke/'
+        super().__init__('SM')
+        self.url = self.news_source.url
     
     def get_top_stories(self):
         rss_feeds = [
@@ -126,7 +127,7 @@ class SMCrawler(AbstractBaseCrawler):
                                             author=article['author'],
                                             publication_date=article['publication_date'],
                                             summary=article['summary'],
-                                            news_source='SM'
+                                            news_source=self.news_source
                                             ))
             except Exception as e:
                 logger.exception('Error {}: updating article details for {}'.format(e, article['article_url']))

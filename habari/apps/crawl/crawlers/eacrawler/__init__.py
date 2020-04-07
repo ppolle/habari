@@ -9,7 +9,8 @@ logger = logging.getLogger(__name__)
 
 class EACrawler(AbstractBaseCrawler):
     def __init__(self):
-        self.url = 'https://www.theeastafrican.co.ke/'
+        super().__init__('EA')
+        self.url = self.news_source.url
 
     def get_rss_feed_links(self):
         logger.info('Getting RSS feeds links')
@@ -128,7 +129,7 @@ class EACrawler(AbstractBaseCrawler):
                                             author=article['author'],
                                             publication_date=article['publication_date'],
                                             summary=article['summary'],
-                                            news_source='EA'
+                                            news_source=self.news_source
                                             ))
 
             except Exception as e:

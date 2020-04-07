@@ -10,7 +10,8 @@ logger = logging.getLogger(__name__)
 
 class DNCrawler(AbstractBaseCrawler):
     def __init__(self):
-        self.url = 'https://www.nation.co.ke/'
+        super.__init__('DN')
+        self.url = self.news_source.url
         self.categories = self.get_category_links()
 
     def partial_links_to_ignore(self, url):
@@ -194,7 +195,7 @@ class DNCrawler(AbstractBaseCrawler):
                                             author=story['author'],
                                             publication_date=story['publication_date'],
                                             summary=story['summary'],
-                                            news_source='DN'
+                                            news_source=self.news_source
                                             ))
 
             except Exception as e:

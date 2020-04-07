@@ -9,7 +9,8 @@ logger = logging.getLogger(__name__)
 
 class DMCrawler(AbstractBaseCrawler):
     def __init__(self):
-        self.url = 'https://www.monitor.co.ug/'
+        super().__init__('DM')
+        self.url = self.news_source.url
 
     def get_rss_feed_links(self):
         logger.info('Getting RSS feeds links')
@@ -124,7 +125,7 @@ class DMCrawler(AbstractBaseCrawler):
                                             author=article['author'],
                                             publication_date=article['publication_date'],
                                             summary=article['summary'],
-                                            news_source='DM'
+                                            news_source=self.news_source
                                             ))
 
             except Exception as e:

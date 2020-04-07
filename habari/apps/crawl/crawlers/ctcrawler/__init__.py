@@ -9,7 +9,8 @@ logger = logging.getLogger(__name__)
 
 class CTCrawler(AbstractBaseCrawler):
     def __init__(self):
-        self.url = 'https://www.thecitizen.co.tz/'
+        super().__init__('CT')
+        self.url = self.news_source.url
 
     def partial_links_to_ignore(self, url):
         links = ('https://www.thecitizen.co.tz/jobs',
@@ -141,7 +142,7 @@ class CTCrawler(AbstractBaseCrawler):
                                             author=article['author'],
                                             publication_date=article['publication_date'],
                                             summary=article['summary'],
-                                            news_source='CT'
+                                            news_source=self.news_source
                                             ))
 
             except Exception as e:
