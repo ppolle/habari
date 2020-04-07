@@ -2,11 +2,14 @@ import re
 import logging
 import tldextract
 from datetime import datetime, timedelta
-from habari.apps.crawl.models import Article
+from habari.apps.crawl.models import Article, NewsSource
 
 logger = logging.getLogger(__name__)
 
 class AbstractBaseCrawler:
+    def __init__(self, slug):
+        self.news_source = NewsSource.objects.get(slug=slug)
+        
     def make_relative_links_absolute(self, link):
         logger.info('Sanitizing ' + str(link))
         try:
