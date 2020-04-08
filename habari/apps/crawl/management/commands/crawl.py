@@ -31,6 +31,6 @@ class Command(BaseCommand):
             if crawler_class is not None:
                 crawler = crawler_class()
                 crawl = crawler.run()
-                self.stdout.write(self.style.SUCCESS('Succesfully updates {} Latest Articles'.format(type(crawler).__name__)))
+                self.stdout.write(self.style.SUCCESS('Succesfully updated {} Latest Articles'.format(type(crawler).__name__)))
             else:
                 self.stdout.write(self.style.WARNING('Crawler with slug {} not found'.format(source)))
