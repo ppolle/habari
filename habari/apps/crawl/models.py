@@ -43,7 +43,7 @@ class Crawl(models.Model):
 
 	news_source = models.ForeignKey('NewsSource', null=True, on_delete=models.SET_NULL)
 	status = models.CharField(max_length=30, choices=StatusType.choices, default=StatusType.Start)
-	total_articles = models.IntegerField(null=True, blank=True)
+	total_articles = models.IntegerField(null=True, blank=True, default=0)
 	crawl_error = models.TextField(null=True, blank=True)
 	crawl_time = models.DateTimeField(auto_now_add=True)
 

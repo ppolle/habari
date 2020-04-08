@@ -30,6 +30,7 @@ class EACrawler(AbstractBaseCrawler):
             else:
                 logger.exception(
                     '{0} error while getting rss links from: {1}'.format(get_categories.status_code, self.url))
+                self.errors.append(get_categories.status_code)
 
             for category in categories:
                 request = requests.get(category)
@@ -44,10 +45,12 @@ class EACrawler(AbstractBaseCrawler):
                 else:
                     logger.exception(
                     '{0} error while getting categories and sub-categories for {1}'.format(request.status_code, category))
+                    self.errors.append(request.status_code)
 
             return rss_feeds
         except Exception as e:
             logger.exception('Error!!{} while getting rss feeds'.format(e))
+            self.errors.append(e)
 
     def get_top_stories(self):
         rss_feeds = self.get_rss_feed_links()
@@ -79,14 +82,17 @@ class EACrawler(AbstractBaseCrawler):
                                 stories.append(article_details)
                         except Exception as e:
                             logger.exception('{} error while getting story details for:{}'.format(e, article.link.get_text()))
+                            self.errors.append(e)
 
                 else:
                     logger.exception(
                     '{0} error while getting top categories for: {1}'.format(request.status_code, rss))
+                    self.errors.append(request.status_code)
 
             except Exception as e:
                 logger.exception(
                     'Error:{0} while getting stories from {1}'.format(e, rss))
+                self.errors.append(e)
         return {story['article_url']:story for story in stories}.values()
 
     def update_article_details(self, article):
@@ -134,11 +140,15 @@ class EACrawler(AbstractBaseCrawler):
 
             except Exception as e:
                 logger.exception('Error!!:{0} .. While getting {1}'.format(e, article['article_url']))
+                self.errors.append(e)
 
         try:
             Article.objects.bulk_create(article_info)
             logger.info('')
             logger.info('Succesfully updated Latest East African Articles.{} new articles added'.format(
                 len(article_info)))
+            self.crawl.total_articles=len(article_info)
+            self.crawl.save()
         except Exception as e:
             logger.exception('Error!!!{}'.format(e))
+            self.errors.append(e)

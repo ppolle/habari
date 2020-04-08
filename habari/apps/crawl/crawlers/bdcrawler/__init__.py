@@ -39,6 +39,7 @@ class BDCrawler(AbstractBaseCrawler):
         else:
             logger.exception(
                     '{0} error while getting categories and sub-categories for {1}'.format(get_categories.status_code, self.url))
+            self.errors.append(get_categories.status_code)
 
         for category in categories:
             get_all_categories = requests.get(category)
@@ -52,6 +53,7 @@ class BDCrawler(AbstractBaseCrawler):
             else:
                 logger.exception(
                     '{0} error while getting categories and sub-categories for {1}'.format(get_all_categories.status_code, category))
+                self.errors.append(get_all_categories.status_code)
 
         return categories
 
@@ -74,10 +76,12 @@ class BDCrawler(AbstractBaseCrawler):
                                 story_links.append(article)
                         except Exception as e:
                             logger.exception('{} error while sanitizing {} and getting stories from {}'.format(e, article.get('href'), stories))
+                            self.errors.append(e)
 
             except Exception as e:
                 logger.exception(
                     'Crawl Error: {0} ,while getting top stories for: {1}'.format(e, stories))
+                self.errors.append(e)
 
         return filter(lambda x: x not in self.categories, story_links)
 
@@ -135,11 +139,15 @@ class BDCrawler(AbstractBaseCrawler):
 
             except Exception as e:
                 logger.exception('Crawling Error: {0} while getting data from: {1}'.format(e, article))
+                self.errors.append(e)
 
         try:
             Article.objects.bulk_create(article_info)
             logging.info('')
             logging.info('Succesfully updated Business Daily Latest Articles.{} new articles added'.format(
                 len(article_info)))
+            self.crawl.total_articles=len(article_info)
+            self.crawl.save()
         except Exception as e:
             logger.exception('Error!!!{}'.format(e))
+            self.errors.append(e)
