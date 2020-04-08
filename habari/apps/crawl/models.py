@@ -1,5 +1,6 @@
 from autoslug import AutoSlugField
 from django.db import models
+from djchoices import ChoiceItem, DjangoChoices
 
 # Create your models here.
 class Article(models.Model):
@@ -31,3 +32,18 @@ class NewsSource(models.Model):
 
 	class Meta:
 		ordering = ['name']
+
+class Crawl(models.Model):
+	'''Model to save details of a crawl run'''
+	class StatusType(DjangoChoices):
+		Crawling = ChoiceItem('crawling','Crawling')
+		Error = ChoiceItem('error','Error')
+		Good = ChoiceItem('good','Good')
+		Start = ChoiceItem('start', 'Start')
+
+	news_source = models.ForeignKey('NewsSource', null=True, on_delete=models.SET_NULL)
+	status = models.CharField(max_length=30, choices=StatusType.choices, default=StatusType.Start)
+	total_articles = models.IntegerField(null=True, blank=True)
+	crawl_error = models.TextField(null=True, blank=True)
+	crawl_time = models.DateTimeField(auto_now_add=True)
+
