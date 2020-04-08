@@ -18,6 +18,7 @@ class AbstractBaseCrawler:
         self.update_top_stories()
         if len(self.errors) > 0:
             self.crawl.status = Crawl.StatusType.Error
+            self.crawl.crawl_error = self.errors
         else:
             self.crawl.status = Crawl.StatusType.Good
         self.crawl.save()
