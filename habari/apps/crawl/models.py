@@ -1,19 +1,10 @@
 from autoslug import AutoSlugField
 from django.db import models
+from djchoices import ChoiceItem, DjangoChoices
 
 # Create your models here.
 class Article(models.Model):
 	'''Model that saves crawled articles'''
-	NEWS_SOURCE_CHOICES = (
-			('DN', 'THE DAILY NATION'),
-			('BD', 'THE BUSINESS DAILY'),
-			('EA', 'THE EAST AFRICAN'),
-			('CT', 'THE CITIZEN'),
-			('SM', 'THE DAILY STANDARD'),
-			('DM', 'THE DAILY MONITOR'),
-			('TS', 'THE STAR KENYA')
-		)
-
 	title = models.CharField(max_length=500)
 	article_url = models.URLField(max_length=500, unique=True)
 	article_image_url = models.URLField(max_length=500)
@@ -41,3 +32,18 @@ class NewsSource(models.Model):
 
 	class Meta:
 		ordering = ['name']
+
+class Crawl(models.Model):
+	'''Model to save details of a crawl run'''
+	class StatusType(DjangoChoices):
+		Crawling = ChoiceItem('crawling','Crawling')
+		Error = ChoiceItem('error','Error')
+		Good = ChoiceItem('good','Good')
+		Start = ChoiceItem('start', 'Start')
+
+	news_source = models.ForeignKey('NewsSource', null=True, on_delete=models.SET_NULL)
+	status = models.CharField(max_length=30, choices=StatusType.choices, default=StatusType.Start)
+	total_articles = models.IntegerField(null=True, blank=True, default=0)
+	crawl_error = models.TextField(null=True, blank=True)
+	crawl_time = models.DateTimeField(auto_now_add=True)
+

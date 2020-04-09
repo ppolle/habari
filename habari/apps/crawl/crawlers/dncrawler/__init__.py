@@ -5,6 +5,7 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 from habari.apps.crawl.models import Article
 from habari.apps.crawl.crawlers import AbstractBaseCrawler
+from habari.apps.utils.error_utils import error_to_string, http_error_to_string
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +40,7 @@ class DNCrawler(AbstractBaseCrawler):
         else:
             logger.exception(
                     '{0} error while getting categories and sub-categories for {1}'.format(get_categories.status_code, self.url))
+            self.errors.append(http_error_to_string(get_categories.status_code,sel.url))
                     
         return categories
 
@@ -72,10 +74,12 @@ class DNCrawler(AbstractBaseCrawler):
                         except Exception as e:
                             logger.exception(
                     '{0} error while sanitizing {1} and getting top stories from:'.format(e, story.get('href'), stories))
+                            self.errors.append(error_to_string(e))
 
             except Exception as e:
                 logger.exception(
                     '{0} error while getting top stories for {1}'.format(e, stories))
+                self.errors.append(error_to_string(e))
 
         return filter(lambda x:x not in self.categories, story_links)
 
@@ -109,6 +113,7 @@ class DNCrawler(AbstractBaseCrawler):
 
         else:
             logger.exception('Failed to get {} details.'.format(link))
+            self.errors.append(http_error_to_string(story.status_code,link))
 
 
         return {'article_url': link,
@@ -138,6 +143,7 @@ class DNCrawler(AbstractBaseCrawler):
 
         else:
             logger.exception('Failed to get {} details'. format(link))
+            self.errors.append(http_error_to_string(story.status_code,link))
 
         return {'article_url': link,
                 'image_url': image_url,
@@ -161,6 +167,7 @@ class DNCrawler(AbstractBaseCrawler):
             summary = 'None'
         else:
             logger.exception('Failed to get {} details'. format(link))
+            self.errors.append(http_error_to_string(story.status_code,link))
 
         return {'article_url': link,
                 'image_url': image_url,
@@ -200,11 +207,15 @@ class DNCrawler(AbstractBaseCrawler):
 
             except Exception as e:
                 logger.exception('Crawling Error: {0} while getting data from: {1}'.format(e, article))
+                self.errors.append(error_to_string(e))
 
         try:
             Article.objects.bulk_create(article_info)
             logger.info('')
             logger.info('Succesfully updated Daily Nation Latest Articles.{} new articles added'.format(
                 len(article_info)))
+            self.crawl.total_articles=len(article_info)
+            self.crawl.save()
         except Exception as e:
             logger.exception('Error!!!{}'.format(e))
+            self.errors.append(error_to_string(e))

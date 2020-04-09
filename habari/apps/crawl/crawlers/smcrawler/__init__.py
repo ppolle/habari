@@ -4,6 +4,7 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 from habari.apps.crawl.models import Article
 from habari.apps.crawl.crawlers import AbstractBaseCrawler
+from habari.apps.utils.error_utils import error_to_string, http_error_to_string
 
 logger = logging.getLogger(__name__)
 
@@ -65,10 +66,12 @@ class SMCrawler(AbstractBaseCrawler):
                             stories.append(article_details)
                 else:
                     logger.exception('{0} error!!Failed to get top stories from: {1}.'.format(request.status_code,rss))
+                    self.errors.append(http_error_to_string(request.status_code, rss))
 
             except Exception as e:
                 logger.exception(
                     'Error:{0} while getting stories from {1}'.format(e, rss))
+                self.errors.append(error_to_string(e))
 
         return {story['article_url']:story for story in stories}.values()
 
@@ -109,6 +112,7 @@ class SMCrawler(AbstractBaseCrawler):
             article['article_image_url'] = article_image_url
         else:
             logger.exception('{} Error while updating article details for {}'.format(request.status_code, article['article_url']))
+            self.errors.append(http_error_to_string(request.status_code,article['article_url']))
 
         return article
 
@@ -131,11 +135,15 @@ class SMCrawler(AbstractBaseCrawler):
                                             ))
             except Exception as e:
                 logger.exception('Error {}: updating article details for {}'.format(e, article['article_url']))
+                self.errors.append(error_to_string(e))
 
         try:
             Article.objects.bulk_create(article_info)
             logger.info('')
             logger.info("Succesfully updated The Daily Standard's Articles.{} new articles added".format(
                 len(article_info)))
+            self.crawl.total_articles=len(article_info)
+            self.crawl.save()
         except Exception as e:
             logger.exception('Error!!!{}'.format(e))
+            self.errors.append(error_to_string(e))

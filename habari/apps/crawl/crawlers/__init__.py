@@ -2,13 +2,26 @@ import re
 import logging
 import tldextract
 from datetime import datetime, timedelta
-from habari.apps.crawl.models import Article, NewsSource
+from habari.apps.crawl.models import Article, NewsSource, Crawl
 
 logger = logging.getLogger(__name__)
 
 class AbstractBaseCrawler:
     def __init__(self, slug):
         self.news_source = NewsSource.objects.get(slug=slug)
+        self.crawl = Crawl.objects.create(news_source=self.news_source)
+        self.errors = []
+
+    def run(self):
+        self.crawl.status = Crawl.StatusType.Crawling
+        self.crawl.save()
+        self.update_top_stories()
+        if len(self.errors) > 0:
+            self.crawl.status = Crawl.StatusType.Error
+            self.crawl.crawl_error = self.errors
+        else:
+            self.crawl.status = Crawl.StatusType.Good
+        self.crawl.save()
         
     def make_relative_links_absolute(self, link):
         logger.info('Sanitizing ' + str(link))
