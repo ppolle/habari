@@ -31,7 +31,7 @@ class DMCrawler(AbstractBaseCrawler):
             else:
                 logger.exception(
                     '{0} error while getting rss links from: {1}'.format(get_categories.status_code, self.url))
-                self.errors.append(get_categories.status_code)
+                self.errors.append(http_error_to_string(get_categories.status_code,self.url))
 
             for category in categories:
                 request = requests.get(category)
@@ -46,7 +46,7 @@ class DMCrawler(AbstractBaseCrawler):
                 else:
                     logger.exception(
                     '{0} error while getting rss links from: {1}'.format(request.status_code, category))
-                    self.errors.append(request.status_code)
+                    self.errors.append(http_error_to_string(request.status_code,category))
 
             return rss_feeds
         except Exception as e:
@@ -83,7 +83,7 @@ class DMCrawler(AbstractBaseCrawler):
                 else:
                     logger.exception(
                     '{0} error while getting rss details from: {1}'.format(get_categories.status_code, rss))
-                    self.errors.append(get_categories.status_code)
+                    self.errors.append(http_error_to_string(get_categories.status_code,rss))
 
             except Exception as e:
                 logger.exception(

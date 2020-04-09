@@ -4,7 +4,7 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 from habari.apps.crawl.models import Article
 from habari.apps.crawl.crawlers import AbstractBaseCrawler
-from habari.apps.utils.error_utils import error_to_string
+from habari.apps.utils.error_utils import error_to_string, http_error_to_string
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +66,7 @@ class SMCrawler(AbstractBaseCrawler):
                             stories.append(article_details)
                 else:
                     logger.exception('{0} error!!Failed to get top stories from: {1}.'.format(request.status_code,rss))
-                    self.errors.append(request.status_code)
+                    self.errors.append(http_error_to_string(request.status_code, rss))
 
             except Exception as e:
                 logger.exception(
@@ -112,7 +112,7 @@ class SMCrawler(AbstractBaseCrawler):
             article['article_image_url'] = article_image_url
         else:
             logger.exception('{} Error while updating article details for {}'.format(request.status_code, article['article_url']))
-            self.errors.append(request.status_code)
+            self.errors.append(http_error_to_string(request.status_code,article['article_url']))
 
         return article
 
