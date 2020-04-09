@@ -31,6 +31,10 @@ class CTCrawler(AbstractBaseCrawler):
 
         try:
             get_categories = requests.get(self.url)
+        except Exception as e:
+            logger.exception('Error!!{} while getting rss categories'.format(e))
+            self.errors.append(error_to_string(e))
+        else:
             if get_categories.status_code == 200:
                 soup = BeautifulSoup(get_categories.content, 'html.parser')
                 all_categories = soup.select('.menu-vertical a')
@@ -45,24 +49,25 @@ class CTCrawler(AbstractBaseCrawler):
                 self.errors.append(http_error_to_string(get_categories.status_code,self.url))
 
             for category in categories:
-                request = requests.get(category)
-                if request.status_code == 200:
-                    soup = BeautifulSoup(request.content, 'html.parser')
-                    social_links = soup.select('.social-networks a')
-                    for social_link in social_links:
-                        if social_link.get('href').endswith('.xml'):
-                            link = self.make_relative_links_absolute(social_link.get('href'))
-                            if self.partial_links_to_ignore(link): rss_feeds.append(link)
+                try:
+                    request = requests.get(category)
+                except Exception as e:
+                    logger.exception('Error: {} while getting rss feeds'.format(e))
+                    self.errors.append(error_to_string(e))
                 else:
-                    logger.exception(
-                    '{0} error while getting rss links from: {1}'.format(request.status_code, category))
-                    self.errors.append(http_error_to_string(request.status_code,category))
+                    if request.status_code == 200:
+                        soup = BeautifulSoup(request.content, 'html.parser')
+                        social_links = soup.select('.social-networks a')
+                        for social_link in social_links:
+                            if social_link.get('href').endswith('.xml'):
+                                link = self.make_relative_links_absolute(social_link.get('href'))
+                                if self.partial_links_to_ignore(link): rss_feeds.append(link)
+                    else:
+                        logger.exception(
+                        '{0} error while getting rss links from: {1}'.format(request.status_code, category))
+                        self.errors.append(http_error_to_string(request.status_code,category))
 
-            return rss_feeds
-
-        except Exception as e:
-            logger.exception('Error!!{} while getting rss feeds'.format(e))
-            self.errors.append(error_to_string(e))
+        return rss_feeds
 
     def get_top_stories(self):
         rss_feeds = self.get_rss_feed_links()
