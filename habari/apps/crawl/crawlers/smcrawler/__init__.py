@@ -4,6 +4,7 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 from habari.apps.crawl.models import Article
 from habari.apps.crawl.crawlers import AbstractBaseCrawler
+from habari.apps.utils.error_utils import error_to_string
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +71,7 @@ class SMCrawler(AbstractBaseCrawler):
             except Exception as e:
                 logger.exception(
                     'Error:{0} while getting stories from {1}'.format(e, rss))
-                self.errors.append(e)
+                self.errors.append(error_to_string(e))
 
         return {story['article_url']:story for story in stories}.values()
 
@@ -134,7 +135,7 @@ class SMCrawler(AbstractBaseCrawler):
                                             ))
             except Exception as e:
                 logger.exception('Error {}: updating article details for {}'.format(e, article['article_url']))
-                self.errors.append(e)
+                self.errors.append(error_to_string(e))
 
         try:
             Article.objects.bulk_create(article_info)
@@ -145,4 +146,4 @@ class SMCrawler(AbstractBaseCrawler):
             self.crawl.save()
         except Exception as e:
             logger.exception('Error!!!{}'.format(e))
-            self.errors.append(e)
+            self.errors.append(error_to_string(e))

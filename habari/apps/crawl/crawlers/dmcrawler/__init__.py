@@ -4,6 +4,7 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 from habari.apps.crawl.models import Article
 from habari.apps.crawl.crawlers import AbstractBaseCrawler
+from habari.apps.utils.error_utils import error_to_string
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +51,7 @@ class DMCrawler(AbstractBaseCrawler):
             return rss_feeds
         except Exception as e:
             logger.exception('Error!! {}while getting rss feeds'.format(e))
-            self.errors.append(e)
+            self.errors.append(error_to_string(e))
 
     def get_top_stories(self):
         rss_feeds = self.get_rss_feed_links()
@@ -87,7 +88,7 @@ class DMCrawler(AbstractBaseCrawler):
             except Exception as e:
                 logger.exception(
                     'Error:{0} while getting stories from {1}'.format(e, rss))
-                self.errors.append(e)
+                self.errors.append(error_to_string(e))
         return {story['article_url']:story for story in stories}.values()
 
     def update_article_details(self, article):
@@ -135,7 +136,7 @@ class DMCrawler(AbstractBaseCrawler):
 
             except Exception as e:
                 logger.exception('Error!!:{0} .. While getting {1}'.format(e, article['article_url']))
-                self.errors.append(e)
+                self.errors.append(error_to_string(e))
 
         try:
             Article.objects.bulk_create(article_info)
@@ -145,4 +146,4 @@ class DMCrawler(AbstractBaseCrawler):
             self.crawl.total_articles=len(article_info)
         except Exception as e:
             logger.exception('Error!!!{}'.format(e))
-            self.errors.append(e)
+            self.errors.append(error_to_string(e))

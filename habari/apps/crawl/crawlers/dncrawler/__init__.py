@@ -5,6 +5,7 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 from habari.apps.crawl.models import Article
 from habari.apps.crawl.crawlers import AbstractBaseCrawler
+from habari.apps.utils.error_utils import error_to_string
 
 logger = logging.getLogger(__name__)
 
@@ -73,12 +74,12 @@ class DNCrawler(AbstractBaseCrawler):
                         except Exception as e:
                             logger.exception(
                     '{0} error while sanitizing {1} and getting top stories from:'.format(e, story.get('href'), stories))
-                            self.errors.append(e)
+                            self.errors.append(error_to_string(e))
 
             except Exception as e:
                 logger.exception(
                     '{0} error while getting top stories for {1}'.format(e, stories))
-                self.errors.append(e)
+                self.errors.append(error_to_string(e))
 
         return filter(lambda x:x not in self.categories, story_links)
 
@@ -206,7 +207,7 @@ class DNCrawler(AbstractBaseCrawler):
 
             except Exception as e:
                 logger.exception('Crawling Error: {0} while getting data from: {1}'.format(e, article))
-                self.errors.append(e)
+                self.errors.append(error_to_string(e))
 
         try:
             Article.objects.bulk_create(article_info)
@@ -217,4 +218,4 @@ class DNCrawler(AbstractBaseCrawler):
             self.crawl.save()
         except Exception as e:
             logger.exception('Error!!!{}'.format(e))
-            self.errors.append(e)
+            self.errors.append(error_to_string(e))
