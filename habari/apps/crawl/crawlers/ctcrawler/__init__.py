@@ -48,24 +48,24 @@ class CTCrawler(AbstractBaseCrawler):
                     '{0} error while getting rss links from: {1}'.format(get_categories.status_code, self.url))
                 self.errors.append(http_error_to_string(get_categories.status_code,self.url))
 
-            for category in categories:
-                try:
-                    request = requests.get(category)
-                except Exception as e:
-                    logger.exception('Error: {} while getting rss feeds'.format(e))
-                    self.errors.append(error_to_string(e))
+        for category in categories:
+            try:
+                request = requests.get(category)
+            except Exception as e:
+                logger.exception('Error: {} while getting rss feeds'.format(e))
+                self.errors.append(error_to_string(e))
+            else:
+                if request.status_code == 200:
+                    soup = BeautifulSoup(request.content, 'html.parser')
+                    social_links = soup.select('.social-networks a')
+                    for social_link in social_links:
+                        if social_link.get('href').endswith('.xml'):
+                            link = self.make_relative_links_absolute(social_link.get('href'))
+                            if self.partial_links_to_ignore(link): rss_feeds.append(link)
                 else:
-                    if request.status_code == 200:
-                        soup = BeautifulSoup(request.content, 'html.parser')
-                        social_links = soup.select('.social-networks a')
-                        for social_link in social_links:
-                            if social_link.get('href').endswith('.xml'):
-                                link = self.make_relative_links_absolute(social_link.get('href'))
-                                if self.partial_links_to_ignore(link): rss_feeds.append(link)
-                    else:
-                        logger.exception(
-                        '{0} error while getting rss links from: {1}'.format(request.status_code, category))
-                        self.errors.append(http_error_to_string(request.status_code,category))
+                    logger.exception(
+                    '{0} error while getting rss links from: {1}'.format(request.status_code, category))
+                    self.errors.append(http_error_to_string(request.status_code,category))
 
         return rss_feeds
 

@@ -26,18 +26,22 @@ class TSCrawler(AbstractBaseCrawler):
 
     def get_category_links(self):
         logger.info('Getting links to all categories and subcategories')
-        get_categories = requests.get(self.url)
         categories = [self.url,]
 
-        if get_categories.status_code == 200:
-            soup = BeautifulSoup(get_categories.content, 'lxml')
-            all_categories = soup.select('.sidebar .nav-sidebar li a')
+        try:
+            get_categories = requests.get(self.url)
+        except Exception as e:
+            logger.exception('Error: {0} while getting categories from {1}'.format(e,self.url))
+        else:
+            if get_categories.status_code == 200:
+                soup = BeautifulSoup(get_categories.content, 'lxml')
+                all_categories = soup.select('.sidebar .nav-sidebar li a')
 
-            for category in all_categories:
-                cat = self.make_relative_links_absolute(category.get('href'))
-                if cat not in categories and self.check_for_top_level_domain(cat) and not self.partial_links_to_ignore(cat) and cat is not None:
-                    categories.append(cat)
-        
+                for category in all_categories:
+                    cat = self.make_relative_links_absolute(category.get('href'))
+                    if cat not in categories and self.check_for_top_level_domain(cat) and not self.partial_links_to_ignore(cat) and cat is not None:
+                        categories.append(cat)
+
         return categories
         
     def get_top_stories(self):

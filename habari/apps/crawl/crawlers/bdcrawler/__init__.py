@@ -52,7 +52,7 @@ class BDCrawler(AbstractBaseCrawler):
             except Exception as e:
                 logger.exception('Error: {0} while getting categories from {1}'.format(e,category))
                 self.errors.append(error_to_string(e))
-            finally:
+            else:
                 if get_all_categories.status_code == 200:
                     soup = BeautifulSoup(get_all_categories.content, 'html.parser')
                     additional_cat = soup.select('article.article.article-list-featured header h5 a')
