@@ -1,21 +1,17 @@
 from autoslug import AutoSlugField
 from django.db import models
+from djchoices import ChoiceItem, DjangoChoices
 
 # Create your models here.
 class Article(models.Model):
 	'''Model that saves crawled articles'''
-	NEWS_SOURCE_CHOICES = (
-			('DN', 'DAILY NATION'),
-			('BD', 'BUSINESS DAILY'),
-		)
-
 	title = models.CharField(max_length=500)
 	article_url = models.URLField(max_length=500, unique=True)
 	article_image_url = models.URLField(max_length=500)
 	author = models.CharField(max_length=500)
 	publication_date = models.DateField()
 	summary = models.CharField(max_length=3000)
-	news_source = models.CharField(max_length=100, choices=NEWS_SOURCE_CHOICES)
+	news_source = models.ForeignKey('NewsSource', null=True, on_delete=models.SET_NULL)
 	slug = AutoSlugField(blank=False, populate_from='title')
 	timestamp = models.DateTimeField(auto_now_add=True)
 
@@ -24,3 +20,30 @@ class Article(models.Model):
 
 	class Meta:
 		ordering = ['-publication_date']
+
+class NewsSource(models.Model):
+	'''Model that saves details about a news source'''
+	name = models.CharField(max_length=300)
+	slug = models.CharField(max_length=5)
+	url = models.URLField()
+
+	def __str__(self):
+		return self.name
+
+	class Meta:
+		ordering = ['name']
+
+class Crawl(models.Model):
+	'''Model to save details of a crawl run'''
+	class StatusType(DjangoChoices):
+		Crawling = ChoiceItem('crawling','Crawling')
+		Error = ChoiceItem('error','Error')
+		Good = ChoiceItem('good','Good')
+		Start = ChoiceItem('start', 'Start')
+
+	news_source = models.ForeignKey('NewsSource', null=True, on_delete=models.SET_NULL)
+	status = models.CharField(max_length=30, choices=StatusType.choices, default=StatusType.Start)
+	total_articles = models.IntegerField(null=True, blank=True, default=0)
+	crawl_error = models.TextField(null=True, blank=True)
+	crawl_time = models.DateTimeField(auto_now_add=True)
+

@@ -1,0 +1,65 @@
+[
+  {
+    "model": "crawl.NewsSource",
+    "pk": 1,
+    "fields": {
+      "name": "THE DAILY NATION",
+      "slug": "DN",
+      "url": "https://www.nation.co.ke/"
+    }
+  },
+  {
+    "model": "crawl.NewsSource",
+    "pk": 2,
+    "fields": {
+      "name": "THE BUSINESS DAILY",
+      "slug": "BD",
+      "url": "https://www.businessdailyafrica.com/"
+    }
+  },
+  {
+    "model": "crawl.NewsSource",
+    "pk": 3,
+    "fields": {
+      "name": "THE EAST AFRICAN",
+      "slug": "EA",
+      "url": "https://www.theeastafrican.co.ke/"
+    }
+  },
+  {
+    "model": "crawl.NewsSource",
+    "pk": 4,
+    "fields": {
+      "name": "THE CITIZEN",
+      "slug": "CT",
+      "url": "https://www.thecitizen.co.tz/"
+    }
+  },
+  {
+    "model": "crawl.NewsSource",
+    "pk": 5,
+    "fields": {
+      "name": "THE DAILY STANDARD",
+      "slug": "SM",
+      "url": "https://www.standardmedia.co.ke/"
+    }
+  },
+  {
+    "model": "crawl.NewsSource",
+    "pk": 6,
+    "fields": {
+      "name": "THE DAILY MONITOR",
+      "slug": "DM",
+      "url": "https://www.monitor.co.ug/"
+    }
+  },
+  {
+    "model": "crawl.NewsSource",
+    "pk": 7,
+    "fields": {
+      "name": "THE STAR KENYA",
+      "slug": "TS",
+      "url": "https://www.the-star.co.ke/"
+    }
+  }
+]
