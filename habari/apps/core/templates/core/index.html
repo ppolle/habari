@@ -1,6 +1,17 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h1>Noma!</h1>
-
+<div class="row">
+	{% for source in sources %}
+	<div class="col-md-4">
+		<strong>
+		{{source.name}} - {{source.slug}}</strong><br>
+		{% for article in source.article_set.all %}
+		<strong>{{ forloop.counter }}.</strong>
+		<a href="{{article.article_url}}">{{article.title}}</a><br>
+		{% endfor %}
+	</div>
+	{% endfor %}
+</div>
+	
 {% endblock %}

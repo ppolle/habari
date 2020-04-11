@@ -16,8 +16,8 @@
 		<tr>
 			<td>{{source.name}}</td>
 			<td>{{source.slug}}</td>
-			<td>{{source.crawls}}</td>
-			<td></td>
+			<td>{{source.crawl_set.last.crawl_time|timesince}} ago</td>
+			<td>{{source.crawl_set.last.status.capitalize}}</td>
 		</tr>
 	</tbody>
 	{% endfor %}
