@@ -39,9 +39,10 @@ class DNCrawler(AbstractBaseCrawler):
                 all_categories = soup.select('.menu-vertical a') + soup.select('.hot-topics a')
 
                 for category in all_categories:
-                    cat = self.make_relative_links_absolute(category.get('href'))
-                    if not self.partial_links_to_ignore(cat):
-                        categories.append(cat)
+                    if category.get('href') is not None:
+                        cat = self.make_relative_links_absolute(category.get('href'))
+                        if not self.partial_links_to_ignore(cat):
+                            categories.append(cat)
             else:
                 logger.exception(
                         '{0} error while getting categories and sub-categories for {1}'.format(get_categories.status_code, self.url))
@@ -72,10 +73,11 @@ class DNCrawler(AbstractBaseCrawler):
 
                     for story in stories:
                         try:
-                            story = self.make_relative_links_absolute(
-                                story.get('href'))
-                            if not Article.objects.filter(article_url=story).exists() and story not in story_links and self.check_for_top_level_domain(story) and not self.partial_links_to_ignore(story):
-                                story_links.append(story)
+                            if story.get('href') is not None:
+                                story = self.make_relative_links_absolute(
+                                    story.get('href'))
+                                if not Article.objects.filter(article_url=story).exists() and story not in story_links and self.check_for_top_level_domain(story) and not self.partial_links_to_ignore(story):
+                                    story_links.append(story)
                         except Exception as e:
                             logger.exception(
                     '{0} error while sanitizing {1} and getting top stories from:'.format(e, story.get('href'), stories))

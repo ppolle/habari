@@ -82,7 +82,7 @@ class BDCrawler(AbstractBaseCrawler):
 
                     for article in articles:
                         try:
-                            if article is not None:
+                            if article.get('href') is not None:
                                 article = self.make_relative_links_absolute(
                                     article.get('href'))
                                 if not Article.objects.filter(article_url=article).exists() and article not in story_links and self.check_for_top_level_domain(article) and not self.partial_links_to_ignore(article):
