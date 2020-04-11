@@ -46,6 +46,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'habari.apps.core.context_processors.get_source_names',
 ]
 
 ROOT_URLCONF = 'habari.urls'
