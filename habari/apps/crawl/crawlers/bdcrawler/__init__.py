@@ -34,9 +34,10 @@ class BDCrawler(AbstractBaseCrawler):
             all_categories = soup.select('.menu-vertical a')
 
             for category in all_categories:
-                cat = self.make_relative_links_absolute(category.get('href'))
-                if not self.partial_links_to_ignore(cat):
-                    categories.append(cat)
+                if category.get('href') is not None:
+                    cat = self.make_relative_links_absolute(category.get('href'))
+                    if not self.partial_links_to_ignore(cat):
+                        categories.append(cat)
         else:
             logger.exception(
                     '{0} error while getting categories and sub-categories for {1}'.format(get_categories.status_code, self.url))
@@ -48,9 +49,10 @@ class BDCrawler(AbstractBaseCrawler):
                 soup = BeautifulSoup(get_all_categories.content, 'html.parser')
                 additional_cat = soup.select('article.article.article-list-featured header h5 a')
                 for new_cat in additional_cat:
-                    cat = self.make_relative_links_absolute(new_cat.get('href'))
-                    if not self.partial_links_to_ignore(cat) and cat not in categories:
-                        categories.append(cat)
+                    if new_cat is not None:
+                        cat = self.make_relative_links_absolute(new_cat.get('href'))
+                        if not self.partial_links_to_ignore(cat) and cat not in categories:
+                            categories.append(cat)
             else:
                 logger.exception(
                     '{0} error while getting categories and sub-categories for {1}'.format(get_all_categories.status_code, category))
@@ -71,10 +73,11 @@ class BDCrawler(AbstractBaseCrawler):
 
                     for article in articles:
                         try:
-                            article = self.make_relative_links_absolute(
-                                article.get('href'))
-                            if not Article.objects.filter(article_url=article).exists() and article not in story_links and self.check_for_top_level_domain(article) and not self.partial_links_to_ignore(article):
-                                story_links.append(article)
+                            if article is not None:
+                                article = self.make_relative_links_absolute(
+                                    article.get('href'))
+                                if not Article.objects.filter(article_url=article).exists() and article not in story_links and self.check_for_top_level_domain(article) and not self.partial_links_to_ignore(article):
+                                    story_links.append(article)
                         except Exception as e:
                             logger.exception('{} error while sanitizing {} and getting stories from {}'.format(e, article.get('href'), stories))
                             self.errors.append(error_to_string(e))
