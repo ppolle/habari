@@ -2,20 +2,24 @@
 {% block content %}
 
 
-<table>
-	<th>
-		<td>News Source</td>
-		<td>Slug</td>
-		<td>Last Crawl</td>
-		<td>Status</td>
-	</th>
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			<th>News Source</td>
+			<th>Slug</td>
+			<th>Last Crawl</td>
+			<th>Status</td>
+		</tr>
+	</thead>
 	{% for source in sources %}
-	<tr>
-		<td>{{source.name}}</td>
-		<td>{{source.slug}}</td>
-		<td></td>
-		<td></td>
-	</tr>
+	<tbody>
+		<tr>
+			<td>{{source.name}}</td>
+			<td>{{source.slug}}</td>
+			<td>{{source.crawls}}</td>
+			<td></td>
+		</tr>
+	</tbody>
 	{% endfor %}
 </table>
 
