@@ -26,21 +26,26 @@ class DNCrawler(AbstractBaseCrawler):
 
     def get_category_links(self):
         logger.info('Getting links to all categories and sub-categories')
-        get_categories = requests.get(self.url)
         categories = [self.url, ]
 
-        if get_categories.status_code == 200:
-            soup = BeautifulSoup(get_categories.content, 'html.parser')
-            all_categories = soup.select('.menu-vertical a') + soup.select('.hot-topics a')
-
-            for category in all_categories:
-                cat = self.make_relative_links_absolute(category.get('href'))
-                if not self.partial_links_to_ignore(cat):
-                    categories.append(cat)
+        try:
+            get_categories = requests.get(self.url)
+        except Exception as e:
+            logger.exception('Error: {0} while getting categories from {1}'.format(e,self.url))
+            self.errors.append(error_to_string(e))
         else:
-            logger.exception(
-                    '{0} error while getting categories and sub-categories for {1}'.format(get_categories.status_code, self.url))
-            self.errors.append(http_error_to_string(get_categories.status_code,sel.url))
+            if get_categories.status_code == 200:
+                soup = BeautifulSoup(get_categories.content, 'html.parser')
+                all_categories = soup.select('.menu-vertical a') + soup.select('.hot-topics a')
+
+                for category in all_categories:
+                    cat = self.make_relative_links_absolute(category.get('href'))
+                    if not self.partial_links_to_ignore(cat):
+                        categories.append(cat)
+            else:
+                logger.exception(
+                        '{0} error while getting categories and sub-categories for {1}'.format(get_categories.status_code, self.url))
+                self.errors.append(http_error_to_string(get_categories.status_code,sel.url))
                     
         return categories
 

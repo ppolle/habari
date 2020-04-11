@@ -26,37 +26,46 @@ class BDCrawler(AbstractBaseCrawler):
 
     def get_category_links(self):
         logger.info('Getting links to all categories and sub-categories')
-        get_categories = requests.get(self.url)
         categories = [self.url, ]
-
-        if get_categories.status_code == 200:
-            soup = BeautifulSoup(get_categories.content, 'html.parser')
-            all_categories = soup.select('.menu-vertical a')
-
-            for category in all_categories:
-                if category.get('href') is not None:
-                    cat = self.make_relative_links_absolute(category.get('href'))
-                    if not self.partial_links_to_ignore(cat):
-                        categories.append(cat)
+        try:
+            get_categories = requests.get(self.url)
+        except Exception as e:
+            logger.exception('Error: {0} , while getting categories from: {1}'.format(e,self.url))
+            self.errors.append(error_to_string(e))
         else:
-            logger.exception(
-                    '{0} error while getting categories and sub-categories for {1}'.format(get_categories.status_code, self.url))
-            self.errors.append(http_error_to_string(get_categories.status_code,self.url))
+            if get_categories.status_code == 200:
+                soup = BeautifulSoup(get_categories.content, 'html.parser')
+                all_categories = soup.select('.menu-vertical a')
 
-        for category in categories:
-            get_all_categories = requests.get(category)
-            if get_all_categories.status_code == 200:
-                soup = BeautifulSoup(get_all_categories.content, 'html.parser')
-                additional_cat = soup.select('article.article.article-list-featured header h5 a')
-                for new_cat in additional_cat:
-                    if new_cat is not None:
-                        cat = self.make_relative_links_absolute(new_cat.get('href'))
-                        if not self.partial_links_to_ignore(cat) and cat not in categories:
+                for category in all_categories:
+                    if category.get('href') is not None:
+                        cat = self.make_relative_links_absolute(category.get('href'))
+                        if not self.partial_links_to_ignore(cat):
                             categories.append(cat)
             else:
                 logger.exception(
-                    '{0} error while getting categories and sub-categories for {1}'.format(get_all_categories.status_code, category))
-                self.errors.append(http_error_to_string(get_all_categories.status_code,category))
+                        '{0} error while getting categories and sub-categories for {1}'.format(get_categories.status_code, self.url))
+                self.errors.append(http_error_to_string(get_categories.status_code,self.url))
+
+        for category in categories:
+            try:
+                get_all_categories = requests.get(category)
+            except Exception as e:
+                logger.exception('Error: {0} while getting categories from {1}'.format(e,category))
+                self.errors.append(error_to_string(e))
+            else:
+                if get_all_categories.status_code == 200:
+                    soup = BeautifulSoup(get_all_categories.content, 'html.parser')
+                    additional_cat = soup.select('article.article.article-list-featured header h5 a')
+                    for new_cat in additional_cat:
+                        if new_cat.get('href') is not None:
+                            cat = self.make_relative_links_absolute(new_cat.get('href'))
+                            if not self.partial_links_to_ignore(cat) and cat not in categories:
+                                categories.append(cat)
+                else:
+                    logger.exception(
+                        '{0} error while getting categories and sub-categories for {1}'.format(get_all_categories.status_code, category))
+                    self.errors.append(http_error_to_string(get_all_categories.status_code,category))
 
         return categories
 

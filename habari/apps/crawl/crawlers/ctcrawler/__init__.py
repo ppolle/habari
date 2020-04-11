@@ -31,6 +31,10 @@ class CTCrawler(AbstractBaseCrawler):
 
         try:
             get_categories = requests.get(self.url)
+        except Exception as e:
+            logger.exception('Error!!{} while getting rss categories'.format(e))
+            self.errors.append(error_to_string(e))
+        else:
             if get_categories.status_code == 200:
                 soup = BeautifulSoup(get_categories.content, 'html.parser')
                 all_categories = soup.select('.menu-vertical a')
@@ -44,8 +48,13 @@ class CTCrawler(AbstractBaseCrawler):
                     '{0} error while getting rss links from: {1}'.format(get_categories.status_code, self.url))
                 self.errors.append(http_error_to_string(get_categories.status_code,self.url))
 
-            for category in categories:
+        for category in categories:
+            try:
                 request = requests.get(category)
+            except Exception as e:
+                logger.exception('Error: {} while getting rss feeds'.format(e))
+                self.errors.append(error_to_string(e))
+            else:
                 if request.status_code == 200:
                     soup = BeautifulSoup(request.content, 'html.parser')
                     social_links = soup.select('.social-networks a')
@@ -58,11 +67,7 @@ class CTCrawler(AbstractBaseCrawler):
                     '{0} error while getting rss links from: {1}'.format(request.status_code, category))
                     self.errors.append(http_error_to_string(request.status_code,category))
 
-            return rss_feeds
-
-        except Exception as e:
-            logger.exception('Error!!{} while getting rss feeds'.format(e))
-            self.errors.append(error_to_string(e))
+        return rss_feeds
 
     def get_top_stories(self):
         rss_feeds = self.get_rss_feed_links()
