@@ -1,17 +1,13 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<div class="row">
-	{% for source in sources %}
-	<div class="col-md-4">
-		<strong>
-		{{source.name}} - {{source.slug}}</strong><br>
-		{% for article in source.article_set.all %}
-		<strong>{{ forloop.counter }}.</strong>
-		<a href="{{article.article_url}}">{{article.title}}</a><br>
-		{% endfor %}
-	</div>
-	{% endfor %}
-</div>
+
+{% for source, article in articles.items %}
+{{source}}<br>
+{% for item in article.items %}
+{{item.title}}
+{% endfor %}
+<br>
+{% endfor %}
 	
 {% endblock %}
