@@ -1,19 +1,20 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from habari.apps.crawl import crawler
-
+from habari.apps.crawl.crawlers import (dncrawler, eacrawler, bdcrawler, ctcrawler, dmcrawler,
+    smcrawler, tscrawler)
 
 class Command(BaseCommand):
     help = 'Crawl News Sources for New Articles'
 
     def get_crawler_class(self, slug):
         crawler_classes = {
-        'DN': crawler.DNCrawler,
-        'BD': crawler.BDCrawler,
-        'EA': crawler.EACrawler,
-        'CT':crawler.CTCrawler,
-        'SM':crawler.SMCrawler,
-        'DM':crawler.DMCrawler,
+        'DN': dncrawler.DNCrawler,
+        'BD': bdcrawler.BDCrawler,
+        'EA': eacrawler.EACrawler,
+        'CT': ctcrawler.CTCrawler,
+        'SM': smcrawler.SMCrawler,
+        'DM': dmcrawler.DMCrawler,
+        'TS': tscrawler.TSCrawler
         }
 
         return crawler_classes.get(slug)
@@ -29,7 +30,7 @@ class Command(BaseCommand):
             crawler_class = self.get_crawler_class(source)
             if crawler_class is not None:
                 crawler = crawler_class()
-                crawl = crawler.update_top_stories()
-                self.stdout.write(self.style.SUCCESS('Succesfully updates {} Latest Articles'.format(type(crawler).__name__)))
+                crawl = crawler.run()
+                self.stdout.write(self.style.SUCCESS('Succesfully updated {} Latest Articles'.format(type(crawler).__name__)))
             else:
                 self.stdout.write(self.style.WARNING('Crawler with slug {} not found'.format(source)))
