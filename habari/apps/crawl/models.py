@@ -1,6 +1,7 @@
-from autoslug import AutoSlugField
 from django.db import models
+from autoslug import AutoSlugField
 from djchoices import ChoiceItem, DjangoChoices
+from django.contrib.postgres.fields import ArrayField
 
 # Create your models here.
 class Article(models.Model):
@@ -9,6 +10,7 @@ class Article(models.Model):
 	article_url = models.URLField(max_length=500, unique=True)
 	article_image_url = models.URLField(max_length=500)
 	author = models.CharField(max_length=500)
+	new_author = ArrayField(models.CharField(max_length=500), blank=True, null=True)
 	publication_date = models.DateField()
 	summary = models.CharField(max_length=3000)
 	news_source = models.ForeignKey('NewsSource', null=True, on_delete=models.SET_NULL)
