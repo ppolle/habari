@@ -18,6 +18,7 @@ from django.contrib import admin
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'', include('habari.apps.core.urls')),
     url(r'^api/v1/', include('habari.apps.api.urls')),
+    url(r'', include('habari.apps.core.urls')),
+    
 ]
