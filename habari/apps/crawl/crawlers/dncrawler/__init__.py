@@ -45,13 +45,13 @@ class DNCrawler(AbstractBaseCrawler):
                     try:
                         if cat.get('href') is not None:
                             request.get(cat.get('href'))
-                        except Exception as e:
-                            logget.exception('Error {} while getting categories from {}'.format(e,cat.get('href')))
-                            self.errors(append(error_to_string(e)))
-                        else:
-                            if request.status_code == 200:
-                                soup = BeautifulSoup(request.content, 'html.parser')
-                                gallery.extend(soup.select_one('.gallery-words h4 a'))
+                    except Exception as e:
+                        logget.exception('Error {} while getting categories from {}'.format(e,cat.get('href')))
+                        self.errors(append(error_to_string(e)))
+                    else:
+                        if request.status_code == 200:
+                            soup = BeautifulSoup(request.content, 'html.parser')
+                            gallery.extend(soup.select_one('.gallery-words h4 a'))
 
                 for cat in additional_categories:
                     sup_categories = []
