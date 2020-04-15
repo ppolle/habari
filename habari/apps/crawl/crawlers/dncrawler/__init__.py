@@ -39,9 +39,9 @@ class DNCrawler(AbstractBaseCrawler):
                 soup = BeautifulSoup(get_categories.content, 'html.parser')
                 main_categories = soup.select('.menu-vertical a') + soup.select('li.story-teaser.tiny-teaser a')[:9]
                 additional_categories = soup.select('.hot-topics a')
+                sup_categories = []
 
                 for cat in main_categories:
-                    gallery = []
                     try:
                         if cat.get('href') is not None:
                             link = self.make_relative_links_absolute(cat.get('href'))
@@ -52,12 +52,11 @@ class DNCrawler(AbstractBaseCrawler):
                     else:
                         if request.status_code == 200:
                             soup = BeautifulSoup(request.content, 'html.parser')
-                            item = soup.select_one('.gallery-words h4 a')
-                            if item is not None:
-                                gallery.extend(soup.select_one('.gallery-words h4 a'))
+                            item = soup.select('.gallery-words h4 a')
+                            if len(item) > 0:
+                                sup_categories.extend(item)
 
                 for cat in additional_categories:
-                    sup_categories = []
                     try:
                         if cat.get('href') is not None:
                             link = self.make_relative_links_absolute(cat.get('href'))
@@ -69,10 +68,10 @@ class DNCrawler(AbstractBaseCrawler):
                         if request.status_code == 200:
                             soup = BeautifulSoup(request.content, 'html.parser')
                             items = soup.select('.breadcrumb-item a')
-                            if items is not None:
-                                sup_categories.extend(soup.select('.breadcrumb-item a'))
+                            if len(items) > 0:
+                                sup_categories.extend(items)
 
-                all_categories = main_categories+additional_categories+sup_categories+gallery
+                all_categories = main_categories+additional_categories+sup_categories
 
                 for category in all_categories:
                     cat = self.make_relative_links_absolute(category.get('href'))
