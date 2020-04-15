@@ -17,7 +17,8 @@ class DNCrawler(AbstractBaseCrawler):
 
     def partial_links_to_ignore(self, url):
         links = ('https://www.nation.co.ke/photo',
-        'https://www.nation.co.ke/video')
+        'https://www.nation.co.ke/video',
+        'https://www.nation.co.ke/newsplex/deadly-force-database')
 
         if url.startswith(links):
             return True
@@ -36,11 +37,26 @@ class DNCrawler(AbstractBaseCrawler):
         else:
             if get_categories.status_code == 200:
                 soup = BeautifulSoup(get_categories.content, 'html.parser')
-                all_categories = soup.select('.menu-vertical a') + soup.select('.hot-topics a')+ soup.select('li.story-teaser.tiny-teaser a')[:9]
+                main_categories = soup.select('.menu-vertical a') + soup.select('li.story-teaser.tiny-teaser a')[:9]
+                additional_categories = soup.select('.hot-topics a')
+
+                for cat in additional_categories:
+                    try:
+                        if cat.get('href') is not None:
+                            request = requests.get(cat.get('href'))
+                    except Exception as e:
+                        logger.exception('Error {} while getting additonal categories from {}'.format(e,cat.get('href')))
+                        self.errors(append(error_to_string(e)))
+                    else:
+                        if request.status_code == 200:
+                            soup = BeautifulSoup(request.contant, 'html.parser')
+                            sup_categories = soup.select('.breadcrumb-item a')
+
+                all_categories = main_categories+additional_categories+sup_categories
 
                 for category in all_categories:
                     cat = self.make_relative_links_absolute(category.get('href'))
-                    if not self.partial_links_to_ignore(cat):
+                    if not self.partial_links_to_ignore(cat) and cat not in categories:
                         categories.append(cat)
             else:
                 logger.exception(
