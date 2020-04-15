@@ -18,7 +18,8 @@ class DNCrawler(AbstractBaseCrawler):
     def partial_links_to_ignore(self, url):
         links = ('https://www.nation.co.ke/photo',
         'https://www.nation.co.ke/video',
-        'https://www.nation.co.ke/newsplex/deadly-force-database')
+        'https://www.nation.co.ke/newsplex/deadly-force-database',
+        'https://www.nation.co.ke/newsplex/murder-at-home-database')
 
         if url.startswith(links):
             return True
