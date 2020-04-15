@@ -44,27 +44,33 @@ class DNCrawler(AbstractBaseCrawler):
                     gallery = []
                     try:
                         if cat.get('href') is not None:
-                            request.get(cat.get('href'))
+                            link = self.make_relative_links_absolute(cat.get('href'))
+                            request = requests.get(link)
                     except Exception as e:
-                        logget.exception('Error {} while getting categories from {}'.format(e,cat.get('href')))
-                        self.errors(append(error_to_string(e)))
+                        logger.exception('Error {} while getting categories from {}'.format(e,cat.get('href')))
+                        self.errors.append(error_to_string(e))
                     else:
                         if request.status_code == 200:
                             soup = BeautifulSoup(request.content, 'html.parser')
-                            gallery.extend(soup.select_one('.gallery-words h4 a'))
+                            item = soup.select_one('.gallery-words h4 a')
+                            if item is not None:
+                                gallery.extend(soup.select_one('.gallery-words h4 a'))
 
                 for cat in additional_categories:
                     sup_categories = []
                     try:
                         if cat.get('href') is not None:
-                            request = requests.get(cat.get('href'))
+                            link = self.make_relative_links_absolute(cat.get('href'))
+                            request = requests.get(link)
                     except Exception as e:
                         logger.exception('Error {} while getting additonal categories from {}'.format(e,cat.get('href')))
                         self.errors(append(error_to_string(e)))
                     else:
                         if request.status_code == 200:
                             soup = BeautifulSoup(request.content, 'html.parser')
-                            sup_categories.extend(soup.select('.breadcrumb-item a'))
+                            items = soup.select('.breadcrumb-item a')
+                            if items is not None:
+                                sup_categories.extend(soup.select('.breadcrumb-item a'))
 
                 all_categories = main_categories+additional_categories+sup_categories+gallery
 
