@@ -4,6 +4,28 @@ from __future__ import unicode_literals
 
 from django.db import migrations
 
+def populate_new_author_field(apps, schema_editor):
+	Article = apps.get_model('crawl', 'Article')
+
+	for article in Article.objects.all():
+		if article.author.startswith('['):
+			new_auth = article.author.strip('[]')
+		else:
+			new_auth = article.author
+
+		if ',' in new_auth:
+		    auth = [a.strip().strip('\'').strip('\"').upper() for a in new_auth.split(',')]
+		elif 'AND' in new_auth:
+		    auth = [a.strip().strip('\'').strip('\"').upper() for a in new_auth.split(' AND ')]
+		elif ' & ' in new_auth:
+		    auth = [a.strip().strip('\'').strip('\"').upper() for a in new_auth.split(' & ')]
+		elif new_auth == 'None' or new_auth == '':
+		    auth = []
+		else:
+		    auth = [new_auth.strip().strip('\'').strip('\"').upper()]
+
+		article.new_author = auth
+		article.save()
 
 class Migration(migrations.Migration):
 
@@ -12,4 +34,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+    migrations.RunPython(populate_new_author_field),
     ]
