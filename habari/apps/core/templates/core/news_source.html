@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row">
+	<div class="col-md-6">
+		{% for article in articles %}
+		{{forloop.counter}}. <a href="{{article.article_url}}" target="_blank">{{article.title}}</a>
+		
+		<br>
+		{% endfor %}		
+	</div>
+</div>
+
+{% endblock %}

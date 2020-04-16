@@ -1,6 +1,6 @@
 from itertools import groupby
-from django.shortcuts import render
-from datetime import datetime
+from django.shortcuts import render, get_object_or_404
+from datetime import datetime, timedelta
 from habari.apps.crawl.models import Article, NewsSource
 
 # Create your views here.
@@ -35,3 +35,10 @@ def index(request):
 def status(request):
 	sources = NewsSource.objects.all().order_by('pk')
 	return render(request, 'core/status.html', {'sources':sources})
+
+def get_source(request, source):
+	source = source.upper()
+	news_source = get_object_or_404(NewsSource,slug=source)
+	last_week = datetime.today() - timedelta(days=7)
+	articles = Article.objects.filter(publication_date__gte=last_week,news_source=news_source).order_by('-publication_date')
+	return render(request, 'core/news_source.html', {"articles":articles,'source':news_source})
