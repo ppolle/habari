@@ -24,6 +24,8 @@
     
     <div class="container">
       <section class="text-right">{% now "l, jS F Y, H:i:s" %}</section>
+      <h3>{% block source %}
+      {% endblock %}</h3>
       {% include 'includes/_bottom_nav.html' %}
       {% block content %}
       {% endblock %}
