@@ -1,7 +1,8 @@
 from itertools import groupby
-from django.shortcuts import render, get_object_or_404
 from datetime import datetime, timedelta
+from django.shortcuts import render, get_object_or_404
 from habari.apps.crawl.models import Article, NewsSource
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 # Create your views here.
 
@@ -40,5 +41,14 @@ def get_source(request, source):
 	source = source.upper()
 	news_source = get_object_or_404(NewsSource,slug=source)
 	last_week = datetime.today() - timedelta(days=7)
-	articles = Article.objects.filter(publication_date__gte=last_week,news_source=news_source).order_by('-publication_date')
+	article_list = Article.objects.filter(publication_date__gte=last_week,news_source=news_source).order_by('-publication_date')
+	
+	paginator = Paginator(article_list, 50)
+	page = request.GET.get('page')
+	try:
+		articles = paginator.page(page)
+	except PageNotAnInteger:
+		articles = paginator.page(1)
+	except EmptyPage:
+		articles = paginator.page(paginator.num_pages)
 	return render(request, 'core/news_source.html', {"articles":articles,'source':news_source})
