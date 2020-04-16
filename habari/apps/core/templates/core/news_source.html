@@ -3,14 +3,13 @@
 {{source.name|title}}
 {% endblock %}
 {% block content %}
-<div class="row">
-	<div class="col-md-6">
+
 		{% for article in articles %}
 		{{forloop.counter}}. <a href="{{article.article_url}}" target="_blank">{{article.title}}</a>
+		<p>
+		<small><strong>Publication date</strong>: {{article.publication_date}} , <strong>Authors</strong>: {% for author in article.author%}{{author|title}}{%if not forloop.last%}, {%endif%}{%endfor%}</small>
+		</p>
 		
-		<br>
 		{% endfor %}		
-	</div>
-</div>
 
 {% endblock %}
