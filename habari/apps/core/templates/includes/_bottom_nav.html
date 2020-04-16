@@ -1,6 +1,16 @@
 <ol class="breadcrumb">
+  {% if request.path == '/' %}
+  <li>Front Page</li>
+  {% else %}
   <li class="active"><a href="{% url 'index' %}">Front Page</a></li>
+  {% endif %}
   {% for source in sources %}
-  <li><a href="{% url 'sources' source.slug %}">{{source.name|title}}</a></li>
+	  {% with source.slug as slug %}
+		  {% if request.path == slug %}
+		  <li>Noma</li>
+		  {%else%}
+		  <li><a href="{% url 'sources' slug %}">{{source.name|title}}</a></li>
+		  {%endif%}
+	  {% endwith %}
   {% endfor %}
 </ol>
