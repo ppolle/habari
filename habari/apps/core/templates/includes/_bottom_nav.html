@@ -1,5 +1,6 @@
-<ul class="nav nav-pills">
+<ol class="breadcrumb">
+  <li class="active"><a href="#">Front Page</a></li>
   {% for source in sources %}
-  <li role="presentation" class="active"><a href="#">{{source}}</a></li>
+  <li><a href="#">{{source|title}}</a></li>
   {% endfor %}
-</ul>
+</ol>
