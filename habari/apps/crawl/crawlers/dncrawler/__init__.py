@@ -20,7 +20,8 @@ class DNCrawler(AbstractBaseCrawler):
         'https://www.nation.co.ke/video',
         'https://www.nation.co.ke/newsplex/deadly-force-database',
         'https://www.nation.co.ke/newsplex/murder-at-home-database',
-        'https://www.nation.co.ke/oped/cartoon/')
+        'https://www.nation.co.ke/oped/cartoon/',
+        'https://www.nation.co.ke/health/3476990-5485696-da2r6w/index.html')
 
         if url.startswith(links):
             return True
