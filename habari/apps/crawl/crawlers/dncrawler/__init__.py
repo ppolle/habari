@@ -17,7 +17,11 @@ class DNCrawler(AbstractBaseCrawler):
 
     def partial_links_to_ignore(self, url):
         links = ('https://www.nation.co.ke/photo',
-        'https://www.nation.co.ke/video')
+        'https://www.nation.co.ke/video',
+        'https://www.nation.co.ke/newsplex/deadly-force-database',
+        'https://www.nation.co.ke/newsplex/murder-at-home-database',
+        'https://www.nation.co.ke/oped/cartoon/',
+        'https://www.nation.co.ke/health/3476990-5485696-da2r6w/index.html')
 
         if url.startswith(links):
             return True
@@ -36,18 +40,52 @@ class DNCrawler(AbstractBaseCrawler):
         else:
             if get_categories.status_code == 200:
                 soup = BeautifulSoup(get_categories.content, 'html.parser')
-                all_categories = soup.select('.menu-vertical a') + soup.select('.hot-topics a')
+                main_categories = soup.select('.menu-vertical a') + soup.select('li.story-teaser.tiny-teaser a')[:9]
+                additional_categories = soup.select('.hot-topics a')
+                sup_categories = []
+
+                for cat in main_categories:
+                    try:
+                        if cat.get('href') is not None:
+                            link = self.make_relative_links_absolute(cat.get('href'))
+                            request = requests.get(link)
+                    except Exception as e:
+                        logger.exception('Error {} while getting categories from {}'.format(e,cat.get('href')))
+                        self.errors.append(error_to_string(e))
+                    else:
+                        if request.status_code == 200:
+                            soup = BeautifulSoup(request.content, 'html.parser')
+                            item = soup.select('.gallery-words h4 a')
+                            if len(item) > 0:
+                                sup_categories.extend(item)
+
+                for cat in additional_categories:
+                    try:
+                        if cat.get('href') is not None:
+                            link = self.make_relative_links_absolute(cat.get('href'))
+                            request = requests.get(link)
+                    except Exception as e:
+                        logger.exception('Error {} while getting additonal categories from {}'.format(e,cat.get('href')))
+                        self.errors(append(error_to_string(e)))
+                    else:
+                        if request.status_code == 200:
+                            soup = BeautifulSoup(request.content, 'html.parser')
+                            items = soup.select('.breadcrumb-item a')
+                            if len(items) > 0:
+                                sup_categories.extend(items)
+
+                all_categories = main_categories+additional_categories+sup_categories
 
                 for category in all_categories:
                     if category.get('href') is not None:
                         cat = self.make_relative_links_absolute(category.get('href'))
-                        if not self.partial_links_to_ignore(cat):
+                        if not self.partial_links_to_ignore(cat) and cat not in categories:
                             categories.append(cat)
             else:
                 logger.exception(
                         '{0} error while getting categories and sub-categories for {1}'.format(get_categories.status_code, self.url))
                 self.errors.append(http_error_to_string(get_categories.status_code,sel.url))
-                    
+
         return categories
 
     def get_top_stories(self):
@@ -188,8 +226,8 @@ class DNCrawler(AbstractBaseCrawler):
         article_info = []
         startswith_newsplex = ('https://www.nation.co.ke/health',
           'https://www.nation.co.ke/newsplex',
-          'https://www.nation.co.ke/brandbook', 
-          'https://www.nation.co.ke/gender', 
+          'https://www.nation.co.ke/brandbook',
+          'https://www.nation.co.ke/gender',
           )
 
         for article in top_articles:

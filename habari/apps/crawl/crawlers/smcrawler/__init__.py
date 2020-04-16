@@ -51,7 +51,7 @@ class SMCrawler(AbstractBaseCrawler):
                             publication_date = datetime.strptime(
                                 date, '%a, %d %b %Y %H:%M:%S %z')
                         try:
-                            author = [a.strip() for a in article.author.get_text().split(' and ')]
+                            author = [a.strip().upper() for a in article.author.get_text().split(' and ')]
                         except AttributeError:
                             author = ['']
 
@@ -90,10 +90,10 @@ class SMCrawler(AbstractBaseCrawler):
 
             if  article['author'] == ['']:
                 try:
-                    author = [a.strip() for a in soup.select_one('.article-meta a').get_text().split(' and ')]
+                    author = [a.strip().upper() for a in soup.select_one('.article-meta a').get_text().split(' and ')]
                 except AttributeError:
                     try:
-                        author = [soup.select_one('div .io-hidden-author').get_text().strip()]
+                        author = [soup.select_one('div .io-hidden-author').get_text().strip().upper()]
                     except AttributeError:
                         author = ['']
                 article['author'] = author
