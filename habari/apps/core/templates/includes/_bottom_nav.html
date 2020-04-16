@@ -1,6 +1,6 @@
 <ol class="breadcrumb">
   <li class="active"><a href="{% url 'index' %}">Front Page</a></li>
   {% for source in sources %}
-  <li><a href="#">{{source|title}}</a></li>
+  <li><a href="{% url 'sources' source.slug %}">{{source.name|title}}</a></li>
   {% endfor %}
 </ol>
