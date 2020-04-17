@@ -39,7 +39,7 @@ def status(request):
 
 def get_source(request, source):
 	source = source.upper()
-	news_source = get_object_or_404(NewsSource,slug=source)
+	news_source = get_object_or_404(NewsSource,slug__iexact=source)
 	last_week = datetime.today() - timedelta(days=7)
 	article_list = Article.objects.filter(publication_date__gte=last_week,news_source=news_source).order_by('-publication_date', '-timestamp')
 	
