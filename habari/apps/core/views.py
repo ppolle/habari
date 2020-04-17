@@ -38,7 +38,7 @@ def get_author_articles(request, source, author):
 	import re
 	author_string = re.sub(r'-',' ',author).upper()  
 	news_source = get_object_or_404(NewsSource, slug__iexact=source)
-	article_list = Article.objects.filter(news_source=news_source, author__contains=[author_string])
+	article_list = Article.objects.filter(news_source=news_source, author__contains=[author_string]).order_by('-publication_date', '-timestamp')
 
 	paginator = Paginator(article_list, 50)
 	page = request.GET.get('page')
