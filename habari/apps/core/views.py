@@ -51,4 +51,22 @@ def get_source(request, source):
 		articles = paginator.page(1)
 	except EmptyPage:
 		articles = paginator.page(paginator.num_pages)
-	return render(request, 'core/news_source.html', {"articles":articles,'source':news_source})
+	return render(request, 'core/news_source.html', {'articles':articles,'source':news_source})
+
+def get_author_articles(request, source, author):
+	'''
+	Get articles belonging to a particular author
+	'''
+	news_source = get_object_or_404(NewsSource, slug__iexact=source)
+	article_list = Article.objects.filter(news_source=news_source, author__contains=[author])
+
+	paginator = Paginator(article_list, 50)
+	page = request.GET.get('page')
+	try:
+		articles = paginator.page(page)
+	except PageNotAnInteger:
+		articles = paginator.page(1)
+	except EmptyPage:
+		articles = paginator.page(paginator.num_pages)
+
+	return render(request, 'core/author_articles.html', {'articles':articles, 'source':source, 'author':author})
