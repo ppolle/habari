@@ -34,6 +34,11 @@ class NewsSource(models.Model):
 	class Meta:
 		ordering = ['name']
 
+	def front_page_filtered_Set(self):
+		from datetime import datetime
+		today = datetime.today()
+		return Article.objects.filter(news_source=self).order_by('-publication_date','-timestamp')[:10]
+
 class Crawl(models.Model):
 	'''Model to save details of a crawl run'''
 	class StatusType(DjangoChoices):

@@ -1,17 +1,26 @@
 {% extends 'base.html' %}
 {% block source %}
-Front Page
+Front Page <small>(The Most Recent News Articles)</small>
 {% endblock %}
 
 {% block content %}
 
 
-{% for source, article in articles.items %}
-{{source}}<br>
-{% for item in article.items %}
-{{item.title}}
-{% endfor %}
-<br>
-{% endfor %}
+<div class="row">
+	{% for source in sources %}
+	<div class="col-md-4">
+		<strong>
+		{{source}} - {{source.slug}}</strong><br>
+		{% for article in source.front_page_filtered_Set %}
+		<strong>{{ forloop.counter }}.</strong>
+		<a href="{{article.article_url}}">{{article.title}}</a><br>
+		<p>
+		<small><strong>Publication date</strong>: {{article.publication_date}} , <strong>Authors</strong>: {% for author in article.author%}<a href="{% url 'author' source.slug author|slugify %}">{{author|title}}</a>{%if not forloop.last%}, {%endif%}{%endfor%}</small>
+		</p>
+		{% endfor %}
+	</div>
+	{% endfor %}
+</div>
+<hr>
 	
 {% endblock %}
