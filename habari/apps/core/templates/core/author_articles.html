@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 {% block source%}
-{{source.name|title}}<small>(All Articles From The Last Seven Days)</small>
+{{source.name|title}}<small>(All Articles By: {{author|title}})</small>
 {% endblock %}
 {% block content %}
 
 	{% for article in articles %}
 	{{ forloop.counter0|add:articles.start_index }}. <a href="{{article.article_url}}" target="_blank">{{article.title}}</a>
 	<p>
-	<small><strong>Publication date</strong>: {{article.publication_date}} , <strong>Authors</strong>: {% for author in article.author%}<a href="{% url 'author' source.slug author|slugify %}">{{author|title}}</a>{%if not forloop.last%}, {%endif%}{%endfor%}</small>
+	<small><strong>Publication date</strong>: {{article.publication_date}} , <strong>Authors</strong>: {% for author in article.author%}{{author|title}}{%if not forloop.last%}, {%endif%}{%endfor%}</small>
 	</p>
 
 	{% endfor %}
