@@ -21,6 +21,11 @@ Front Page <small>(The Most Recent News Articles)</small>
 		<a href="{% url 'sources' source.slug %}">Read More {{source.name|title}} Articles ...</a>
 		</p>
 	</div>
+	{% if forloop.counter|divisibleby:3 %}
+		</div>
+		<hr>
+	<div class="row">
+    {% endif %}
 	{% endfor %}
 </div>
 <hr>
