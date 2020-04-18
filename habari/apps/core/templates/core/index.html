@@ -14,10 +14,12 @@ Front Page <small>(The Most Recent News Articles)</small>
 		<strong>{{ forloop.counter }}.</strong>
 		<a href="{{article.article_url}}">{{article.title}}</a><br>
 		<p>
-		<small><strong>Publication date</strong>: {{article.publication_date}} , <strong>Authors</strong>: {% for author in article.author%}<a href="{% url 'author' source.slug author|slugify %}">{{author|title}}</a>{%if not forloop.last%}, {%endif%}{%endfor%}</small>
+		<small><strong>Publication date</strong>: {{article.publication_date}} , <strong>Authors</strong>: {% for author in article.author%}<a href="{% url 'author' source.slug author|slugify %}">{{author|title}}</a>{%if not forloop.last%}, {%endif%}{% empty %}No Author{%endfor%}</small>
 		</p>
 		{% endfor %}
+		<p>
 		<a href="{% url 'sources' source.slug %}">Read More {{source.name|title}} Articles ...</a>
+		</p>
 	</div>
 	{% endfor %}
 </div>
