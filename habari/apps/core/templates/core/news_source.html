@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load core %}
 {% block source%}
 {{source.name|title}}<small>(All Articles From The Last Seven Days)</small>
 {% endblock %}
@@ -7,7 +8,7 @@
 	{% for article in articles %}
 	{{ forloop.counter0|add:articles.start_index }}. <a href="{{article.article_url}}" target="_blank">{{article.title}}</a>
 	<p>
-	<small><strong>Publication date</strong>: {{article.publication_date}} , <strong>Authors</strong>: {% for author in article.author%}<a href="{% url 'author' source.slug author|slugify %}">{{author|title}}</a>{%if not forloop.last%}, {%endif%}{%endfor%}</small>
+	<small><strong>Publication date</strong>: {{article.publication_date}} , <strong>Authors</strong>: {% for author in article.author%}<a href="{% url 'author' source.slug author|author_slug %}">{{author|author_capitalize}}</a>{%if not forloop.last%}, {%endif%}{% empty %}No Author{%endfor%}</small>
 	</p>
 
 	{% endfor %}
