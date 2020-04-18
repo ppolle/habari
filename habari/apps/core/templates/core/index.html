@@ -1,7 +1,34 @@
 {% extends 'base.html' %}
+{% load core %}
+{% block source %}
+Front Page <small>(The Most Recent News Articles)</small>
+{% endblock %}
+
 {% block content %}
-<section class="text-right">{% now "l, jS F Y, H:i:s" %}</section>
 
-<h1>Noma!</h1>
 
+<div class="row">
+	{% for source in sources %}
+	<div class="col-md-4">
+		<strong><h5>{{source}} - {{source.slug}}</h5></strong>
+		{% for article in source.front_page_filtered_Set %}
+		<strong>{{ forloop.counter }}.</strong>
+		<a href="{{article.article_url}}" target="_blank">{{article.title}}</a><br>
+		<p>
+		<small><strong>Publication date</strong>: {{article.publication_date}} , <strong>Authors</strong>: {% for author in article.author%}<a href="{% url 'author' source.slug author|author_slug %}">{{author|author_capitalize}}</a>{%if not forloop.last%}, {%endif%}{% empty %}No Author{%endfor%}</small>
+		</p>
+		{% endfor %}
+		<p>
+		<a href="{% url 'sources' source.slug %}">Read More {{source.name|title}} Articles ...</a>
+		</p>
+	</div>
+	{% if forloop.counter|divisibleby:3 %}
+		</div>
+		<hr>
+	<div class="row">
+    {% endif %}
+	{% endfor %}
+</div>
+<hr>
+	
 {% endblock %}

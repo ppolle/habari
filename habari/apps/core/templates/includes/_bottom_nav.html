@@ -1,5 +1,16 @@
-<ul class="nav nav-pills">
-  <li role="presentation" class="active"><a href="#">Home</a></li>
-  <li role="presentation"><a href="#">Profile</a></li>
-  <li role="presentation"><a href="#">Messages</a></li>
-</ul>
+<ol class="breadcrumb">
+  {% if request.path == '/' %}
+  <li>Front Page</li>
+  {% else %}
+  <li class="active"><a href="{% url 'index' %}">Front Page</a></li>
+  {% endif %}
+  {% for source in sources %}
+	  {% with source.slug as slug %}
+		  {% if request.path == slug %}
+		  <li>Noma</li>
+		  {%else%}
+		  <li><a href="{% url 'sources' slug %}">{{source.name|title}}</a></li>
+		  {%endif%}
+	  {% endwith %}
+  {% endfor %}
+</ol>

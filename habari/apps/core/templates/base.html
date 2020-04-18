@@ -23,11 +23,17 @@
     {% include 'includes/_nav.html' %}
     
     <div class="container">
+      <section class="text-right">{% now "l, jS F Y, H:i:s" %}</section>
+      <h3>{% block source %}
+      {% endblock %}</h3>
+      {% include 'includes/_bottom_nav.html' %}
       {% block content %}
       {% endblock %}
+      {% block footer %}
+      {% include 'includes/footer.html' %}
+      {% endblock %}
     </div>
-    
-    
+
     {% block scripts %}
     {% include 'includes/_scripts.html' %} 
     {% endblock %}
