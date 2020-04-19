@@ -79,8 +79,9 @@ class TSCrawler(AbstractBaseCrawler):
             publication_date = soup.select_one('.article-body .article-published').get_text().strip()
             date = datetime.strptime(publication_date, '%d %B %Y - %H:%M')
             try:
-                author = [self.sanitize_author_string(a.strip(' /')) for a in soup.select_one(
-                '.article-body .mobile-display .author-name span').get_text().split(' AND')]
+                author_string = soup.select_one(
+                '.article-body .mobile-display .author-name span').get_text()
+                author = [self.sanitize_author_string(a.strip(' /')) for a in re.split(' AND |/',author_string)]
             except AttributeError:
                 author = []
 
