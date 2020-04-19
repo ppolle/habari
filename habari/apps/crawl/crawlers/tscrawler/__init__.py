@@ -81,7 +81,7 @@ class TSCrawler(AbstractBaseCrawler):
             try:
                 author_string = soup.select_one(
                 '.article-body .mobile-display .author-name span').get_text()
-                author = [self.sanitize_author_string(a.strip(' /')) for a in re.split(' AND |/',author_string)]
+                author = [self.sanitize_author_string(a.strip(' /')) for a in re.split(' AND | and |/ ',author_string)]
             except AttributeError:
                 author = []
 
