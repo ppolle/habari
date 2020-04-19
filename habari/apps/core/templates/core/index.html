@@ -10,7 +10,7 @@ Front Page <small>(The Most Recent News Articles)</small>
 <div class="row">
 	{% for source in sources %}
 	<div class="col-md-4">
-		<strong><h5>{{source}} - {{source.slug}}</h5></strong>
+		<h5><strong>{{source}} - {{source.slug}}</strong></h5>
 		{% for article in source.front_page_filtered_Set %}
 		<strong>{{ forloop.counter }}.</strong>
 		<a href="{{article.article_url}}" target="_blank">{{article.title}}</a><br>
