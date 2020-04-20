@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 import os
 from celery import Celery
+from celery.schedules import crontab
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'habari.settings')
 
@@ -13,8 +14,17 @@ def debug_task(self):
     print('Request: {0!r}'.format(self.request))
 
 app.conf.beat_schedule = {
-    'crawl-dn-articles': {  #name of the scheduler
-        'task': 'dn_crawler',  # task name which we have created in tasks.py
-        'schedule': 300.0,   # set the period of running
+    'frequent_crawlers':{
+    'task':'frequent_crawlers',
+    'schedule':crontab(minute=0,hour='*/4'),
+    },
+    'non_frequent_crawlers':{
+    'task':'non_frequent_crawlers',
+    'schedule':crontab(minute=0,hour='*/6')
+    },
+    'bd_crawler':{
+    'task':'bd_crawler',
+    'schedule':crontab(minute=0,hour='*/5',day_of_week='1-5')
     }
+
 }
