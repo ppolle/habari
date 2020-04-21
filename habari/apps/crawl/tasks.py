@@ -8,7 +8,7 @@ def frequent_crawlers():
         'DN': dncrawler.DNCrawler,
         'SM': smcrawler.SMCrawler,
         'TS': tscrawler.TSCrawler,
-        'DM':dmcrawler.DMCrawer
+        'DM': dmcrawler.DMCrawler
         }
 	for key, value in crawlers.items():
 		crawler = value()
