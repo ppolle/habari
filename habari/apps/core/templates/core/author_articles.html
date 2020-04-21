@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load core %}
+{% load core_filter %}
 {% block source%}
 {{source.name|title}}<small>(All Articles By: {{author|title}})</small>
 {% endblock %}
