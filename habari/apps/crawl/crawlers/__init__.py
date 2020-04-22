@@ -75,6 +75,6 @@ class AbstractBaseCrawler:
 
     def sanitize_author_string(self, author):
         new_author = re.sub(
-            r'\w*@.*|(\w+[.|\w])*@(\w+[.])*\w+|More by this Author|By|BY ', '', author).strip().upper()
+            r'\w*@.*|(\w+[.|\w])*@(\w+[.])*\w+|More by this Author|By|BY |by', '', author.lower()).strip().upper()
         return new_author
 

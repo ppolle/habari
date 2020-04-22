@@ -1,0 +1,11 @@
+{% load core_tags %}
+<ol class="breadcrumb">
+
+  <li class="active"><a href="{% url 'index' %}">Today</a></li>
+  <li class="active"><a href="{% url 'index' %}">Yesterday</a></li>
+  <li class="active"><a href="{% url 'index' %}">{% day_name delta=2 %}</a></li>
+  <li class="active"><a href="{% url 'index' %}">{% day_name delta=3 %}</a></li>
+  <li class="active"><a href="{% url 'index' %}">{% day_name delta=4 %}</a></li>
+  <li class="active"><a href="{% url 'index' %}">{% day_name delta=5 %}</a></li>
+  <li class="active"><a href="{% url 'index' %}">{% day_name delta=6 %}</a></li>
+</ol>
