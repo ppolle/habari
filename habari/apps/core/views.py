@@ -36,6 +36,7 @@ def get_author_articles(request, source, author):
 	Get articles belonging to a particular author
 	'''
 	import re
+	source = source.upper()
 	author_string = re.sub(r'-',' ',author).upper()  
 	news_source = get_object_or_404(NewsSource, slug__iexact=source)
 	article_list = Article.objects.filter(news_source=news_source, author__contains=[author_string]).order_by('-publication_date', '-timestamp')
@@ -55,4 +56,18 @@ def day(request, source, year, month, day):
 	'''
 	Get articles for a particular day from a particular new source
 	'''
-	pass
+	source = source.upper()
+	date = datetime(int(year), int(month), int(day))
+	source = get_object_or_404(NewsSource, slug__iexact=source)
+	article_list = Article.objects.filter(news_source=news_source, publication_date=date).order_by('-publication_date', '-timestamp')
+
+	paginator = Paginator(article_list, 30)
+	page = request.GET.get('page')
+	try:
+		articles = pagintor.page(page)
+	except PageNotAnInteger:
+		articles = paginator.page(1)
+	except EmptyPage:
+		articles = paginator.page(paginator.num_pages)
+	
+	return render(request, 'core/news_source.html', {'articles':articles,'source':source})

@@ -6,4 +6,5 @@ urlpatterns = [
     url(r'^status/$', views.status, name='status'),
     url(r'^(?P<source>\w+)/$', views.get_source, name='sources'),
     url(r'^(?P<source>\w+)/(?P<author>.+)/$', views.get_author_articles, name='author'),
+    url(r'^(?P<source>\w+)/(?P<year>\d{4})/(?P<month>\d{2})/(?P<day>\d{2})/$', views.day, name='day'),
 ]
