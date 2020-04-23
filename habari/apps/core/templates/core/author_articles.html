@@ -1,8 +1,14 @@
 {% extends 'base.html' %}
-{% load core %}
-{% block source%}
+{% load core_filter %}
+
+{% block title%}
 {{source.name|title}}<small>(All Articles By: {{author|title}})</small>
 {% endblock %}
+
+{% block source%}
+
+{% endblock %}
+
 {% block content %}
 
 	{% for article in articles %}

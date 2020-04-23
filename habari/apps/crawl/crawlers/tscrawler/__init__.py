@@ -94,7 +94,7 @@ class TSCrawler(AbstractBaseCrawler):
                     image_url ='None'
 
             try:
-                summary = re.sub(r'•|\n', '', soup.select_one('.article-intro').get_text()).strip()
+                summary = re.sub(r'•|\n', '', soup.select_one('.article-intro').get_text().strip())
             except AttributeError:
                 summary = ' '
 

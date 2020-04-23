@@ -1,8 +1,18 @@
 {% extends 'base.html' %}
-{% load core %}
-{% block source%}
-{{source.name|title}}<small>(All Articles From The Last Seven Days)</small>
+{% load core_filter %}
+
+{% block title%}
+Top Stories<small>(All Articles From The Last Seven Days)</small>
 {% endblock %}
+
+{% block source%}
+{{source.name|title}}
+{% endblock %}
+
+{% block day_nav %}
+{% include 'includes/_day_nav.html' %}
+{% endblock %}
+
 {% block content %}
 
 	{% for article in articles %}
