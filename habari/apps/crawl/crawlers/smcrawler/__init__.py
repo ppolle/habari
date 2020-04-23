@@ -99,7 +99,7 @@ class SMCrawler(AbstractBaseCrawler):
                             author = [a.strip().upper() for a in soup.select_one('.small.text-muted.mb-3 a').get_text().split('and')]
                         except AttributeError:
                             author = []
-                if author == [''] of author == [':']:
+                if author == [''] or author == [':']:
                     author = []
 
                 article['author'] = author
