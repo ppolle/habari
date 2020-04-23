@@ -53,7 +53,7 @@ class SMCrawler(AbstractBaseCrawler):
                         try:
                             author = [a.strip().upper() for a in article.author.get_text().split(' and ')]
                         except AttributeError:
-                            author = ['']
+                            author = []
 
                         article_details = {
                             'title': title,
@@ -88,14 +88,17 @@ class SMCrawler(AbstractBaseCrawler):
                     title = soup.select_one('h1.mb-4').get_text().strip()
                 article['title'] = title
 
-            if  article['author'] == ['']:
+            if  len(article['author']) == 0:
                 try:
                     author = [a.strip().upper() for a in soup.select_one('.article-meta a').get_text().split(' and ')]
                 except AttributeError:
                     try:
                         author = [soup.select_one('div .io-hidden-author').get_text().strip().upper()]
                     except AttributeError:
-                        author = ['']
+                        try:
+                            author = [a.strip() for a in soup.select_one('.small.text-muted.mb-3 a').get_text().split('and')]
+                        except AttributeError:
+                            author = []
                 article['author'] = author
             
             try:
