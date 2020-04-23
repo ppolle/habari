@@ -30,6 +30,8 @@ def get_source(request, source):
 	except EmptyPage:
 		articles = paginator.page(paginator.num_pages)
 	return render(request, 'core/news_source.html', {'articles':articles,'source':news_source})
+	# today = timezone.now()
+	# return day(request,source, today.year, today.month,today.day)
 
 def get_author_articles(request, source, author):
 	'''
@@ -59,12 +61,12 @@ def day(request, source, year, month, day):
 	source = source.upper()
 	date = datetime(int(year), int(month), int(day))
 	source = get_object_or_404(NewsSource, slug__iexact=source)
-	article_list = Article.objects.filter(news_source=news_source, publication_date=date).order_by('-publication_date', '-timestamp')
+	article_list = Article.objects.filter(news_source=source, publication_date=date).order_by('-publication_date', '-timestamp')
 
 	paginator = Paginator(article_list, 30)
 	page = request.GET.get('page')
 	try:
-		articles = pagintor.page(page)
+		articles = paginator.page(page)
 	except PageNotAnInteger:
 		articles = paginator.page(1)
 	except EmptyPage:

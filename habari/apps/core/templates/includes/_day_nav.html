@@ -1,11 +1,11 @@
 {% load core_tags %}
 <ol class="breadcrumb">
 
-  <li class="active"><a href="{% url 'index' %}">Today</a></li>
-  <li class="active"><a href="{% url 'index' %}">Yesterday</a></li>
-  <li class="active"><a href="{% url 'index' %}">{% day_name delta=2 %}</a></li>
-  <li class="active"><a href="{% url 'index' %}">{% day_name delta=3 %}</a></li>
-  <li class="active"><a href="{% url 'index' %}">{% day_name delta=4 %}</a></li>
-  <li class="active"><a href="{% url 'index' %}">{% day_name delta=5 %}</a></li>
-  <li class="active"><a href="{% url 'index' %}">{% day_name delta=6 %}</a></li>
+  <li class="active"><a href="{% url 'sources' source.slug %}">Today</a></li>
+  <li class="active"><a href="{% day_url source=source.slug delta=1 %}">Yesterday</a></li>
+  <li class="active"><a href="{% day_url source=source.slug delta=2 %}">{% day_name delta=2 %}</a></li>
+  <li class="active"><a href="{% day_url source=source.slug delta=3 %}">{% day_name delta=3 %}</a></li>
+  <li class="active"><a href="{% day_url source=source.slug delta=4 %}">{% day_name delta=4 %}</a></li>
+  <li class="active"><a href="{% day_url source=source.slug delta=5 %}">{% day_name delta=5 %}</a></li>
+  <li class="active"><a href="{% day_url source=source.slug delta=6 %}">{% day_name delta=6 %}</a></li>
 </ol>
