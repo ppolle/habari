@@ -17,21 +17,8 @@ def status(request):
 
 def get_source(request, source):
 	source = source.upper()
-	news_source = get_object_or_404(NewsSource,slug__iexact=source)
-	last_week = timezone.now() - timezone.timedelta(days=7)
-	article_list = Article.objects.filter(publication_date__gte=last_week,news_source=news_source).order_by('-publication_date', '-timestamp')
-	
-	paginator = Paginator(article_list, 50)
-	page = request.GET.get('page')
-	try:
-		articles = paginator.page(page)
-	except PageNotAnInteger:
-		articles = paginator.page(1)
-	except EmptyPage:
-		articles = paginator.page(paginator.num_pages)
-	return render(request, 'core/news_source.html', {'articles':articles,'source':news_source})
-	# today = timezone.now()
-	# return day(request,source, today.year, today.month,today.day)
+	today = timezone.now()
+	return day(request,source, today.year, today.month,today.day)
 
 def get_author_articles(request, source, author):
 	'''
