@@ -96,9 +96,12 @@ class SMCrawler(AbstractBaseCrawler):
                         author = [soup.select_one('div .io-hidden-author').get_text().strip().upper()]
                     except AttributeError:
                         try:
-                            author = [a.strip() for a in soup.select_one('.small.text-muted.mb-3 a').get_text().split('and')]
+                            author = [a.strip().upper() for a in soup.select_one('.small.text-muted.mb-3 a').get_text().split('and')]
                         except AttributeError:
                             author = []
+                if author == [''] of author == [':']:
+                    author = []
+
                 article['author'] = author
             
             try:
