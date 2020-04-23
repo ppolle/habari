@@ -9,9 +9,7 @@ def author_slug(value):
 
 @register.filter
 def author_capitalize(value):
-	cap_list = ['afp','reuters','bbc','a.p','xinhua']
+	cap_list = ['afp','reuters','bbc','a.p','xinhua','mirror']
 	val = value.strip().lower()
-	if val in cap_list:
-		return value.upper()
-	else:
-		return capwords(value)
+	return " ".join(s.upper() if s in cap_list else s.title() for s in val.split())
+
