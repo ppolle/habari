@@ -25,6 +25,10 @@ app.conf.beat_schedule = {
     'bd_crawler':{
     'task':'bd_crawler',
     'schedule':crontab(minute=0,hour='*/5',day_of_week='1-5')
+    },
+    'retry_failed_crawls':{
+    'task': 'retry_failed_crawls',
+    'schedule': crontab(minute='*/30')
     }
 
 }
