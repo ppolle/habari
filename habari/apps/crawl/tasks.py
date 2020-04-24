@@ -55,7 +55,7 @@ def retry_failed_crawls():
 			crawl_class = crawler_classes.get(source.slug)
 			crawl = crawl_class().run()
 
-		if source.crawl_set.last().status == Crawl.StatusType.Crawling and source.crawl_set.last().crawl_time <= a_while_ago:
+		if source.crawl_set.last().status != Crawl.StatusType.Good and source.crawl_set.last().crawl_time <= a_while_ago:
 			crawl_class = crawler_classes.get(source.slug)
 			crawl = crawl_class().run()
 
