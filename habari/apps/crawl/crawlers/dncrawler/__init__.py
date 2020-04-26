@@ -19,7 +19,9 @@ class DNCrawler(AbstractBaseCrawler):
         links = ('https://www.nation.co.ke/photo',
         'https://www.nation.co.ke/video',
         'https://www.nation.co.ke/newsplex/deadly-force-database',
-        'https://www.nation.co.ke/newsplex/murder-at-home-database')
+        'https://www.nation.co.ke/newsplex/murder-at-home-database',
+        'https://www.nation.co.ke/oped/cartoon/',
+        'https://www.nation.co.ke/health/3476990-5485696-da2r6w/index.html')
 
         if url.startswith(links):
             return True
@@ -75,14 +77,15 @@ class DNCrawler(AbstractBaseCrawler):
                 all_categories = main_categories+additional_categories+sup_categories
 
                 for category in all_categories:
-                    cat = self.make_relative_links_absolute(category.get('href'))
-                    if not self.partial_links_to_ignore(cat) and cat not in categories:
-                        categories.append(cat)
+                    if category.get('href') is not None:
+                        cat = self.make_relative_links_absolute(category.get('href'))
+                        if not self.partial_links_to_ignore(cat) and cat not in categories:
+                            categories.append(cat)
             else:
                 logger.exception(
                         '{0} error while getting categories and sub-categories for {1}'.format(get_categories.status_code, self.url))
                 self.errors.append(http_error_to_string(get_categories.status_code,sel.url))
-                    
+
         return categories
 
     def get_top_stories(self):
@@ -108,10 +111,11 @@ class DNCrawler(AbstractBaseCrawler):
 
                     for story in stories:
                         try:
-                            story = self.make_relative_links_absolute(
-                                story.get('href'))
-                            if not Article.objects.filter(article_url=story).exists() and story not in story_links and self.check_for_top_level_domain(story) and not self.partial_links_to_ignore(story):
-                                story_links.append(story)
+                            if story.get('href') is not None:
+                                story = self.make_relative_links_absolute(
+                                    story.get('href'))
+                                if not Article.objects.filter(article_url=story).exists() and story not in story_links and self.check_for_top_level_domain(story) and not self.partial_links_to_ignore(story):
+                                    story_links.append(story)
                         except Exception as e:
                             logger.exception(
                     '{0} error while sanitizing {1} and getting top stories from:'.format(e, story.get('href'), stories))
@@ -222,8 +226,8 @@ class DNCrawler(AbstractBaseCrawler):
         article_info = []
         startswith_newsplex = ('https://www.nation.co.ke/health',
           'https://www.nation.co.ke/newsplex',
-          'https://www.nation.co.ke/brandbook', 
-          'https://www.nation.co.ke/gender', 
+          'https://www.nation.co.ke/brandbook',
+          'https://www.nation.co.ke/gender',
           )
 
         for article in top_articles:

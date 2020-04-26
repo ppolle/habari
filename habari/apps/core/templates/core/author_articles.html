@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load core_filter %}
+
+{% block title%}
+{{source.name|title}}<small>(All Articles By: {{author|title}})</small>
+{% endblock %}
+
+{% block source%}
+
+{% endblock %}
+
+{% block content %}
+
+	{% for article in articles %}
+	{{ forloop.counter0|add:articles.start_index }}. <a href="{{article.article_url}}" target="_blank">{{article.title}}</a>
+	<p>
+	<small><strong>Publication date</strong>: {{article.publication_date}} , <strong>Authors</strong>: {% for author in article.author%}{{author|author_capitalize}}{%if not forloop.last%}, {%endif%}{% empty %}No Author{%endfor%}</small>
+	</p>
+
+	{% endfor %}
+
+  	{% if articles.paginator.num_pages > 1 %}
+		<nav aria-label="Page navigation" class="text-center">
+		  <ul class="pagination">
+		  	{% if articles.has_previous %}
+	        <li>
+		      <a href="?page={{ articles.previous_page_number }}" aria-label="Previous">
+		        <span aria-hidden="true">&laquo;</span>
+		      </a>
+		    </li>
+	      	{% else %}
+	        <li class="disabled"><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span>
+	      	{% endif %}
+	      	{% for i in articles.paginator.page_range %}
+		      	{% if articles.number == i %}
+			    <li class="active"><a href="#">{{i}} <span class="sr-only">(current)</span></a></li>
+			    {% else %}
+			    <li><a href="?page={{i}}">{{i}}</a></li>
+			    {% endif %}
+		    {% endfor %}
+		    {% if articles.has_next %}
+		    <li>
+		      <a href="?page={{ articles.next_page_number }}" aria-label="Next">
+		        <span aria-hidden="true">&raquo;</span>
+		      </a>
+		    </li>
+		    {% else %}
+		    <li class="disabled"><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span>
+		    {% endif %}
+		  </ul>
+		</nav>
+	{% endif %}	
+
+{% endblock %}

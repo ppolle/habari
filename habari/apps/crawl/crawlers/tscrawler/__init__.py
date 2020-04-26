@@ -38,9 +38,10 @@ class TSCrawler(AbstractBaseCrawler):
                 all_categories = soup.select('.sidebar .nav-sidebar li a')
 
                 for category in all_categories:
-                    cat = self.make_relative_links_absolute(category.get('href'))
-                    if cat not in categories and self.check_for_top_level_domain(cat) and not self.partial_links_to_ignore(cat) and cat is not None:
-                        categories.append(cat)
+                    if category.get('href') is not None:
+                        cat = self.make_relative_links_absolute(category.get('href'))
+                        if cat not in categories and self.check_for_top_level_domain(cat) and not self.partial_links_to_ignore(cat) and cat is not None:
+                            categories.append(cat)
 
         return categories
         
@@ -78,8 +79,9 @@ class TSCrawler(AbstractBaseCrawler):
             publication_date = soup.select_one('.article-body .article-published').get_text().strip()
             date = datetime.strptime(publication_date, '%d %B %Y - %H:%M')
             try:
-                author = [self.sanitize_author_string(a.strip(' /')) for a in soup.select_one(
-                '.article-body .mobile-display .author-name span').get_text().split(' AND')]
+                author_string = soup.select_one(
+                '.article-body .mobile-display .author-name span').get_text().lower()
+                author = [self.sanitize_author_string(a.strip(' /')) for a in re.split(' AND | and |/ ',author_string)]
             except AttributeError:
                 author = []
 
@@ -92,7 +94,7 @@ class TSCrawler(AbstractBaseCrawler):
                     image_url ='None'
 
             try:
-                summary = re.sub(r'•|\n', '', soup.select_one('.article-intro').get_text()).strip()
+                summary = re.sub(r'•|\n', '', soup.select_one('.article-intro').get_text().strip())
             except AttributeError:
                 summary = ' '
 

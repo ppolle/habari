@@ -29,9 +29,10 @@ class EACrawler(AbstractBaseCrawler):
                 all_categories = soup.select('.menu-vertical a')
 
                 for category in all_categories:
-                    category = self.make_relative_links_absolute(
-                        category.get('href'))
-                    categories.append(category)
+                    if category.get('href') is not None:
+                        category = self.make_relative_links_absolute(
+                            category.get('href'))
+                        categories.append(category)
             else:
                 logger.exception(
                     '{0} error while getting rss links from: {1}'.format(get_categories.status_code, self.url))
@@ -49,7 +50,7 @@ class EACrawler(AbstractBaseCrawler):
                     social_links = soup.select('.social-networks a')
                     for social_link in social_links:
                         link = social_link.get('href')
-                        if link.endswith('.xml'):
+                        if link.endswith('.xml') and link is not None:
                             rss_feeds.append(
                                 self.make_relative_links_absolute(link))
                 else:

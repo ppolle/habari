@@ -40,9 +40,10 @@ class CTCrawler(AbstractBaseCrawler):
                 all_categories = soup.select('.menu-vertical a')
 
                 for category in all_categories:
-                    category = self.make_relative_links_absolute(
-                        category.get('href'))
-                    categories.append(category)
+                    if category.get('href') is not None:
+                        category = self.make_relative_links_absolute(
+                            category.get('href'))
+                        categories.append(category)
             else:
                 logger.exception(
                     '{0} error while getting rss links from: {1}'.format(get_categories.status_code, self.url))
@@ -59,7 +60,7 @@ class CTCrawler(AbstractBaseCrawler):
                     soup = BeautifulSoup(request.content, 'html.parser')
                     social_links = soup.select('.social-networks a')
                     for social_link in social_links:
-                        if social_link.get('href').endswith('.xml'):
+                        if social_link.get('href').endswith('.xml') and social_link.get('href') is not None:
                             link = self.make_relative_links_absolute(social_link.get('href'))
                             if self.partial_links_to_ignore(link): rss_feeds.append(link)
                 else:

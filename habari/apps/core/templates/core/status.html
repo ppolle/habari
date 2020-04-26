@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+
+
+<table class="table table-bordered table-hover">
+	<thead>
+		<tr>
+			<th>News Source</td>
+			<th>Slug</td>
+			<th>Last Crawl</td>
+			<th>Status</td>
+		</tr>
+	</thead>
+	{% for source in sources %}
+	<tbody>
+		<tr>
+			<td>{{source.name}}</td>
+			<td>{{source.slug}}</td>
+			<td>{{source.crawl_set.last.crawl_time|timesince}} ago</td>
+			<td>{{source.crawl_set.last.status.capitalize}}</td>
+		</tr>
+	</tbody>
+	{% endfor %}
+</table>
+
+
+{% endblock %}
