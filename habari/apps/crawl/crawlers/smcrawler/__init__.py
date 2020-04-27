@@ -46,7 +46,7 @@ class SMCrawler(AbstractBaseCrawler):
                         link = article.link.get_text().strip()
                         date = article.pubDate.get_text().strip()
                         try:
-                            publication_date = pytz.timezone("Africa/nairobi").localize(datetime.strptime(date, '%Y-%m-%d %H:%M:%S'), is_dst=None)
+                            publication_date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(date, '%Y-%m-%d %H:%M:%S'), is_dst=None)
                         except ValueError:
                             publication_date = datetime.strptime(date, '%a, %d %b %Y %H:%M:%S %z').astimezone(pytz.timezone("Africa/Nairobi"))
                         try:

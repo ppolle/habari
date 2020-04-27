@@ -88,7 +88,7 @@ class CTCrawler(AbstractBaseCrawler):
                             summary = article.description.get_text().strip()[:3000]
                             link = article.link.get_text().strip()
                             date = article.date.get_text().strip()
-                            publication_date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(date, '%Y-%m-%dT%H:%M:%SZ'), is_dst=None)
+                            publication_date = pytz.timezone("Africa/Dar_es_Salaam").localize(datetime.strptime(date, '%Y-%m-%dT%H:%M:%SZ'), is_dst=None)
 
                             article_details = {
                                 'title': title,
