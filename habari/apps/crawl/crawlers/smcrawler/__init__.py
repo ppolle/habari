@@ -1,3 +1,4 @@
+import pytz
 import logging
 import requests
 from datetime import datetime
@@ -45,11 +46,9 @@ class SMCrawler(AbstractBaseCrawler):
                         link = article.link.get_text().strip()
                         date = article.pubDate.get_text().strip()
                         try:
-                            publication_date = datetime.strptime(
-                            date, '%Y-%m-%d %H:%M:%S')
+                            publication_date = pytz.timezone("Africa/nairobi").localize(datetime.strptime(date, '%Y-%m-%d %H:%M:%S'), is_dst=None)
                         except ValueError:
-                            publication_date = datetime.strptime(
-                                date, '%a, %d %b %Y %H:%M:%S %z')
+                            publication_date = datetime.strptime(date, '%a, %d %b %Y %H:%M:%S %z').astimezone(pytz.timezone("Africa/Nairobi"))
                         try:
                             author = [a.strip().upper() for a in article.author.get_text().split(' and ')]
                         except AttributeError:
