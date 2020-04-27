@@ -5,7 +5,7 @@ class NewsSourceSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = NewsSource
 		fields = ('name',)
-		read_only_fields = ('name')
+		read_only_fields = ('name',)
 
 class ArticleSerializer(serializers.ModelSerializer):
 	news_source = NewsSourceSerializer(many=False)
