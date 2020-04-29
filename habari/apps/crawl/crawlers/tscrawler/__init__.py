@@ -1,4 +1,5 @@
 import re
+import pytz
 import logging
 import requests
 from datetime import datetime
@@ -77,7 +78,7 @@ class TSCrawler(AbstractBaseCrawler):
             soup = BeautifulSoup(story.content, 'lxml')
             title = soup.select_one('.header-primary-title .article-title').get_text().strip()
             publication_date = soup.select_one('.article-body .article-published').get_text().strip()
-            date = datetime.strptime(publication_date, '%d %B %Y - %H:%M')
+            date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%d %B %Y - %H:%M'), is_dst=None)
             try:
                 author_string = soup.select_one(
                 '.article-body .mobile-display .author-name span').get_text().lower()

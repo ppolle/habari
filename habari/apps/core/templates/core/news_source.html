@@ -20,6 +20,10 @@ Top Stories<small>(All Articles From The Last Seven Days)</small>
 	<p>
 	<small><strong>Publication date</strong>: {{article.publication_date}} , <strong>Authors</strong>: {% for author in article.author%}<a href="{% url 'author' source.slug author|author_slug %}">{{author|author_capitalize}}</a>{%if not forloop.last%}, {%endif%}{% empty %}No Author{%endfor%}</small>
 	</p>
+	{%empty%}
+	<p>
+		{{source.name|title}} does not have any news content on {% now "l, jS F Y, H:i:s" %} 
+	</p>
 
 	{% endfor %}
 

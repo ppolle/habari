@@ -1,3 +1,4 @@
+import pytz
 import logging
 import requests
 from datetime import datetime
@@ -78,8 +79,7 @@ class EACrawler(AbstractBaseCrawler):
                             summary = article.description.get_text().strip()[:3000]
                             link = article.link.get_text().strip()
                             date = article.date.get_text().strip()
-                            publication_date = datetime.strptime(
-                                date, '%Y-%m-%dT%H:%M:%SZ')
+                            publication_date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(date, '%Y-%m-%dT%H:%M:%SZ'), is_dst=None)
 
                             article_details = {
                                 'title': title,

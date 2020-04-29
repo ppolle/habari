@@ -17,7 +17,7 @@ def status(request):
 
 def get_source(request, source):
 	source = source.upper()
-	today = timezone.now()
+	today = timezone.localtime(timezone.now())
 	return day(request,source, today.year, today.month,today.day)
 
 def get_author_articles(request, source, author):
