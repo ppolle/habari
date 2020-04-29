@@ -29,6 +29,10 @@ app.conf.beat_schedule = {
     'retry_failed_crawls':{
     'task': 'retry_failed_crawls',
     'schedule': crontab(minute='*/30')
+    },
+    'sanitize_sm_author_field':{
+    'task': 'sanitize_sm_author_lists_with_empty_strings',
+    'schedule': crontab(minute='*/5')
     }
 
 }

@@ -59,3 +59,26 @@ def retry_failed_crawls():
 			crawl_class = crawler_classes.get(source.slug)
 			crawl = crawl_class().run()
 
+@shared_task(name='sanitize_sm_author_lists_with_empty_strings')
+def sanitize_sm_author_lists_with_empty_strings():
+	'''
+	Correct Standard Media author lists that crawl for lists with a empty strings. This causes author url errors on standard media pages
+	'''
+	source = NewsSource.objects.get(slug='SM')
+	articles = Articles.objects.filter(news_source=source, author__contains=[''])
+	for article in articles:
+		request = requests.get(article.article_url)
+		if request.status_code == 200:
+            soup = BeautifulSoup(request.content, 'lxml')
+            try:
+                author = [a.strip().upper() for a in soup.select_one('.article-meta a').get_text().split(' and ') if a is not '']
+            except AttributeError:
+            	author = [a.strip().upper() for a in soup.select('div .io-hidden-author').get_text()]
+            except AttributeError:
+            	author = [a.strip().upper() for a in soup.select_one('.small.text-muted.mb-3 a').get_text().lower().split(' and ')]
+            except AttributeError:
+                        author = []
+        if author == [''] or author == [':']:
+            author = []
+        article.author = author
+        article.save()
