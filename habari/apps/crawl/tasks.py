@@ -4,7 +4,7 @@ from habari.apps.crawl.models import NewsSource, Crawl, Article
 from habari.apps.crawl.crawlers import (smcrawler, tscrawler, dncrawler, dmcrawler,
  eacrawler, bdcrawler, ctcrawler)
 
-@shared_task()
+@shared_task(autoretry_for=(Exception,))
 def frequent_crawlers():
 	crawlers ={
         'DN': dncrawler.DNCrawler,
@@ -16,7 +16,7 @@ def frequent_crawlers():
 		crawler = value()
 		crawl = crawler.run()
 
-@shared_task()
+@shared_task(autoretry_for=(Exception,))
 def non_frequent_crawlers():
 	crawlers = {
 	'EA':eacrawler.EACrawler,
@@ -27,13 +27,13 @@ def non_frequent_crawlers():
 		crawler = value()
 		crawl = crawler.run()
 
-@shared_task()
+@shared_task(autoretry_for=(Exception,))
 def bd_crawler():
 	bd = bdcrawler.BDCrawler
 	crawler = bd()
 	crawl = crawler.run()
 
-@shared_task()
+@shared_task(autoretry_for=(Exception,))
 def retry_failed_crawls():
 	'''
 	Retry crawls that have an error status or stuck in a Crawing status
@@ -59,7 +59,7 @@ def retry_failed_crawls():
 			crawl_class = crawler_classes.get(source.slug)
 			crawl = crawl_class().run()
 
-@shared_task()
+@shared_task(autoretry_for=(Exception,))
 def sanitize_sm_author_lists_with_empty_strings():
 	'''
 	Correct Standard Media author lists that crawl for lists with a empty strings. This causes author url errors on standard media pages
