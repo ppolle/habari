@@ -76,11 +76,13 @@ def sanitize_sm_author_lists_with_empty_strings():
 			try:
 				author = [a.strip().upper() for a in soup.select_one('.article-meta a').get_text().split(' and ') if a is not '']
 			except AttributeError:
-				author = [a.strip().upper() for a in soup.select('div .io-hidden-author').get_text()]
-			except AttributeError:
-				author = [a.strip().upper() for a in soup.select_one('.small.text-muted.mb-3 a').get_text().lower().split(' and ')]
-			except AttributeError:
-				author = []
+				try:
+					author = [a.strip().upper() for a in soup.select('div .io-hidden-author').get_text()]
+				except AttributeError:
+					try:
+						author = [a.strip().upper() for a in soup.select_one('.small.text-muted.mb-3 a').get_text().lower().split(' and ')]
+					except AttributeError:
+						author = []			
 		
 			if author == [''] or author == [':']:
 				author = []
