@@ -67,7 +67,7 @@ class DNCrawler(AbstractBaseCrawler):
                             request = requests.get(link)
                     except Exception as e:
                         logger.exception('Error {} while getting additonal categories from {}'.format(e,cat.get('href')))
-                        self.errors(append(error_to_string(e)))
+                        self.errors.append(error_to_string(e))
                     else:
                         if request.status_code == 200:
                             soup = BeautifulSoup(request.content, 'html.parser')
