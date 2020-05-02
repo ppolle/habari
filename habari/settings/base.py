@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 
 import os
 from decouple import config
+from celery.schedules import crontab
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -136,6 +137,36 @@ STATIC_URL = '/static/'
 
 CELERY_BROKER_URL = 'amqp://localhost'
 CELERY_TIMEZONE = 'Africa/Nairobi'
+CELERY_TASK_DEFAULT_QUEUE = 'default'
+
+#Celery beat schedules
+CELERY_BEAT_SCHEDULE = {
+    'frequent_crawlers': {
+        'task':'habari.apps.crawl.tasks.frequent_crawlers',
+        'schedule':crontab(minute=0,hour='*/4'),
+        'options': {'queue':'crawling_queue'}
+    },
+    'non_frequent_crawlers': {
+        'task':'habari.apps.crawl.tasks.non_frequent_crawlers',
+        'schedule':crontab(minute=0,hour='*/6'),
+        'options': {'queue':'crawling_queue'}
+    },
+    'bd_crawler': {
+        'task':'habari.apps.crawl.tasks.bd_crawler',
+        'schedule':crontab(minute=0,hour='*/5',day_of_week='1-5'),
+        'options': {'queue':'crawling_queue'}
+    },
+    'retry_failed_crawls': {
+        'task': 'habari.apps.crawl.tasks.retry_failed_crawls',
+        'schedule': crontab(minute='*/30'),
+        'options': {'queue':'crawling_queue'}
+    },
+    'sanitize_sm_author_field': {
+        'task': 'habari.apps.crawl.tasks.sanitize_sm_author_lists_with_empty_strings',
+        'schedule': crontab(minute='*/5'),
+        'options': {'queue':'sanitize_sm_authors'}
+    }
+}
 
 # ==============================================================================
 # Logging settings

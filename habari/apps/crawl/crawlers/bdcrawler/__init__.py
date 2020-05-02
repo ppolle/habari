@@ -1,3 +1,4 @@
+import pytz
 import logging
 import requests
 from datetime import datetime
@@ -106,7 +107,7 @@ class BDCrawler(AbstractBaseCrawler):
             title = soup.find(class_='article-title').get_text().strip()
             publication_date = soup.select_one(
                 '.page-box-inner header small.byline').get_text().strip()
-            date = datetime.strptime(publication_date, '%A, %B %d, %Y %H:%M')
+            date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%A, %B %d, %Y %H:%M'), is_dst=None)
             author = [self.sanitize_author_string(a.get_text()) for a in soup.select(
                 ' article.article.article-summary header.article-meta-summary ')]
 

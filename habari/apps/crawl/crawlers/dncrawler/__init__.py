@@ -1,3 +1,4 @@
+import pytz
 import logging
 import requests
 import cssutils
@@ -66,7 +67,7 @@ class DNCrawler(AbstractBaseCrawler):
                             request = requests.get(link)
                     except Exception as e:
                         logger.exception('Error {} while getting additonal categories from {}'.format(e,cat.get('href')))
-                        self.errors(append(error_to_string(e)))
+                        self.errors.append(error_to_string(e))
                     else:
                         if request.status_code == 200:
                             soup = BeautifulSoup(request.content, 'html.parser')
@@ -137,7 +138,7 @@ class DNCrawler(AbstractBaseCrawler):
                      for t in soup.select('.story-view header h2')][0]
             publication_date = [p.get_text().strip()
                                 for p in soup.select('.story-view header h6')][0]
-            date = datetime.strptime(publication_date, '%A %B %d %Y')
+            date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%A %B %d %Y'), is_dst=None)
             author = [self.sanitize_author_string(
                 a.get_text().strip()) for a in soup.select('.story-view .author')]
 
@@ -175,7 +176,7 @@ class DNCrawler(AbstractBaseCrawler):
             soup = BeautifulSoup(story.content, 'html.parser')
             title = soup.select_one('.hero.hero-chart').get_text().strip()
             publication_date = soup.select('date')[0].get_text().strip()
-            date = self.create_datetime_object_from_string(publication_date)
+            date = pytz.timezone("Africa/Nairobi").localize(self.create_datetime_object_from_string(publication_date), is_dst=None)
             author = [self.sanitize_author_string(
                 a.get_text().strip()) for a in soup.select('.byline figcaption h6')]
             try:
@@ -204,7 +205,7 @@ class DNCrawler(AbstractBaseCrawler):
             soup = BeautifulSoup(story.content, 'html.parser')
             title = soup.select_one('.page-title').get_text().strip()
             publication_date = soup.select_one('.date').get_text().strip()
-            date = datetime.strptime(publication_date, '%A %B %d %Y')
+            date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%A %B %d %Y'), is_dst=None)
             author = [self.sanitize_author_string(
                 a.get_text().strip()) for a in soup.select('.article-content h6.name')]
             image = cssutils.parseStyle(soup.select_one('.hero-image').get('style'))['background-image']
