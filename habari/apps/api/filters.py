@@ -3,7 +3,7 @@ from habari.apps.crawl.models import Article
 
 
 class ArticleFilter(filters.FilterSet):
-    source = filters.CharFilter(field_name="news_source__slug", lookup_expr='exact')
+    source = filters.CharFilter(field_name="news_source__slug", lookup_expr='iexact')
     title = filters.CharFilter(field_name="title", lookup_expr='icontains')
 
     class Meta:
