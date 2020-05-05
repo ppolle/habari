@@ -70,15 +70,14 @@ def login(request):
 	if request.method == 'POST':
 		form = UserAuthForm(request.POST)
 		if form.is_valid():
-			email = form.cleaned_data['username']
+			email = form.cleaned_data['email']
 			password = form.cleaned_data['password']
 
 			user = authenticate(request, email=email, password=password)
 			if user is not None:
 				user_login(request, user)
 				messages.success(request, f'Welcome back {request.user.first_name} {request.user.last_name}!')
-				return redirect('index')
-
+				return redirect('profile')
 			else:
 				messages.error(
 	                request, 'wrong username or password combination. try again!')
@@ -88,3 +87,23 @@ def login(request):
 		form = UserAuthForm()
 
 	return render(request, 'auth/login.html', {"form": form})
+
+def register(request):
+	'''
+	Create a new user
+	'''
+	from .forms import RegisterUserForm
+	if request.method == 'POST':
+		form = RegisterUserForm(request.POST)
+		if form.is_valid():
+			form.save()
+			email = form.cleaned_data['email']
+			password = form.cleaned_data['password1']
+
+			user  = authenticate(request, email=email, password=password)
+			if user is not None:
+				user_login(request, user)
+				return redirect('profile')
+	else:
+		form = RegisterUserForm()
+	return render(request, 'auth/register.html', {'form':form})

@@ -5,7 +5,7 @@
 	Use the form to Login<br>
     <div class="panel panel-default">
 	<div class="panel-body">
-		<form method="post" action="{% url 'auth' %}" >
+		<form method="post" action="{% url 'login' %}" >
 		    {% csrf_token %}
 		    {% for field in  form %}
 		      <p>
