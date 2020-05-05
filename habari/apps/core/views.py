@@ -107,3 +107,14 @@ def register(request):
 	else:
 		form = RegisterUserForm()
 	return render(request, 'auth/register.html', {'form':form})
+
+def profile(request):
+	'''
+	View an authenticated user's profile
+	'''
+	from rest_framework.authtoken.models import Token
+	try:
+		obj = Token.objects.get(user=request.user)
+	except Token.DoesNotExist:
+		obj = Token.objects.create(user=request.user)
+	return render(request, 'core/profile.html', {})

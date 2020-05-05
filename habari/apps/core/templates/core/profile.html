@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row">
+	
+	<div class="col-md-7">
+		<p><strong>Profile Info</strong></p>
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<P>
+				Full Name: <strong>{{obj.user.first_name.capitalize}}
+						   {{obj.user.last_name.capitalize}}
+						   </strong>
+				</P>
+				<p>
+					<div class="input-group">
+					  <span class="input-group-addon">API key</span>
+				      <input class="form-control" id="disabledInput" type="text" placeholder="{{obj.key}}" disabled>
+				      <span class="input-group-btn">
+				        <button class="btn btn-default" type="button" data-clipboard-text="{{obj.key}}">Copy!</button>
+				      </span>
+				    </div>
+					
+				</p>
+				<a href="" class="btn btn-sm btn-primary">Regenerate Auth Key</a>
+
+			</div>
+		</div>
+	</div>
+	<div class="col-md-5"></div>
+</div>
+<div class="row">
+	
+
+</div>
+		
+
+
+
+
+{% endblock %}
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js"></script>
+<script type="text/javascript">
+	new ClipboardJS('.btn');
+</script>
+{% endblock %}
