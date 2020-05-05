@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from django.shortcuts import render, get_object_or_404
 from habari.apps.crawl.models import Article, NewsSource
 from django.contrib.auth import authenticate, login as user_login
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 # Create your views here.
@@ -108,6 +109,7 @@ def register(request):
 		form = RegisterUserForm()
 	return render(request, 'auth/register.html', {'form':form})
 
+@login_required
 def profile(request):
 	'''
 	View an authenticated user's profile
@@ -117,4 +119,4 @@ def profile(request):
 		obj = Token.objects.get(user=request.user)
 	except Token.DoesNotExist:
 		obj = Token.objects.create(user=request.user)
-	return render(request, 'core/profile.html', {})
+	return render(request, 'core/profile.html', {'obj':obj})

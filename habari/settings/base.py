@@ -33,6 +33,7 @@ INSTALLED_APPS = [
 
     #Third party Apps
     'rest_framework',
+    'rest_framework.authtoken',
     'django_filters',
     'bootstrap3',
     #habari apps
