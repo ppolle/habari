@@ -3,6 +3,7 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from django.shortcuts import render, get_object_or_404
 from habari.apps.crawl.models import Article, NewsSource
+from django.contrib.auth import authenticate, login as user_login
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 # Create your views here.
@@ -60,3 +61,30 @@ def day(request, source, year, month, day):
 		articles = paginator.page(paginator.num_pages)
 	
 	return render(request, 'core/news_source.html', {'articles':articles,'source':source})
+
+def login(request):
+	'''
+	Functionality to login a user 
+	'''
+	from .forms import UserAuthForm
+	if request.method == 'POST':
+		form = UserAuthForm(request.POST)
+		if form.is_valid():
+			email = form.cleaned_data['username']
+			password = form.cleaned_data['password']
+
+			user = authenticate(request, email=email, password=password)
+			if user is not None:
+				user_login(request, user)
+				messages.success(request, f'Welcome back {request.user.first_name} {request.user.last_name}!')
+				return redirect('index')
+
+			else:
+				messages.error(
+	                request, 'wrong username or password combination. try again!')
+				return redirect(request.META.get('HTTP_REFERER'))
+
+	else:
+		form = UserAuthForm()
+
+	return render(request, 'auth/login.html', {"form": form})

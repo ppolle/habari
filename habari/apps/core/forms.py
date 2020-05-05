@@ -29,9 +29,9 @@ class UserAuthForm(forms.Form):
 	'''
 	username = forms.CharField(max_length=254, help_text='Required. Valid Username.',
 		widget=forms.TextInput(attrs={'autofocus': 'autofocus', 'class': 'form-control'}))
-	password1 = forms.CharField(label="Password", max_length=300, required=True,
+	password = forms.CharField(label="Password", max_length=300, required=True,
 		widget=forms.PasswordInput(attrs={'autofocus': 'autofocus', 'class': 'form-control'}))
 	
 	class Meta:
 		model = User
-		fields =('username', 'password1')
+		fields =('username', 'password')
