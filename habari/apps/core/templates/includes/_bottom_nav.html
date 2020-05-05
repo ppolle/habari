@@ -5,11 +5,11 @@
   <li class="active"><a href="{% url 'index' %}">Front Page</a></li>
   {% endif %}
   {% for source in news_sources %}
-	  {% with source.slug as slug %}
+	  {% with "/"|add:source.slug|add:"/" as slug %}
 		  {% if request.path == slug %}
-		  <li>Noma</li>
+		  <li>{{source.name|title}}</li>
 		  {%else%}
-		  <li><a href="{% url 'sources' slug %}">{{source.name|title}}</a></li>
+		  <li><a href="{% url 'sources' source.slug %}">{{source.name|title}}</a></li>
 		  {%endif%}
 	  {% endwith %}
   {% endfor %}
