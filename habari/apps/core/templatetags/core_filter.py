@@ -13,3 +13,10 @@ def author_capitalize(value):
 	val = value.strip().lower()
 	return " ".join(s.upper() if s in cap_list else s.title() for s in val.split())
 
+@register.filter
+def startswith(value, starts):
+	starts = '/{}/'.format(starts)
+	if value.startswith(starts):
+		return True
+	return False
+

@@ -1,3 +1,4 @@
+{% load core_filter %}
 <ol class="breadcrumb">
   {% if request.path == '/' %}
   <li>Front Page</li>
@@ -5,8 +6,8 @@
   <li class="active"><a href="{% url 'index' %}">Front Page</a></li>
   {% endif %}
   {% for source in news_sources %}
-	  {% with "/"|add:source.slug|add:"/" as slug %}
-		  {% if request.path == slug %}
+	  {% with source.slug as slug %}
+		  {% if request.path|startswith:slug %}
 		  <li>{{source.name|title}}</li>
 		  {%else%}
 		  <li><a href="{% url 'sources' source.slug %}">{{source.name|title}}</a></li>
