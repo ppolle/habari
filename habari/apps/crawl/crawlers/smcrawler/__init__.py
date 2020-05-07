@@ -1,3 +1,4 @@
+import re
 import pytz
 import logging
 import requests
@@ -79,42 +80,50 @@ class SMCrawler(AbstractBaseCrawler):
 
         if request.status_code == 200:
             soup = BeautifulSoup(request.content, 'lxml')
-            
-            if article['title'] == '':
-                try:
-                    title = soup.select_one('.article-title').get_text().strip()
-                except AttributeError:
-                    title = soup.select_one('h1.mb-4').get_text().strip()
-                article['title'] = title
+            if soup.find(string=re.compile('Log in for free access to most premium news and information')):
+                if article['title'] == '':
+                    article['title'] = 'Title Not Available'
 
-            if  len(article['author']) == 0:
-                try:
-                    author = [a.strip().upper() for a in soup.select_one('.article-meta a').get_text().split(' and ')]
-                except AttributeError:
+                if len(article['author']) == 0:
+                    article['author'] = []
+
+                article['article_image_url'] = 'None'
+            else:
+                if article['title'] == '':
                     try:
-                        author = [soup.select_one('div .io-hidden-author').get_text().strip().upper()]
+                        title = soup.select_one('.article-title').get_text().strip()
+                    except AttributeError:
+                        title = soup.select_one('h1.mb-4').get_text().strip()
+                    article['title'] = title
+
+                if  len(article['author']) == 0:
+                    try:
+                        author = [a.strip().upper() for a in soup.select_one('.article-meta a').get_text().split(' and ')]
                     except AttributeError:
                         try:
-                            author = [a.strip().upper() for a in soup.select_one('.small.text-muted.mb-3 a').get_text().split('and')]
+                            author = [soup.select_one('div .io-hidden-author').get_text().strip().upper()]
                         except AttributeError:
-                            author = []
-                if author == [''] or author == [':']:
-                    author = []
+                            try:
+                                author = [a.strip().upper() for a in soup.select_one('.small.text-muted.mb-3 a').get_text().split('and')]
+                            except AttributeError:
+                                author = []
+                    if author == [''] or author == [':']:
+                        author = []
 
-                article['author'] = author
-            
-            try:
-                article_image_url = self.make_relative_links_absolute(soup.select_one('.article-body img').get('src'))
-            except AttributeError:
+                    article['author'] = author
+                
                 try:
-                    article_image_url = self.make_relative_links_absolute(soup.select_one('figure img').get('src'))
+                    article_image_url = self.make_relative_links_absolute(soup.select_one('.article-body img').get('src'))
                 except AttributeError:
                     try:
-                        article_image_url = soup.select_one('iframe').get('src') 
+                        article_image_url = self.make_relative_links_absolute(soup.select_one('figure img').get('src'))
                     except AttributeError:
-                        article_image_url = 'None'
+                        try:
+                            article_image_url = soup.select_one('iframe').get('src') 
+                        except AttributeError:
+                            article_image_url = 'None'
 
-            article['article_image_url'] = article_image_url
+                article['article_image_url'] = article_image_url
         else:
             logger.exception('{} Error while updating article details for {}'.format(request.status_code, article['article_url']))
             self.errors.append(http_error_to_string(request.status_code,article['article_url']))

@@ -3,6 +3,8 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from django.shortcuts import render, get_object_or_404
 from habari.apps.crawl.models import Article, NewsSource
+from django.contrib.auth import authenticate, login as user_login
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 # Create your views here.
@@ -60,3 +62,61 @@ def day(request, source, year, month, day):
 		articles = paginator.page(paginator.num_pages)
 	
 	return render(request, 'core/news_source.html', {'articles':articles,'source':source})
+
+def login(request):
+	'''
+	Functionality to login a user 
+	'''
+	from .forms import UserAuthForm
+	if request.method == 'POST':
+		form = UserAuthForm(request.POST)
+		if form.is_valid():
+			email = form.cleaned_data['email']
+			password = form.cleaned_data['password']
+
+			user = authenticate(request, email=email, password=password)
+			if user is not None:
+				user_login(request, user)
+				messages.success(request, f'Welcome back {request.user.first_name} {request.user.last_name}!')
+				return redirect('profile')
+			else:
+				messages.error(
+	                request, 'wrong username or password combination. try again!')
+				return redirect(request.META.get('HTTP_REFERER'))
+
+	else:
+		form = UserAuthForm()
+
+	return render(request, 'auth/login.html', {"form": form})
+
+def register(request):
+	'''
+	Create a new user
+	'''
+	from .forms import RegisterUserForm
+	if request.method == 'POST':
+		form = RegisterUserForm(request.POST)
+		if form.is_valid():
+			form.save()
+			email = form.cleaned_data['email']
+			password = form.cleaned_data['password1']
+
+			user  = authenticate(request, email=email, password=password)
+			if user is not None:
+				user_login(request, user)
+				return redirect('profile')
+	else:
+		form = RegisterUserForm()
+	return render(request, 'auth/register.html', {'form':form})
+
+@login_required
+def profile(request):
+	'''
+	View an authenticated user's profile
+	'''
+	from rest_framework.authtoken.models import Token
+	try:
+		obj = Token.objects.get(user=request.user)
+	except Token.DoesNotExist:
+		obj = Token.objects.create(user=request.user)
+	return render(request, 'core/profile.html', {'obj':obj})

@@ -32,8 +32,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     #Third party Apps
+    'rest_framework',
+    'rest_framework.authtoken',
+    'django_filters',
     'bootstrap3',
     #habari apps
+    'habari.apps.api',
     'habari.apps.crawl',
     'habari.apps.core',
 ]
@@ -48,6 +52,12 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
+}
 
 ROOT_URLCONF = 'habari.urls'
 
@@ -198,3 +208,9 @@ LOGGING = {
         }
     }
 }
+
+# ==============================================================================
+# Reference to AbstractUser model in core app
+# ==============================================================================
+
+AUTH_USER_MODEL = 'core.User'
