@@ -1,3 +1,4 @@
+import re
 import pytz
 import logging
 import requests
@@ -114,8 +115,9 @@ class DMCrawler(AbstractBaseCrawler):
                     image_url = 'None'
 
             try:
-                author = [self.sanitize_author_string(
-                    a.get_text()) for a in soup.select('.story-view .author')]
+                author = []
+                for a in soup.select('.story-view .author'):
+                    [author.append(self.sanitize_author_string(x)) for x in map(lambda x:x.strip().upper(), re.split('& | and |, ', a.get_text().lower()))]
             except AttributeError:
                 author = []
 
