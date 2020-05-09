@@ -1,3 +1,4 @@
+import re
 import pytz
 import logging
 import requests
@@ -115,7 +116,7 @@ class DMCrawler(AbstractBaseCrawler):
 
             try:
                 author = [self.sanitize_author_string(
-                    a.get_text()) for a in soup.select('.story-view .author')]
+                    a) for a in re.split(' & |, | and ', soup.select_one('.story-view .author').lower())]
             except AttributeError:
                 author = []
 
