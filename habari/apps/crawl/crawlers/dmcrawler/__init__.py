@@ -115,8 +115,9 @@ class DMCrawler(AbstractBaseCrawler):
                     image_url = 'None'
 
             try:
-                author = [self.sanitize_author_string(
-                    a) for a in re.split(' & |, | and ', soup.select_one('.story-view .author').lower())]
+                author = []
+                for a in soup.select('.story-view .author'):
+                    [author.append(self.sanitize_author_string(x)) for x in map(lambda x:x.strip().upper(), re.split('& | and |, ', a.get_text().lower()))]
             except AttributeError:
                 author = []
 
