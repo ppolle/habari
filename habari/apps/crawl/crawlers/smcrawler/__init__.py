@@ -93,7 +93,11 @@ class SMCrawler(AbstractBaseCrawler):
                     try:
                         title = soup.select_one('.article-title').get_text().strip()
                     except AttributeError:
-                        title = soup.select_one('h1.mb-4').get_text().strip()
+                        try: 
+                            title = soup.select_one('h1.mb-4').get_text().strip()
+                        except AttributeError:
+                            title = soup.select_one('.articleheading').get_text().strip()
+
                     article['title'] = title
 
                 if  len(article['author']) == 0:
