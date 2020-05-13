@@ -4,7 +4,7 @@ from django.contrib import messages
 from habari.apps.crawl.models import Article, NewsSource
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth import authenticate, login as user_login
+from django.contrib.auth import logout as user_logout, authenticate, login as user_login
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 # Create your views here.
@@ -121,3 +121,11 @@ def profile(request):
 	except Token.DoesNotExist:
 		obj = Token.objects.create(user=request.user)
 	return render(request, 'core/profile.html', {'obj':obj})
+
+@login_required
+def logout(request):
+	'''
+	View to log a user out
+	'''
+	user_logout(request)
+	return redirect('index')
