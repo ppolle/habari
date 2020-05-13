@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django_filters',
     'bootstrap3',
     #habari apps
+    'habari.apps.accounts',
     'habari.apps.api',
     'habari.apps.crawl',
     'habari.apps.core',
