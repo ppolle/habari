@@ -129,3 +129,14 @@ def logout(request):
 	'''
 	user_logout(request)
 	return redirect('index')
+
+@login_required
+def regenerate_token(request):
+	'''
+	View to regenerate a token
+	'''
+	user = request.user
+	user.regenerate_api_token()
+	messages.success(request, 'Api key has been regenerated.')
+
+	return redirect('profile')
