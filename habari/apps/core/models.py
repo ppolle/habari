@@ -52,6 +52,7 @@ class User(AbstractUser):
 
 	objects = CustomBaseUserManager()
 
+	@property
 	def regenerate_api_token(self):
 		from rest_framework.authtoken.models import Token
 		try:
@@ -60,6 +61,10 @@ class User(AbstractUser):
 		except Token.DoesNotExist:
 			pass
 		Token.objects.create(user=self)
+
+	@property
+	def get_full_name(self):
+		return '{0} {1}'.format(self.first_name, self.last_name)
 
 
 

@@ -7,9 +7,7 @@
 		<div class="panel panel-default">
 			<div class="panel-body">
 				<P>
-				Full Name: <strong>{{obj.user.first_name.capitalize}}
-						   {{obj.user.last_name.capitalize}}
-						   </strong>
+				Full Name: <strong>{{obj.user.get_full_name|title}}</strong>
 				</P>
 				<p>
 					<div class="input-group">

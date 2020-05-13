@@ -136,7 +136,7 @@ def regenerate_token(request):
 	View to regenerate a token
 	'''
 	user = request.user
-	user.regenerate_api_token()
+	user.regenerate_api_token
 	messages.success(request, 'Api key has been regenerated.')
 
 	return redirect('profile')
