@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'django_filters',
     'bootstrap3',
+    'drf_yasg',
     #habari apps
     'habari.apps.accounts',
     'habari.apps.api',
@@ -240,3 +241,16 @@ LOGGING = {
 # ==============================================================================
 
 AUTH_USER_MODEL = 'core.User'
+
+# ==============================================================================
+# Swagger Settings
+# ==============================================================================
+SWAGGER_SETTINGS = {
+   'SECURITY_DEFINITIONS': {
+      'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+      }
+   }
+}
