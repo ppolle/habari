@@ -12,9 +12,3 @@ app.autodiscover_tasks()
 def debug_task(self):
     print('Request: {0!r}'.format(self.request))
 
-app.conf.beat_schedule = {
-    'crawl-dn-articles': {  #name of the scheduler
-        'task': 'dn_crawler',  # task name which we have created in tasks.py
-        'schedule': 300.0,   # set the period of running
-    }
-}

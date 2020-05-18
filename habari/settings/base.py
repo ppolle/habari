@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 
 import os
 from decouple import config
+from celery.schedules import crontab
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -31,20 +32,59 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     #Third party Apps
+    'rest_framework',
+    'rest_framework.authtoken',
+    'django_filters',
+    'bootstrap3',
+    'drf_yasg',
     #habari apps
+    'habari.apps.accounts',
+    'habari.apps.api',
     'habari.apps.crawl',
+    'habari.apps.core',
 ]
 
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+REST_FRAMEWORK = {
+
+    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.URLPathVersioning',
+
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
+
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    ),
+
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '5/day',
+        'user': '2/hour'
+    }
+
+}
 
 ROOT_URLCONF = 'habari.urls'
 
@@ -59,6 +99,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'habari.apps.core.context_processors.get_source_names',
             ],
         },
     },
@@ -124,6 +165,36 @@ STATIC_URL = '/static/'
 
 CELERY_BROKER_URL = 'amqp://localhost'
 CELERY_TIMEZONE = 'Africa/Nairobi'
+CELERY_TASK_DEFAULT_QUEUE = 'default'
+
+#Celery beat schedules
+CELERY_BEAT_SCHEDULE = {
+    'frequent_crawlers': {
+        'task':'habari.apps.crawl.tasks.frequent_crawlers',
+        'schedule':crontab(minute=0,hour='*/4'),
+        'options': {'queue':'crawling_queue'}
+    },
+    'non_frequent_crawlers': {
+        'task':'habari.apps.crawl.tasks.non_frequent_crawlers',
+        'schedule':crontab(minute=0,hour='*/6'),
+        'options': {'queue':'crawling_queue'}
+    },
+    'bd_crawler': {
+        'task':'habari.apps.crawl.tasks.bd_crawler',
+        'schedule':crontab(minute=0,hour='*/5',day_of_week='1-5'),
+        'options': {'queue':'crawling_queue'}
+    },
+    'retry_failed_crawls': {
+        'task': 'habari.apps.crawl.tasks.retry_failed_crawls',
+        'schedule': crontab(minute='*/30'),
+        'options': {'queue':'crawling_queue'}
+    },
+    'sanitize_sm_author_field': {
+        'task': 'habari.apps.crawl.tasks.sanitize_sm_author_lists_with_empty_strings',
+        'schedule': crontab(minute='*/5'),
+        'options': {'queue':'sanitize_sm_authors'}
+    }
+}
 
 # ==============================================================================
 # Logging settings
@@ -163,4 +234,23 @@ LOGGING = {
             'level': 'INFO',
         }
     }
+}
+
+# ==============================================================================
+# Reference to AbstractUser model in core app
+# ==============================================================================
+
+AUTH_USER_MODEL = 'core.User'
+
+# ==============================================================================
+# Swagger Settings
+# ==============================================================================
+SWAGGER_SETTINGS = {
+   'SECURITY_DEFINITIONS': {
+      'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+      }
+   }
 }

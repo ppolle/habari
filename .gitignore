@@ -7,8 +7,11 @@ __pycache__/
 
 #Log files
 *.log
+*.log.*
 
  #unit test / coverage reports
 .coverage
 .coverage.*
 htmlcov/
+
+celerybeat-schedule
