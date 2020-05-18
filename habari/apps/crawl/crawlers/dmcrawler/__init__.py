@@ -90,8 +90,8 @@ class DMCrawler(AbstractBaseCrawler):
                             stories.append(article_details)
                 else:
                     logger.exception(
-                    '{0} error while getting rss details from: {1}'.format(get_categories.status_code, rss))
-                    self.errors.append(http_error_to_string(get_categories.status_code,rss))
+                    '{0} error while getting rss details from: {1}'.format(request.status_code, rss))
+                    self.errors.append(http_error_to_string(request.status_code,rss))
 
             except Exception as e:
                 logger.exception(

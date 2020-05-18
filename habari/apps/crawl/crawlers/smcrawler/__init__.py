@@ -51,7 +51,7 @@ class SMCrawler(AbstractBaseCrawler):
                         except ValueError:
                             publication_date = datetime.strptime(date, '%a, %d %b %Y %H:%M:%S %z').astimezone(pytz.timezone("Africa/Nairobi"))
                         try:
-                            author = [a.strip().upper() for a in article.author.get_text().split(' and ')]
+                            author = [a.strip().upper() for a in re.split(' and |, |&',article.author.get_text().lower())]
                         except AttributeError:
                             author = []
 
@@ -102,13 +102,13 @@ class SMCrawler(AbstractBaseCrawler):
 
                 if  len(article['author']) == 0:
                     try:
-                        author = [a.strip().upper() for a in soup.select_one('.article-meta a').get_text().lower().split(' and ')]
+                        author = [a.strip().upper() for a in re.split('&| and |, ',soup.select_one('.article-meta a').get_text().lower())]
                     except AttributeError:
                         try:
                             author = [soup.select_one('div .io-hidden-author').get_text().strip().upper()]
                         except AttributeError:
                             try:
-                                author = [a.strip().upper() for a in soup.select_one('.small.text-muted.mb-3 a').get_text().lower().split('and')]
+                                author = [a.strip().upper() for a in re.split('&| and |, ', soup.select_one('.small.text-muted.mb-3 a').get_text().lower())]
                             except AttributeError:
                                 author = []
                     if author == [''] or author == [':']:
