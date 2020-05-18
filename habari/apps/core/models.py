@@ -52,6 +52,22 @@ class User(AbstractUser):
 
 	objects = CustomBaseUserManager()
 
+	@property
+	def regenerate_api_token(self):
+		from rest_framework.authtoken.models import Token
+		try:
+			token = Token.objects.get(user=self)
+			token.delete()
+		except Token.DoesNotExist:
+			pass
+		Token.objects.create(user=self)
+
+	@property
+	def get_full_name(self):
+		return '{0} {1}'.format(self.first_name, self.last_name)
+
+
+
 @receiver(post_save, sender=User)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:

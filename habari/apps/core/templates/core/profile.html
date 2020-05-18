@@ -7,9 +7,7 @@
 		<div class="panel panel-default">
 			<div class="panel-body">
 				<P>
-				Full Name: <strong>{{obj.user.first_name.capitalize}}
-						   {{obj.user.last_name.capitalize}}
-						   </strong>
+				Full Name: <strong>{{obj.user.get_full_name|title}}</strong>
 				</P>
 				<p>
 					<div class="input-group">
@@ -21,7 +19,7 @@
 				    </div>
 					
 				</p>
-				<a href="" class="btn btn-sm btn-primary">Regenerate Auth Key</a>
+				<a href="{% url 'regenerate_token' %}" class="btn btn-sm btn-primary">Regenerate Auth Key</a>
 
 			</div>
 		</div>

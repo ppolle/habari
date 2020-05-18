@@ -1,10 +1,10 @@
-from itertools import groupby
+from datetime import datetime
 from django.utils import timezone
-from datetime import datetime, timedelta
-from django.shortcuts import render, get_object_or_404
+from django.contrib import messages
 from habari.apps.crawl.models import Article, NewsSource
-from django.contrib.auth import authenticate, login as user_login
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth import logout as user_logout, authenticate, login as user_login
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 # Create your views here.
@@ -81,7 +81,7 @@ def login(request):
 				return redirect('profile')
 			else:
 				messages.error(
-	                request, 'wrong username or password combination. try again!')
+	                request, 'Wrong username and password combination. Please Try Again!')
 				return redirect(request.META.get('HTTP_REFERER'))
 
 	else:
@@ -104,6 +104,7 @@ def register(request):
 			user  = authenticate(request, email=email, password=password)
 			if user is not None:
 				user_login(request, user)
+				messages.success(request, f'Hey there {request.user.first_name} {request.user.last_name}, your new account has been created!')
 				return redirect('profile')
 	else:
 		form = RegisterUserForm()
@@ -120,3 +121,22 @@ def profile(request):
 	except Token.DoesNotExist:
 		obj = Token.objects.create(user=request.user)
 	return render(request, 'core/profile.html', {'obj':obj})
+
+@login_required
+def logout(request):
+	'''
+	View to log a user out
+	'''
+	user_logout(request)
+	return redirect('index')
+
+@login_required
+def regenerate_token(request):
+	'''
+	View to regenerate a token
+	'''
+	user = request.user
+	user.regenerate_api_token
+	messages.success(request, 'Api key has been regenerated.')
+
+	return redirect('profile')
