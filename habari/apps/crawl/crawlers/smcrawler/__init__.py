@@ -42,8 +42,8 @@ class SMCrawler(AbstractBaseCrawler):
                     articles = soup.find_all('item')
 
                     for article in articles:
-                        title = article.title.get_text().strip()
-                        summary = article.description.get_text().strip()[:3000]
+                        title = self.printable_text(article.title.get_text().strip())
+                        summary = self.printable_text(article.description.get_text().strip()[:3000])
                         link = article.link.get_text().strip()
                         date = article.pubDate.get_text().strip()
                         try:
@@ -51,7 +51,7 @@ class SMCrawler(AbstractBaseCrawler):
                         except ValueError:
                             publication_date = datetime.strptime(date, '%a, %d %b %Y %H:%M:%S %z').astimezone(pytz.timezone("Africa/Nairobi"))
                         try:
-                            author = [a.strip().upper() for a in re.split(' and |, |&',article.author.get_text().lower())]
+                            author = [self.printable_text(a.strip().upper()) for a in re.split(' and |, |&',article.author.get_text().lower())]
                         except AttributeError:
                             author = []
 
@@ -96,13 +96,19 @@ class SMCrawler(AbstractBaseCrawler):
                         try: 
                             title = soup.select_one('h1.mb-4').get_text().strip()
                         except AttributeError:
-                            title = soup.select_one('.articleheading').get_text().strip()
+                            try:
+                                title = soup.select_one('.articleheading').get_text().strip()
+                            except AttributeError:
+                                try:
+                                    title = soup.select_one('.header h2').get_text().strip()
+                                except Exception as e:
+                                    title = re.sub('-',' ',article.article_url.split('/')[-1])
 
-                    article['title'] = title
+                    article['title'] = self.printable_text(title)
 
                 if  len(article['author']) == 0:
                     try:
-                        author = [a.strip().upper() for a in re.split('&| and |, ',soup.select_one('.article-meta a').get_text().lower())]
+                        author = [self.printable_text(a.strip().upper()) for a in re.split('&| and |, ',soup.select_one('.article-meta a').get_text().lower())]
                     except AttributeError:
                         try:
                             author = [soup.select_one('div .io-hidden-author').get_text().strip().upper()]
