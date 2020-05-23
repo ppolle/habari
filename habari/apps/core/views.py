@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 from django.utils import timezone
 from django.contrib import messages
@@ -26,7 +27,6 @@ def get_author_articles(request, source, author):
 	'''
 	Get articles belonging to a particular author
 	'''
-	import re
 	source = source.upper()
 	author_string = re.sub(r'-',' ',author).upper()  
 	news_source = get_object_or_404(NewsSource, slug__iexact=source)
