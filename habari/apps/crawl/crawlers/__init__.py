@@ -80,5 +80,9 @@ class AbstractBaseCrawler:
         return new_author
 
     def printable_text(self, text):
-        return "".join(filter(lambda x: x in set(string.printable), text))
+        if re.search('^[-\w]+$', text):
+            new_text = text.replace('-',' ')
+        else:
+            new_text = text
+        return "".join(filter(lambda x: x in set(string.printable), new_text))
 
