@@ -111,7 +111,7 @@ class SMCrawler(AbstractBaseCrawler):
                         author = [self.printable_text(a.strip().upper()) for a in re.split('&| and |, ',soup.select_one('.article-meta a').get_text().lower())]
                     except AttributeError:
                         try:
-                            author = [soup.select_one('div .io-hidden-author').get_text().strip().upper()]
+                            author = [a.strip().upper() for a in re.split('&| and |, ', soup.select_one('div .io-hidden-author').get_text().strip().lower())]
                         except AttributeError:
                             try:
                                 author = [a.strip().upper() for a in re.split('&| and |, ', soup.select_one('.small.text-muted.mb-3 a').get_text().lower())]
