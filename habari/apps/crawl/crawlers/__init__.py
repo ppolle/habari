@@ -1,4 +1,5 @@
 import re
+import string
 import logging
 import tldextract
 from datetime import datetime, timedelta
@@ -77,4 +78,8 @@ class AbstractBaseCrawler:
         new_author = re.sub(
             r'\w*@.*|(\w+[.|\w])*@(\w+[.])*\w+|more by this author|By|BY |by|\n', '', author.lower()).strip().upper()
         return new_author
+
+    def printable_text(self, text):
+        '''Make sure only printable characters are displayed'''
+        return "".join(filter(lambda x: x in set(string.printable), text.replace('-',' ')))
 

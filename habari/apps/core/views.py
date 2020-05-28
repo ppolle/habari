@@ -1,6 +1,7 @@
 from datetime import datetime
 from django.utils import timezone
 from django.contrib import messages
+from habari.apps.utils.string_utils import unslugify_text
 from habari.apps.crawl.models import Article, NewsSource
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
@@ -26,9 +27,8 @@ def get_author_articles(request, source, author):
 	'''
 	Get articles belonging to a particular author
 	'''
-	import re
 	source = source.upper()
-	author_string = re.sub(r'-',' ',author).upper()  
+	author_string = unslugify_text(author).upper() 
 	news_source = get_object_or_404(NewsSource, slug__iexact=source)
 	article_list = Article.objects.filter(news_source=news_source, author__contains=[author_string]).order_by('-publication_date', '-timestamp')
 
