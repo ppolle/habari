@@ -1,6 +1,6 @@
 amqp==2.5.2
 anyjson==0.3.3
-asgiref==3.2.7
+asgiref==3.2.3
 beautifulsoup4==4.7.1
 billiard==3.6.3.0
 celery==4.4.2
