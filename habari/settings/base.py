@@ -164,7 +164,7 @@ STATIC_URL = '/static/'
 # Celery Project Settings settings
 # ==============================================================================
 
-CELERY_BROKER_URL = 'amqp://localhost'
+CELERY_BROKER_URL = config('CELERY_BROKER_URL')
 CELERY_TIMEZONE = 'Africa/Nairobi'
 CELERY_TASK_DEFAULT_QUEUE = 'default'
 
