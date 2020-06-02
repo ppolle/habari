@@ -142,7 +142,7 @@ class DNCrawler(AbstractBaseCrawler):
                                 for p in soup.select('header h6')][0]
             date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%A %B %d %Y'), is_dst=None)
             author = [self.sanitize_author_string(
-                a.get_text().strip()) for a in soup.select('.story-view .author')]
+                a.get_text().strip()) for a in soup.select('section.author strong')]
 
             try:
                 image_url = self.make_relative_links_absolute(
