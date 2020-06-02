@@ -135,8 +135,7 @@ class DNCrawler(AbstractBaseCrawler):
         if story.status_code == 200:
             soup = BeautifulSoup(story.content, 'html.parser')
             try:
-                title = [t.strip()
-                     for t in soup.select_one('header h2')]
+                title = soup.select_one('header h2').get_text().strip()
             except TypeError:
                 title = soup.find("h3",  itemprop="name").get_text()
             publication_date = [p.get_text().strip()
