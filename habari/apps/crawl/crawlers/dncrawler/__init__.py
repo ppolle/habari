@@ -134,17 +134,17 @@ class DNCrawler(AbstractBaseCrawler):
 
         if story.status_code == 200:
             soup = BeautifulSoup(story.content, 'html.parser')
-            title = [t.get_text().strip()
-                     for t in soup.select('.story-view header h2')][0]
+            title = [t.strip()
+                     for t in soup.select_one('header h2')]
             publication_date = [p.get_text().strip()
-                                for p in soup.select('.story-view header h6')][0]
+                                for p in soup.select('header h6')][0]
             date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%A %B %d %Y'), is_dst=None)
             author = [self.sanitize_author_string(
                 a.get_text().strip()) for a in soup.select('.story-view .author')]
 
             try:
                 image_url = self.make_relative_links_absolute(
-                    soup.select_one('.story-view header img').get('src'))
+                    soup.find("meta",  property="og:image").get('content'))
             except AttributeError:
                 try:
                     image_url = soup.select_one(
@@ -155,7 +155,7 @@ class DNCrawler(AbstractBaseCrawler):
             try:
                 summary = soup.select_one('.summary div ul').get_text().strip()[:3000]
             except AttributeError:
-                summary = ' '
+                summary = soup.find("meta",  property="og:description").get('content')
 
         else:
             logger.exception('Failed to get {} details.'.format(link))
@@ -227,7 +227,7 @@ class DNCrawler(AbstractBaseCrawler):
         article_info = []
         startswith_newsplex = ('https://www.nation.co.ke/health',
           'https://www.nation.co.ke/newsplex',
-          'https://www.nation.co.ke/brandbook',
+          'https://www.nation.co.ke/dailynation/brandbook',
           'https://www.nation.co.ke/gender',
           )
 
