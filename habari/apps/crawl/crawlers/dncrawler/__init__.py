@@ -134,8 +134,11 @@ class DNCrawler(AbstractBaseCrawler):
 
         if story.status_code == 200:
             soup = BeautifulSoup(story.content, 'html.parser')
-            title = [t.strip()
+            try:
+                title = [t.strip()
                      for t in soup.select_one('header h2')]
+            except TypeError:
+                title = soup.find("h3",  itemprop="name").get_text()
             publication_date = [p.get_text().strip()
                                 for p in soup.select('header h6')][0]
             date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%A %B %d %Y'), is_dst=None)
@@ -150,7 +153,10 @@ class DNCrawler(AbstractBaseCrawler):
                     image_url = soup.select_one(
                         '.videoContainer iframe').get('src')
                 except AttributeError:
-                    image_url = 'None'
+                    try:
+                        image_url = soup.select_one('video').get('src')
+                    except AttributeError:
+                        image_url = 'None'
 
             try:
                 summary = soup.select_one('.summary div ul').get_text().strip()[:3000]
@@ -175,16 +181,12 @@ class DNCrawler(AbstractBaseCrawler):
         if story.status_code == 200:
             soup = BeautifulSoup(story.content, 'html.parser')
             title = soup.select_one('.hero.hero-chart').get_text().strip()
-            publication_date = soup.select('date')[0].get_text().strip()
-            date = pytz.timezone("Africa/Nairobi").localize(self.create_datetime_object_from_string(publication_date), is_dst=None)
+            publication_date = soup.find("meta",  property="og:article:published_time").get('content')
+            date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%Y-%m-%d %H:%M:%S'), is_dst=None)
             author = [self.sanitize_author_string(
                 a.get_text().strip()) for a in soup.select('.byline figcaption h6')]
-            try:
-                image_url = self.make_relative_links_absolute(
-                soup.select_one('.hero.hero-chart .figcap-box img').get('src'))
-            except AttributeError:
-                image_url = self.make_relative_links_absolute(
-                    soup.select_one('.hero.hero-chart .figcap-box iframe').get('src'))
+            image_url = self.make_relative_links_absolute(
+                soup.find("meta",  property="og:image").get('content'))
             summary = soup.select_one('article.post header').get_text().strip()[:3000]
 
         else:
@@ -208,8 +210,7 @@ class DNCrawler(AbstractBaseCrawler):
             date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%A %B %d %Y'), is_dst=None)
             author = [self.sanitize_author_string(
                 a.get_text().strip()) for a in soup.select('.article-content h6.name')]
-            image = cssutils.parseStyle(soup.select_one('.hero-image').get('style'))['background-image']
-            image_url = image.replace('url(', '').replace(')', '')
+            image_url = self.make_relative_links_absolute(soup.find("meta",  property="og:image").get('content'))
             summary = 'None'
         else:
             logger.exception('Failed to get {} details'. format(link))
@@ -225,10 +226,11 @@ class DNCrawler(AbstractBaseCrawler):
     def update_top_stories(self):
         top_articles = self.get_top_stories()
         article_info = []
-        startswith_newsplex = ('https://www.nation.co.ke/health',
+        startswith_newsplex = ('https://www.nation.co.ke/dailynation/health',
           'https://www.nation.co.ke/newsplex',
-          'https://www.nation.co.ke/dailynation/brandbook',
+          'https://www.nation.co.ke/dailynation/brand-book',
           'https://www.nation.co.ke/gender',
+          'https://www.nation.co.ke/dailynation/healthy-nation',
           )
 
         for article in top_articles:
