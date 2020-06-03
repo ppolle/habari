@@ -4,6 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 from django.db import migrations
 from django.utils import timezone
+from habari.apps.crawl.crawlers.AbstractBaseCrawler import sanitize_author_string
 
 def sanitize_dn_authors(apps, schema_editor):
 	yesterday = timezone.now() - timezone.timedelta(days=2)
@@ -21,14 +22,15 @@ def sanitize_dn_authors(apps, schema_editor):
 		if request.status_code == 200:
 			soup = BeautifulSoup(request.content, 'html.parser')
             if article.article_url.startswith(startswith_newsplex):
-                author = [self.sanitize_author_string(
+                author = [sanitize_author_string(
         a.get_text().strip()) for a in soup.select('.byline figcaption h6')]
             elif article.article_url.startswith('https://www.nation.co.ke/nationprime/'):
-                author = [self.sanitize_author_string(
+                author = [sanitize_author_string(
         a.get_text().strip()) for a in soup.select('.article-content h6.name')]
             else:
-                author = [self.sanitize_author_string(
+                author = [sanitize_author_string(
         a.get_text().strip()) for a in soup.select('section.author strong')]
+        article.author = authorarticle.save()
 
 class Migration(migrations.Migration):
 
@@ -37,4 +39,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+    migrations.RunPython(sanitize_dn_authors),
     ]
