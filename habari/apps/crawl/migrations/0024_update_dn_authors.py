@@ -16,7 +16,7 @@ def sanitize_dn_authors(apps, schema_editor):
 	  'https://www.nation.co.ke/gender',
 	  'https://www.nation.co.ke/dailynation/healthy-nation',
 	  )
-	base_class= AbstractBaseCrawler()
+	base_class= AbstractBaseCrawler('DN')
 
 	for article in Article.objects.filter(news_source__slug='DN',timestamp__gte=yesterday):
 		request = requests.get(article.article_url)
