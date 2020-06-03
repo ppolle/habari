@@ -83,3 +83,13 @@ class AbstractBaseCrawler:
         '''Make sure only printable characters are displayed'''
         return "".join(filter(lambda x: x in set(string.printable), text.replace('-',' ')))
 
+    def sanitize_author_iterable(self, author_iterable):
+        author_list = []
+        for item in author_iterable:
+            if item is not None:
+                authors = re.split(' & | and |, ', item.get_text().lower())
+                new_authors = [author_list.append(a) for a in map(lambda x:self.sanitize_author_string(x), authors)]
+
+        return author_list
+
+
