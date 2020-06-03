@@ -1,3 +1,4 @@
+import re
 import pytz
 import logging
 import requests
@@ -108,8 +109,9 @@ class BDCrawler(AbstractBaseCrawler):
             publication_date = soup.select_one(
                 '.page-box-inner header small.byline').get_text().strip()
             date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%A, %B %d, %Y %H:%M'), is_dst=None)
-            author = [self.sanitize_author_string(a.get_text()) for a in soup.select(
-                ' article.article.article-summary header.article-meta-summary ')]
+            author_list = soup.select(
+                ' article.article.article-summary header.article-meta-summary ')
+            author = self.sanitize_author_iterable(author_list)
 
             try:
                 image_url = self.make_relative_links_absolute(

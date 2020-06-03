@@ -135,15 +135,14 @@ class DNCrawler(AbstractBaseCrawler):
         if story.status_code == 200:
             soup = BeautifulSoup(story.content, 'html.parser')
             try:
-                title = [t.strip()
-                     for t in soup.select_one('header h2')]
+                title = soup.select_one('header h2').get_text().strip()
             except TypeError:
                 title = soup.find("h3",  itemprop="name").get_text()
             publication_date = [p.get_text().strip()
                                 for p in soup.select('header h6')][0]
             date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%A %B %d %Y'), is_dst=None)
             author = [self.sanitize_author_string(
-                a.get_text().strip()) for a in soup.select('.story-view .author')]
+                a.get_text().strip()) for a in soup.select('section.author strong')]
 
             try:
                 image_url = self.make_relative_links_absolute(
