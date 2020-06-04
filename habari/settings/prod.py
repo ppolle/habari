@@ -5,11 +5,8 @@ from .base import *
 
 DEBUG = False
 CSRF_COOKIE_SECURE = True
-SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
 SECRET_KEY = config('SECRET_KEY')
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
 
 # ==============================================================================
 # Logging settings
