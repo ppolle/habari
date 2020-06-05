@@ -141,8 +141,8 @@ class DNCrawler(AbstractBaseCrawler):
             publication_date = [p.get_text().strip()
                                 for p in soup.select('header h6')][0]
             date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%A %B %d %Y'), is_dst=None)
-            author = [self.sanitize_author_string(
-                a.get_text().strip()) for a in soup.select('section.author strong')]
+            author_list = soup.select('section.author strong')
+            author = self.sanitize_author_iterable(author_list)
 
             try:
                 image_url = self.make_relative_links_absolute(
@@ -182,8 +182,8 @@ class DNCrawler(AbstractBaseCrawler):
             title = soup.select_one('.hero.hero-chart').get_text().strip()
             publication_date = soup.find("meta",  property="og:article:published_time").get('content')
             date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%Y-%m-%d %H:%M:%S'), is_dst=None)
-            author = [self.sanitize_author_string(
-                a.get_text().strip()) for a in soup.select('.byline figcaption h6')]
+            author_list = soup.select('.byline figcaption h6')
+            author = self.sanitize_author_iterable(author_list)
             image_url = self.make_relative_links_absolute(
                 soup.find("meta",  property="og:image").get('content'))
             summary = soup.select_one('article.post header').get_text().strip()[:3000]
@@ -207,8 +207,8 @@ class DNCrawler(AbstractBaseCrawler):
             title = soup.select_one('.page-title').get_text().strip()
             publication_date = soup.select_one('.date').get_text().strip()
             date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%A %B %d %Y'), is_dst=None)
-            author = [self.sanitize_author_string(
-                a.get_text().strip()) for a in soup.select('.article-content h6.name')]
+            author_list = soup.select('.article-content h6.name')
+            author = self.sanitize_author_iterable(author_list)
             image_url = self.make_relative_links_absolute(soup.find("meta",  property="og:image").get('content'))
             summary = 'None'
         else:
