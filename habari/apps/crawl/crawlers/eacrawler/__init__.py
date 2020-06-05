@@ -120,8 +120,8 @@ class EACrawler(AbstractBaseCrawler):
                     image_url = 'None'
 
             try:
-                author = [self.sanitize_author_string(
-                a.get_text()) for a in soup.select('.story-view .author')]
+                author_list = soup.select('.story-view .author')
+                author = self.sanitize_author_iterable(author_list)
             except AttributeError:
                 author = []
 
