@@ -138,9 +138,15 @@ class DNCrawler(AbstractBaseCrawler):
                 title = soup.select_one('header h2').get_text().strip()
             except TypeError:
                 title = soup.find("h3",  itemprop="name").get_text()
-            publication_date = [p.get_text().strip()
+            try:
+                publication_date = [p.get_text().strip()
                                 for p in soup.select('header h6')][0]
-            date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%A %B %d %Y'), is_dst=None)
+            except IndexError:
+                publication_date = soup.find("meta",  property="og:article:published_time").get('content')
+            try: 
+                date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%A %B %d %Y'), is_dst=None)
+            except ValueError:
+                date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%Y-%m-%d %H:%M:%S'), is_dst=None)
             author_list = soup.select('section.author strong')
             author = self.sanitize_author_iterable(author_list)
 
