@@ -61,7 +61,7 @@ def day(request, source, year, month, day):
 	except EmptyPage:
 		articles = paginator.page(paginator.num_pages)
 	
-	return render(request, 'core/news_source.html', {'articles':articles,'source':source})
+	return render(request, 'core/news_source.html', {'articles':articles,'source':source, 'date':date})
 
 def login(request):
 	'''
