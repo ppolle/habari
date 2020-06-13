@@ -6,7 +6,7 @@ Top Stories<small>(All Articles From The Last Seven Days)</small>
 {% endblock %}
 
 {% block source%}
-{{source.name|title}}
+{{source.name|title}}<small>({{ date|date:"l, jS F Y" }})</small>
 {% endblock %}
 
 {% block day_nav %}
@@ -22,7 +22,9 @@ Top Stories<small>(All Articles From The Last Seven Days)</small>
 	</p>
 	{%empty%}
 	<p>
-		{{source.name|title}} does not have any news content on {% now "l, jS F Y, H:i:s" %} 
+		
+		{{source.name|title}} does not have any news content on {{ date|date:"l, jS F Y" }} 
+		
 	</p>
 
 	{% endfor %}
