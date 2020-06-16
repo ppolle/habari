@@ -122,16 +122,17 @@ class SMCrawler(AbstractBaseCrawler):
 
                     article['author'] = author
                 
-                try:
-                    article_image_url = self.make_relative_links_absolute(soup.select_one('.article-body img').get('src'))
-                except AttributeError:
-                    try:
-                        article_image_url = self.make_relative_links_absolute(soup.select_one('figure img').get('src'))
-                    except AttributeError:
-                        try:
-                            article_image_url = soup.select_one('iframe').get('src') 
-                        except AttributeError:
-                            article_image_url = 'None'
+                # try:
+                article_image_url = soup.find("meta",  property="og:image").get('content')
+                # except AttributeError:
+                #     try:
+                #         article_image_url = self.make_relative_links_absolute(soup.select_one('figure img').get('src'))
+                #     except AttributeError:
+                #         try:
+                #             article_image_url = soup.select_one('iframe').get('src') 
+                #         except AttributeError:
+                #             article_image_url = soup.select_one('.standard-content .content img').get('src')
+                        #     article_image_url = 'None'
 
                 article['article_image_url'] = article_image_url
         else:
