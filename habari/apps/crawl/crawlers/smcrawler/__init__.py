@@ -80,7 +80,7 @@ class SMCrawler(AbstractBaseCrawler):
 
         if request.status_code == 200:
             soup = BeautifulSoup(request.content, 'lxml')
-            if soup.find(string=re.compile('Log in for free access to most premium news and information')):
+            if soup.find(string=re.compile('Log in for free access to most premium news and information |Create your free account or log in to continue reading')):
                 if article['title'] == '':
                     article['title'] = 'Title Not Available'
 
