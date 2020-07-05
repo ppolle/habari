@@ -10,6 +10,7 @@ from habari.apps.utils.error_utils import error_to_string, http_error_to_string
 
 logger = logging.getLogger(__name__)
 
+
 class BDCrawler(AbstractBaseCrawler):
     def __init__(self):
         super().__init__('BD')
@@ -18,8 +19,9 @@ class BDCrawler(AbstractBaseCrawler):
 
     def partial_links_to_ignore(self, url):
         links = ('https://www.businessdailyafrica.com/author-profile/',
-        'https://www.businessdailyafrica.com/videos/',
-        'https://www.businessdailyafrica.com/datahub/')
+                 'https://www.businessdailyafrica.com/videos/',
+                 'https://www.businessdailyafrica.com/datahub/',
+                 'https://www.businessdailyafrica.com/news/counties/Traders-suffer-losses-as-Gikomba-market-burns/4003142-5582822-ovxkjr/index.html')
 
         if url.startswith(links):
             return True
@@ -32,7 +34,8 @@ class BDCrawler(AbstractBaseCrawler):
         try:
             get_categories = requests.get(self.url)
         except Exception as e:
-            logger.exception('Error: {0} , while getting categories from: {1}'.format(e,self.url))
+            logger.exception(
+                'Error: {0} , while getting categories from: {1}'.format(e, self.url))
             self.errors.append(error_to_string(e))
         else:
             if get_categories.status_code == 200:
@@ -41,33 +44,40 @@ class BDCrawler(AbstractBaseCrawler):
 
                 for category in all_categories:
                     if category.get('href') is not None:
-                        cat = self.make_relative_links_absolute(category.get('href'))
+                        cat = self.make_relative_links_absolute(
+                            category.get('href'))
                         if not self.partial_links_to_ignore(cat):
                             categories.append(cat)
             else:
                 logger.exception(
-                        '{0} error while getting categories and sub-categories for {1}'.format(get_categories.status_code, self.url))
-                self.errors.append(http_error_to_string(get_categories.status_code,self.url))
+                    '{0} error while getting categories and sub-categories for {1}'.format(get_categories.status_code, self.url))
+                self.errors.append(http_error_to_string(
+                    get_categories.status_code, self.url))
 
         for category in categories:
             try:
                 get_all_categories = requests.get(category)
             except Exception as e:
-                logger.exception('Error: {0} while getting categories from {1}'.format(e,category))
+                logger.exception(
+                    'Error: {0} while getting categories from {1}'.format(e, category))
                 self.errors.append(error_to_string(e))
             else:
                 if get_all_categories.status_code == 200:
-                    soup = BeautifulSoup(get_all_categories.content, 'html.parser')
-                    additional_cat = soup.select('article.article.article-list-featured header h5 a')
+                    soup = BeautifulSoup(
+                        get_all_categories.content, 'html.parser')
+                    additional_cat = soup.select(
+                        'article.article.article-list-featured header h5 a')
                     for new_cat in additional_cat:
                         if new_cat.get('href') is not None:
-                            cat = self.make_relative_links_absolute(new_cat.get('href'))
+                            cat = self.make_relative_links_absolute(
+                                new_cat.get('href'))
                             if not self.partial_links_to_ignore(cat) and cat not in categories:
                                 categories.append(cat)
                 else:
                     logger.exception(
                         '{0} error while getting categories and sub-categories for {1}'.format(get_all_categories.status_code, category))
-                    self.errors.append(http_error_to_string(get_all_categories.status_code,category))
+                    self.errors.append(http_error_to_string(
+                        get_all_categories.status_code, category))
 
         return categories
 
@@ -90,7 +100,8 @@ class BDCrawler(AbstractBaseCrawler):
                                 if not Article.objects.filter(article_url=article).exists() and article not in story_links and self.check_for_top_level_domain(article) and not self.partial_links_to_ignore(article):
                                     story_links.append(article)
                         except Exception as e:
-                            logger.exception('{} error while sanitizing {} and getting stories from {}'.format(e, article.get('href'), stories))
+                            logger.exception('{} error while sanitizing {} and getting stories from {}'.format(
+                                e, article.get('href'), stories))
                             self.errors.append(error_to_string(e))
 
             except Exception as e:
@@ -108,7 +119,8 @@ class BDCrawler(AbstractBaseCrawler):
             title = soup.find(class_='article-title').get_text().strip()
             publication_date = soup.select_one(
                 '.page-box-inner header small.byline').get_text().strip()
-            date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%A, %B %d, %Y %H:%M'), is_dst=None)
+            date = pytz.timezone("Africa/Nairobi").localize(
+                datetime.strptime(publication_date, '%A, %B %d, %Y %H:%M'), is_dst=None)
             author_list = soup.select(
                 ' article.article.article-summary header.article-meta-summary ')
             author = self.sanitize_author_iterable(author_list)
@@ -124,7 +136,8 @@ class BDCrawler(AbstractBaseCrawler):
                     image_url = 'None'
 
             try:
-                summary = soup.select_one('.summary-list').get_text().strip()[:3000]
+                summary = soup.select_one(
+                    '.summary-list').get_text().strip()[:3000]
             except AttributeError:
                 summary = ' '
 
@@ -154,7 +167,8 @@ class BDCrawler(AbstractBaseCrawler):
                                             ))
 
             except Exception as e:
-                logger.exception('Crawling Error: {0} while getting data from: {1}'.format(e, article))
+                logger.exception(
+                    'Crawling Error: {0} while getting data from: {1}'.format(e, article))
                 self.errors.append(error_to_string(e))
 
         try:
@@ -162,7 +176,7 @@ class BDCrawler(AbstractBaseCrawler):
             logging.info('')
             logging.info('Succesfully updated Business Daily Latest Articles.{} new articles added'.format(
                 len(article_info)))
-            self.crawl.total_articles=len(article_info)
+            self.crawl.total_articles = len(article_info)
             self.crawl.save()
         except Exception as e:
             logger.exception('Error!!!{}'.format(e))
