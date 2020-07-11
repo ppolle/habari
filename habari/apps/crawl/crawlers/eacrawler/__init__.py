@@ -51,7 +51,8 @@ class EACrawler(AbstractBaseCrawler):
                     social_links = soup.select('.social-networks a')
                     for social_link in social_links:
                         link = social_link.get('href')
-                        if link.endswith('.xml') and link is not None:
+                        if link.endswith('.rss') and link is not None:
+                            print('Link is:'+link)
                             rss_feeds.append(
                                 self.make_relative_links_absolute(link))
                 else:
