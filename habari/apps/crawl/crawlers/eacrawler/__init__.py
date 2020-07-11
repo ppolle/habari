@@ -52,7 +52,6 @@ class EACrawler(AbstractBaseCrawler):
                     for social_link in social_links:
                         link = social_link.get('href')
                         if link.endswith('.rss') and link is not None:
-                            print('Link is:'+link)
                             rss_feeds.append(
                                 self.make_relative_links_absolute(link))
                 else:
