@@ -117,7 +117,7 @@ class SMCrawler(AbstractBaseCrawler):
                                 author = [a.strip().upper() for a in re.split('&| and |, ', soup.select_one('.small.text-muted.mb-3 a').get_text().lower())]
                             except AttributeError:
                                 try:
-                                    author = [a.strip().upper() for a in re.split('&| and |, ', soup.find("meta",  name="author").get('content').lower())]
+                                    author = [a.strip().upper() for a in re.split('&| and |, ', soup.find("meta",  attrs={'name':'author'}).get('content').lower())]
                                 except AttributeError:
                                     author = []
                     if author == [''] or author == [':']:
