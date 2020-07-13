@@ -51,7 +51,7 @@ class EACrawler(AbstractBaseCrawler):
                     social_links = soup.select('.social-networks a')
                     for social_link in social_links:
                         link = social_link.get('href')
-                        if link.endswith('.xml') and link is not None:
+                        if link.endswith('.rss') and link is not None:
                             rss_feeds.append(
                                 self.make_relative_links_absolute(link))
                 else:
@@ -120,7 +120,7 @@ class EACrawler(AbstractBaseCrawler):
                     image_url = 'None'
 
             try:
-                author_list = soup.select('.story-view .author')
+                author_list = soup.select('.author strong')
                 author = self.sanitize_author_iterable(author_list)
             except AttributeError:
                 author = []
