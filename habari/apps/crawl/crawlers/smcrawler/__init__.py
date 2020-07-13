@@ -116,7 +116,10 @@ class SMCrawler(AbstractBaseCrawler):
                             try:
                                 author = [a.strip().upper() for a in re.split('&| and |, ', soup.select_one('.small.text-muted.mb-3 a').get_text().lower())]
                             except AttributeError:
-                                author = []
+                                try:
+                                    author = [a.strip().upper() for a in re.split('&| and |, ', soup.find("meta",  attrs={'name':'author'}).get('content').lower())]
+                                except AttributeError:
+                                    author = []
                     if author == [''] or author == [':']:
                         author = []
 
@@ -126,15 +129,6 @@ class SMCrawler(AbstractBaseCrawler):
                     article_image_url = soup.find("meta",  property="og:image").get('content')
                 except AttributeError:
                     article_image_url = soup.find("meta",  property="og:image:secure_url").get('content')
-
-                # try:
-                #     article_image_url = self.make_relative_links_absolute(soup.select_one('figure img').get('src'))
-                # except AttributeError:
-                #     try:
-                #         article_image_url = soup.select_one('iframe').get('src') 
-                #     except AttributeError:
-                #         article_image_url = soup.select_one('.standard-content .content img').get('src')
-                        # article_image_url = 'None'
 
                 article['article_image_url'] = article_image_url
         else:
