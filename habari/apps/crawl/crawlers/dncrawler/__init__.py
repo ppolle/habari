@@ -22,7 +22,57 @@ class DNCrawler(AbstractBaseCrawler):
         'https://www.nation.co.ke/newsplex/deadly-force-database',
         'https://www.nation.co.ke/newsplex/murder-at-home-database',
         'https://www.nation.co.ke/oped/cartoon/',
-        'https://www.nation.co.ke/health/3476990-5485696-da2r6w/index.html')
+        'https://www.nation.co.ke/health/3476990-5485696-da2r6w/index.html',
+
+        'https://www.nation.co.ke/kenya/news/education',
+
+        'https://www.nation.co.ke/kenya/counties/isiolo',
+        'https://www.nation.co.ke/kenya/counties/nandi',
+        'https://www.nation.co.ke/kenya/counties/kirinyaga',
+        'https://www.nation.co.ke/kenya/counties/migori',
+        'https://www.nation.co.ke/kenya/counties/samburu',
+        'https://www.nation.co.ke/kenya/counties/embu',
+        'https://www.nation.co.ke/kenya/counties/tana-river',
+        'https://www.nation.co.ke/kenya/counties/bungoma',
+        'https://www.nation.co.ke/kenya/counties/kisii',
+        'https://www.nation.co.ke/kenya/counties/kisumu',
+        'https://www.nation.co.ke/kenya/counties/nyamira',
+        'https://www.nation.co.ke/kenya/counties/vihiga',
+        'https://www.nation.co.ke/kenya/counties/meru',
+        'https://www.nation.co.ke/kenya/counties/nakuru',
+        'https://www.nation.co.ke/kenya/counties/muranga',
+        'https://www.nation.co.ke/kenya/counties/turkana',
+        'https://www.nation.co.ke/kenya/counties/mombasa',
+        'https://www.nation.co.ke/kenya/counties/machakos',
+        'https://www.nation.co.ke/kenya/counties/narok',
+        'https://www.nation.co.ke/kenya/counties/busia',
+        'https://www.nation.co.ke/kenya/counties/kiambu',
+        'https://www.nation.co.ke/kenya/counties/kakamega',
+        'https://www.nation.co.ke/kenya/counties/tharaka-nithi-',
+        'https://www.nation.co.ke/kenya/counties/makueni',
+        'https://www.nation.co.ke/kenya/counties/kitui',
+        'https://www.nation.co.ke/kenya/counties/kilifi',
+        'https://www.nation.co.ke/kenya/counties/lamu',
+        'https://www.nation.co.ke/kenya/counties/west-pokot',
+
+        'https://www.nation.co.ke/kenya/blogs-opinion/blogs/dot9/ndemo',
+        'https://www.nation.co.ke/kenya/blogs-opinion/blogs/dot9/madut',
+        'https://www.nation.co.ke/kenya/blogs-opinion/blogs/dot9/walubengo',
+        'https://www.nation.co.ke/kenya/blogs-opinion/blogs/dot9/bankelele',
+        'https://www.nation.co.ke/kenya/blogs-opinion/blogs/dot9/thangwa',
+        'https://www.nation.co.ke/kenya/blogs-opinion/blogs/dot9/franceschi',
+        'https://www.nation.co.ke/kenya/blogs-opinion/cartoons/1906158-1906158',
+
+        'https://www.nation.co.ke/kenya/life-and-style/saturday-magazine',
+        
+        'https://www.nation.co.ke/kenya/life-and-style/mynetwork',
+        'https://www.nation.co.ke/kenya/life-and-style/weekend'
+        'https://www.nation.co.ke/cdn-cgi/l/email-protection',
+        '',
+        'https://www.nation.co.ke/kenya/sports/motorsports',
+        'https://www.nation.co.ke/kenya/sports/basketball',
+        'https://www.nation.co.ke/kenya/sports/cricket',
+        )
 
         if url.startswith(links):
             return True
