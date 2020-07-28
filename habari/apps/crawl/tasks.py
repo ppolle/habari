@@ -1,3 +1,4 @@
+import re
 from celery import shared_task
 from django.utils import timezone
 from habari.apps.crawl.models import NewsSource, Crawl, Article
