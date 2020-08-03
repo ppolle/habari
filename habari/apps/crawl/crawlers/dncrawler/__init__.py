@@ -23,6 +23,7 @@ class DNCrawler(AbstractBaseCrawler):
         'https://www.nation.co.ke/newsplex/murder-at-home-database',
         'https://www.nation.co.ke/oped/cartoon/',
         'https://www.nation.co.ke/health/3476990-5485696-da2r6w/index.html',
+        'https://www.nation.co.ke/kenya/videos',
 
         )
 
@@ -35,7 +36,9 @@ class DNCrawler(AbstractBaseCrawler):
         '''
         Category links to ignore while updatig news content
         '''
-        categories = ['https://www.nation.co.ke/kenya/news/education',
+        categories = [
+        'https://www.nation.co.ke/kenya/news/education',
+
         'https://www.nation.co.ke/kenya/counties/isiolo',
         'https://www.nation.co.ke/kenya/counties/nandi',
         'https://www.nation.co.ke/kenya/counties/kirinyaga',
@@ -67,6 +70,12 @@ class DNCrawler(AbstractBaseCrawler):
         'https://www.nation.co.ke/kenya/counties/siaya',
         'https://www.nation.co.ke/kenya/counties/west-pokot',
         'https://www.nation.co.ke/kenya/counties/homa-bay',
+        'https://www.nation.co.ke/kenya/counties/bomet',
+        'https://www.nation.co.ke/kenya/counties/nyandarua',
+        'https://www.nation.co.ke/kenya/counties/kajiado',
+        'https://www.nation.co.ke/kenya/counties/taita-taveta',
+        'https://www.nation.co.ke/kenya/counties/uasin-gishu',
+
         'https://www.nation.co.ke/kenya/blogs-opinion/blogs/dot9/ndemo',
         'https://www.nation.co.ke/kenya/blogs-opinion/blogs/dot9/madut',
         'https://www.nation.co.ke/kenya/blogs-opinion/blogs/dot9/walubengo',
@@ -74,16 +83,25 @@ class DNCrawler(AbstractBaseCrawler):
         'https://www.nation.co.ke/kenya/blogs-opinion/blogs/dot9/thangwa',
         'https://www.nation.co.ke/kenya/blogs-opinion/blogs/dot9/franceschi',
         'https://www.nation.co.ke/kenya/blogs-opinion/cartoons/1906158-1906158',
+        'https://www.nation.co.ke/kenya/blogs-opinion/cartoons/1907730-1907730',
+        'https://www.nation.co.ke/kenya/blogs-opinion/cartoons/1908244-1908244',
+        'https://www.nation.co.ke/kenya/blogs-opinion/letters',
+
         'https://www.nation.co.ke/kenya/life-and-style/saturday-magazine',
         'https://www.nation.co.ke/kenya/life-and-style/mynetwork',
         'https://www.nation.co.ke/kenya/life-and-style/weekend',
         'https://www.nation.co.ke/kenya/life-and-style/lifestyle',
         'https://www.nation.co.ke/kenya/life-and-style/lifestyle',
-        'https://www.nation.co.ke/cdn-cgi/l/email-protection',
+        
+
         'https://www.nation.co.ke/kenya/sports/motorsports',
         'https://www.nation.co.ke/kenya/sports/basketball',
         'https://www.nation.co.ke/kenya/sports/cricket',
-        'https://www.nation.co.ke/cdn-cgi/l/email-protection']
+        'https://www.nation.co.ke/kenya/sports/tennis',
+
+        'https://www.nation.co.ke/cdn-cgi/l/email-protection',
+        'https://www.nation.co.ke/cdn-cgi/l/email-protection',
+        ]
         return categories
 
     def get_category_links(self):
@@ -192,9 +210,15 @@ class DNCrawler(AbstractBaseCrawler):
         if story.status_code == 200:
             soup = BeautifulSoup(story.content, 'html.parser')
             try:
-                title = soup.select_one('header h2').get_text().strip()
+                title = soup.find("meta",  property="og:title").get('content')
             except TypeError:
-                title = soup.find("h3",  itemprop="name").get_text()
+                try:
+                    title = soup.select_one('header h2').get_text().strip()    
+                except TypeError:
+                    try:
+                        title = soup.select_one('h1.title-medium').get_text().strip()
+                    except TypeError:
+                        title = soup.find("h3",  itemprop="name").get_text()
             try:
                 publication_date = [p.get_text().strip()
                                 for p in soup.select('header h6')][0]
@@ -203,8 +227,15 @@ class DNCrawler(AbstractBaseCrawler):
             try: 
                 date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%A %B %d %Y'), is_dst=None)
             except ValueError:
-                date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%Y-%m-%d %H:%M:%S'), is_dst=None)
-            author_list = soup.select('section.author strong')
+                try:
+                    date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%Y-%m-%d %H:%M:%S'), is_dst=None)
+                except ValueError:
+                    date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%Y-%m-%dT%H:%M:%SZ'), is_dst=None)
+
+            try:
+                author_list = soup.select('section.author strong')
+            except AttributeError:
+                author_list = soup.select('p.article-authors_authors')
             author = self.sanitize_author_iterable(author_list)
 
             try:
@@ -223,7 +254,10 @@ class DNCrawler(AbstractBaseCrawler):
             try:
                 summary = soup.select_one('.summary div ul').get_text().strip()[:3000]
             except AttributeError:
-                summary = soup.find("meta",  property="og:description").get('content')
+                try:
+                    summary = soup.select('.article-detail-block_summary text-block').get_text().strip()[:3000]
+                except AttributeError:
+                    summary = soup.find("meta",  property="og:description").get('content')
 
         else:
             logger.exception('Failed to get {} details.'.format(link))
@@ -301,7 +335,7 @@ class DNCrawler(AbstractBaseCrawler):
                 if article.startswith(startswith_newsplex):
                     story = self.get_newsplex_and_healthynation_story_details(
                         article)
-                elif article.startswith('https://www.nation.co.ke/nationprime/'):
+                elif article.startswith('https://www.nation.co.ke/kenya/nation-prime/'):
                     story = self.get_nationprime_story_details(article)
                 else:
                     story = self.get_main_story_details(article)
