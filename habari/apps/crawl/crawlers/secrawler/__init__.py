@@ -34,11 +34,12 @@ class SECrawler(AbstractBaseCrawler):
 				all_categories = soup.select('.sidenav.sidenavMob a')
 
 				for category in all_categories:
-					if category.get('href') is not None:
+					if (category.get('href') is not None):
 						cat = self.make_relative_links_absolute(
         					category.get('href'))
-						# print('Adding category: {}'.format(cat))
-						if cat not in categories:
+
+						if cat not in categories and self.check_for_top_level_domain(cat) and not \
+						cat.startswith('https://www.standardmedia.co.ke/entertainment/videos'):
 							categories.append(cat)
 			else:
 				logger.exception(
