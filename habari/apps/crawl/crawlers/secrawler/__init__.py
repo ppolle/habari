@@ -31,7 +31,7 @@ class SECrawler():
         else:
         	if get_categories.status_code == 200:
         		soup = BeautifulSoup(get_categories.content, 'lxml')
-        		all_categories = soup.select('.menu-vertical a')
+        		all_categories = soup.select('.sidenav.sidenavMob a')
 
         		for category in all_categories:
         			if category.get('href') is not None:
@@ -44,5 +44,9 @@ class SECrawler():
                 self.errors.append(http_error_to_string(
                         get_categories.status_code, self.url))
 
+        return categories
+
         def update_top_stories(self):
-        	self.get_category_links()
+        	links = self.get_category_links()
+        	for link in links:
+        		print(link)
