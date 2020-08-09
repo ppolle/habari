@@ -87,7 +87,7 @@ class AbstractBaseCrawler:
         author_list = []
         for item in author_iterable:
             if item is not None:
-                authors = re.split('&| and |,', item.get_text().lower())
+                authors = re.split('&| and |,', item.get_text().strip().lower())
                 new_authors = [author_list.append(a) for a in map(lambda x:self.sanitize_author_string(x), authors)]
 
         return author_list
