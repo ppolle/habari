@@ -14,6 +14,17 @@ class SECrawler(AbstractBaseCrawler):
 	def __init__(self):
 		super().__init__('SE')
 		self.url = self.news_source.url
+		self.categories = self.get_category_links()
+
+	def partial_links_to_ignore(self, url):
+		links = ('https://www.standardmedia.co.ke/entertainment/video',
+			'https://www.standardmedia.co.ke/entertainment/author',
+			'https://www.standardmedia.co.ke/entertainment/gallery')
+
+		if url.startswith(links):
+			return False
+		else:
+			return True
 
 	def get_category_links(self):
 		'''
@@ -38,8 +49,8 @@ class SECrawler(AbstractBaseCrawler):
 						cat = self.make_relative_links_absolute(
         					category.get('href'))
 
-						if cat not in categories and self.check_for_top_level_domain(cat) and not \
-						cat.startswith('https://www.standardmedia.co.ke/entertainment/videos'):
+						if cat not in categories and self.check_for_top_level_domain(cat) and \
+						self.partial_links_to_ignore(cat):
 							categories.append(cat)
 			else:
 				logger.exception(
@@ -49,8 +60,43 @@ class SECrawler(AbstractBaseCrawler):
 
 		return categories
 
+	def get_top_stories(self):
+		logger.info('Getting top stories')
+		story_links = []
+
+		for category in self.categories:
+			try:
+				stories = requests.get(category)
+				if stories.status_code == 200:
+					soup = BeautifulSoup(stories.content, 'lxml')
+
+					right_side_bar = soup.select('.media-body a')
+					main_bar = soup.select('.body-text-formart-two a')
+					top_stories = soup.select('.gradient-cover a')
+					card_stories = soup.select('.body-text-formart a')
+
+					articles = right_side_bar+main_bar+top_stories+card_stories
+
+					for article in articles:
+						if article.get('href') is not None:
+							article_link = self.make_relative_links_absolute(article.get('href'))
+							if article_link not in story_links and self.check_for_top_level_domain(article_link) and not \
+							Article.objects.filter(article_url=article_link).exists() and self.partial_links_to_ignore(article_link):
+								story_links.append(article_link)
+
+			except Exception as e:
+				logger.exception(
+                    'Crawl Error: {0} ,while getting top stories for: {1}'.format(e, category))
+				self.errors.append(error_to_string(e))
+
+		return story_links
+
 	def update_top_stories(self):
-		links = self.get_category_links()
+		links = self.get_top_stories()
+		
+		total_links = len(links)
 
 		for link in links:
 			print(link)
+
+		print('All links amount to: {}'.format(total_links))
