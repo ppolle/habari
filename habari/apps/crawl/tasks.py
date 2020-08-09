@@ -3,7 +3,7 @@ from celery import shared_task
 from django.utils import timezone
 from habari.apps.crawl.models import NewsSource, Crawl, Article
 from habari.apps.crawl.crawlers import (smcrawler, tscrawler, dncrawler, dmcrawler,
- eacrawler, bdcrawler, ctcrawler)
+ eacrawler, bdcrawler, ctcrawler, secrawler)
 
 @shared_task(autoretry_for=(Exception,))
 def frequent_crawlers():
@@ -22,6 +22,7 @@ def non_frequent_crawlers():
 	crawlers = {
 	'EA':eacrawler.EACrawler,
 	'CT':ctcrawler.CTCrawler,
+	'SE':secrawler.SECrawler,
 	}
 
 	for key, value in crawlers.items():

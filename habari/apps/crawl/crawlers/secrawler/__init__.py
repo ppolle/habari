@@ -135,12 +135,12 @@ class SECrawler(AbstractBaseCrawler):
 				self.errors.append(error_to_string(e))
 
 		try:
-            Article.objects.bulk_create(article_info)
-            logger.info('')
-            logger.info('Succesfully updated Standard Digital Entertainment Latest Articles.{} new articles added'.format(
+			Article.objects.bulk_create(article_info)
+			logger.info('')
+			logger.info('Succesfully updated Standard Digital Entertainment Latest Articles.{} new articles added'.format(
                 len(article_info)))
-            self.crawl.total_articles=len(article_info)
-            self.crawl.save()
-        except Exception as e:
-            logger.exception('Error!!!{}'.format(e))
-            self.errors.append(error_to_string(e))
+			self.crawl.total_articles=len(article_info)
+			self.crawl.save()
+		except Exception as e:
+			logger.exception('Error!!!{}'.format(e))
+			self.errors.append(error_to_string(e))
