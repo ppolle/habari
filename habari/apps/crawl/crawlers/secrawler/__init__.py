@@ -91,12 +91,56 @@ class SECrawler(AbstractBaseCrawler):
 
 		return story_links
 
+	def get_story_details(self, link):
+		story = requests.get(link)
+		if story.status_code == 200:
+			soup = BeautifulSoup(story.content, 'lxml')
+			title = self.printable_text(soup.find("meta", property="og:title").get('content'))
+			publication_date = self.create_datetime_object_from_string(\
+				soup.select_one('.fas.fa-clock.mr-2').get_text().strip())
+			date = pytz.timezone("Africa/Nairobi").localize(publication_date, is_dst=None)
+			author_list = soup.select('.author')
+			author = self.sanitize_author_iterable(author_list)
+			try:
+				article_image_url = soup.find("meta",  property="og:image").get('content')
+			except AttributeError:
+				article_image_url = soup.find("meta",  property="og:image:secure_url").get('content')
+			summary = self.printable_text(soup.find("meta", property="og:description").get('content'))
+
+		return {'article_url':link,
+				'article_title':title,
+				'image_url':article_image_url,
+				'publication_date':date,
+				'author':author,
+				'summary':summary}
+
 	def update_top_stories(self):
-		links = self.get_top_stories()
-		
-		total_links = len(links)
+		top_articles = self.get_top_stories()
+		article_info = []
 
-		for link in links:
-			print(link)
+		for article in top_articles:
+			try:
+				logger.info('Updating article details for {}'.format(article))
+				details = self.get_story_details(article)
+				article_info.append(Article(title=details['article_title'],
+                                            article_url=details['article_url'],
+                                            article_image_url=details['image_url'],
+                                            author=details['author'],
+                                            publication_date=details['publication_date'],
+                                            summary=details['summary'],
+                                            news_source=self.news_source
+                                            ))		
+			except Exception as e:
+				logger.exception('Crawling Error: {0} while getting data from: {1}'.format(e, article))
+				self.errors.append(error_to_string(e))
 
-		print('All links amount to: {}'.format(total_links))
+		try:
+            Article.objects.bulk_create(article_info)
+            logger.info('')
+            logger.info('Succesfully updated Standard Digital Entertainment Latest Articles.{} new articles added'.format(
+                len(article_info)))
+            self.crawl.total_articles=len(article_info)
+            self.crawl.save()
+        except Exception as e:
+            logger.exception('Error!!!{}'.format(e))
+            self.errors.append(error_to_string(e))
