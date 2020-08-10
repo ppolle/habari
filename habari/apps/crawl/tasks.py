@@ -22,7 +22,7 @@ def non_frequent_crawlers():
 	crawlers = {
 	'EA':eacrawler.EACrawler,
 	'CT':ctcrawler.CTCrawler,
-	'SE':secrawler.SECrawler,
+	'SE':secrawler.SECrawler
 	}
 
 	for key, value in crawlers.items():
@@ -47,7 +47,8 @@ def retry_failed_crawls():
     'DM': dmcrawler.DMCrawler,
     'EA': eacrawler.EACrawler,
 	'CT': ctcrawler.CTCrawler,
-	'BD': bdcrawler.BDCrawler
+	'BD': bdcrawler.BDCrawler,
+	'SE': secrawler.SECrawler
 	}
 	a_while_ago = timezone.now() - timezone.timedelta(minutes=45)
 
