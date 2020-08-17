@@ -98,7 +98,7 @@ class SECrawler(AbstractBaseCrawler):
 			soup = BeautifulSoup(story.content, 'lxml')
 			title = printable_text(soup.find("meta", property="og:title").get('content'))
 			publication_date = self.create_datetime_object_from_string(\
-				soup.select_one('.fas.fa-clock.mr-2').get_text().strip())
+				soup.select_one('.byline .time').get_text().strip())
 			date = pytz.timezone("Africa/Nairobi").localize(publication_date, is_dst=None)
 			author_list = soup.select('.author')
 			author = self.sanitize_author_iterable(author_list)
