@@ -6,6 +6,7 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 from habari.apps.crawl.models import Article
 from habari.apps.crawl.crawlers import AbstractBaseCrawler
+from habari.apps.utils.string_utils import printable_text
 from habari.apps.utils.error_utils import error_to_string, http_error_to_string
 
 logger = logging.getLogger(__name__)
@@ -95,7 +96,7 @@ class SECrawler(AbstractBaseCrawler):
 		story = requests.get(link)
 		if story.status_code == 200:
 			soup = BeautifulSoup(story.content, 'lxml')
-			title = self.printable_text(soup.find("meta", property="og:title").get('content'))
+			title = printable_text(soup.find("meta", property="og:title").get('content'))
 			publication_date = self.create_datetime_object_from_string(\
 				soup.select_one('.fas.fa-clock.mr-2').get_text().strip())
 			date = pytz.timezone("Africa/Nairobi").localize(publication_date, is_dst=None)
@@ -105,7 +106,7 @@ class SECrawler(AbstractBaseCrawler):
 				article_image_url = soup.find("meta",  property="og:image").get('content')
 			except AttributeError:
 				article_image_url = soup.find("meta",  property="og:image:secure_url").get('content')
-			summary = self.printable_text(soup.find("meta", property="og:description").get('content'))
+			summary = printable_text(soup.find("meta", property="og:description").get('content'))
 
 		return {'article_url':link,
 				'article_title':title,

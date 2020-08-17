@@ -79,10 +79,6 @@ class AbstractBaseCrawler:
             r'\w*@.*|(\w+[.|\w])*@(\w+[.])*\w+|more by this author|By|BY |by|\n', '', author.lower()).strip().upper()
         return new_author
 
-    def printable_text(self, text):
-        '''Make sure only printable characters are displayed'''
-        return "".join(filter(lambda x: x in set(string.printable), text.replace('-',' ')))
-
     def sanitize_author_iterable(self, author_iterable):
         author_list = []
         for item in author_iterable:
