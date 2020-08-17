@@ -3,6 +3,7 @@ import string
 import logging
 import tldextract
 from datetime import datetime, timedelta
+from habari.apps.utils.date_utils import create_timedelta_object
 from habari.apps.crawl.models import Article, NewsSource, Crawl
 
 logger = logging.getLogger(__name__)
@@ -45,11 +46,7 @@ class AbstractBaseCrawler:
             r"^(Sun|Mon|Tue|Wed|Thur|Fri|Sat)\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s(0[1-9]|[12][0-9]|3[01])\s[0-5][0-9]:[0-5][0-9]:[0-5][0-9]\s(UTC|IST|CST|EAT|EST)\s(19|20)\d\d$", date_string)
 
         if date_pattern_1:
-            parsed_date_String = [date_string.split()[:2]]
-            time_dict = dict((fmt, float(amount))
-                             for amount, fmt in parsed_date_String)
-            dt = timedelta(**time_dict)
-            return datetime.now() - dt
+            return create_timedelta_object(date_string)
 
         elif date_pattern_2:
             return datetime.strptime(date_string, '%d/%m/%Y')
