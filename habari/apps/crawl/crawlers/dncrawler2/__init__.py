@@ -24,6 +24,8 @@ class DNCrawler(AbstractBaseCrawler):
 		logger.info('Getting links to all categories and sub-categories')
 		categories = [self.url, ]
 
+		return categories
+
 	def update_top_stories(self):
 		top_categories = self.cagetogies
 		for cat in top_categories:
