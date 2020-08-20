@@ -27,6 +27,6 @@ class DNCrawler(AbstractBaseCrawler):
 		return categories
 
 	def update_top_stories(self):
-		top_categories = self.cagetogies
+		top_categories = self.categories
 		for cat in top_categories:
 			print(cat)
