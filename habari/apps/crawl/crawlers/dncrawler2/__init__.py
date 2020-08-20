@@ -1,5 +1,8 @@
 import logging
+import requests
+from bs4 import BeautifulSoup
 from habari.apps.crawl.crawlers import AbstractBaseCrawler
+from habari.apps.utils.error_utils import error_to_string, http_error_to_string
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +26,22 @@ class DNCrawler(AbstractBaseCrawler):
 	def get_category_links(self):
 		logger.info('Getting links to all categories and sub-categories')
 		categories = [self.url, ]
+
+		try:
+			get_categories = requests.get(self.url)
+		except Exception as e:
+			logger.exception('Error: {0} while getting categories from {1}'.format(e,self.url))
+			self.errors.append(error_to_string(e))
+		else:
+			if get_categories.status_code == 200:
+				soup = BeautifulSoup(get_categories.content, 'html.parser')
+				main_categories = soup.select('.menu-vertical a')
+
+				for cat in main_categories:
+					if cat.get('href') is not None:
+						link = self.make_relative_links_absolute(cat.get('href'))
+						if not self.partial_links_to_ignore(link):
+							categories.append(link)
 
 		return categories
 
