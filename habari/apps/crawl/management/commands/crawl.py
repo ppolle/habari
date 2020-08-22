@@ -27,7 +27,8 @@ class Command(BaseCommand):
         sources = kwargs['sources']
 
         for source in sources:
-            crawler_class = self.get_crawler_class(source)
+            capitalized_source = source.upper()
+            crawler_class = self.get_crawler_class(capitalized_source)
             if crawler_class is not None:
                 crawler = crawler_class()
                 crawl = crawler.run()
