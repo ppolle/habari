@@ -45,7 +45,26 @@ class DNCrawler(AbstractBaseCrawler):
 
 		return categories
 
+	def get_top_stories(self):
+		logger.info('Getting the latest stories')
+		story_links = []
+		for category in self.categories:
+			try:
+				top_stories = requests.get(category)
+				if top_stories.status_code == 200:
+					soup = BeautifulSoup(top_stories.content, 'html.parser')
+					stories = soup.select('a article')
+					for story in stories:
+						story_links.append(story)
+			except Exception as e:
+				logger.exception(
+                    '{0} error while getting top stories for {1}'.format(e, stories))
+				self.errors.append(error_to_string(e))
+
+		return story_links
+
 	def update_top_stories(self):
-		top_categories = self.categories
+		top_categories = self.get_top_stories()
 		for cat in top_categories:
+			print('-'*50)
 			print(cat)
