@@ -76,15 +76,28 @@ class TSCrawler(AbstractBaseCrawler):
         story = requests.get(link)
         if story.status_code == 200:
             soup = BeautifulSoup(story.content, 'lxml')
-            title = soup.select_one('.header-primary-title .article-title').get_text().strip()
-            publication_date = soup.select_one('.article-body .article-published').get_text().strip()
-            date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%d %B %Y - %H:%M'), is_dst=None)
+            try:
+                title = soup.select_one('.header-primary-title .article-title').get_text().strip()
+            except AttributeError:
+                title = soup.find("meta",  property="og:title").get('content').strip()
+            try:
+                publication_date = soup.select_one('.article-body .article-published').get_text().strip()
+            except AttributeError:
+                publication_date = soup.find("meta",  property="article:published", itemprop="datePublished").get('content')
+            try:
+                date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%d %B %Y - %H:%M'), is_dst=None)
+            except ValueError:
+                date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%Y-%m-%dT%H:%M:%S.%fZ'), is_dst=None)
             try:
                 author_string = soup.select_one(
                 '.article-body .mobile-display .author-name span').get_text().lower()
                 author = [self.sanitize_author_string(a.strip(' /')) for a in re.split(' AND | and |/ |, ',author_string)]
             except AttributeError:
-                author = []
+                try:
+                    author_list = soup.select('p.Theme-Byline .Theme-ForegroundColor-10')
+                    author = self.sanitize_author_iterable(author_list)
+                except AttributeError:
+                    author = []
 
             try:
                 image_url = soup.select_one('.article-widgets .wrap img').get('src').lstrip(' /')
@@ -92,12 +105,18 @@ class TSCrawler(AbstractBaseCrawler):
                 try:
                     image_url = soup.select_one('.youtube-wrap iframe').get('src').lstrip(' /')
                 except AttributeError:
-                    image_url ='None'
+                    try:
+                        image_url = soup.find("meta",  property="og:image").get('content').strip()
+                    except AttributeError:
+                        image_url ='None'
 
             try:
                 summary = re.sub(r'•|\n', '', soup.select_one('.article-intro').get_text().strip())
             except AttributeError:
-                summary = ' '
+                try:
+                    summary = soup.find("meta",  property="og:description").get('content').strip()
+                except AttributeError:
+                    summary = ' '
 
         return {'article_url': link,
                 'image_url': image_url,
