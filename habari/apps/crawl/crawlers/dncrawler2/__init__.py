@@ -1,5 +1,7 @@
+import pytz
 import logging
 import requests
+from datetime import datetime
 from bs4 import BeautifulSoup
 from habari.apps.crawl.models import Article
 from habari.apps.crawl.crawlers import AbstractBaseCrawler
@@ -66,9 +68,60 @@ class DNCrawler(AbstractBaseCrawler):
 
 		return story_links
 
+	def get_story_details(self, link):
+		story = requests.get(link)
+
+		if story.status_code == 200:
+			soup = BeautifulSoup(story.content, 'html.parser')
+
+			title = soup.select_one('h1.title-medium').get_text().strip()
+			publication_date = soup.select_one('time.date').get('datetime')
+			date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%Y-%m-%dT%H:%M:%SZ'), is_dst=None)
+			author_list = soup.select('.article-authors_texts .article-authors_authors')
+			authors = self.sanitize_author_iterable(author_list)
+			try:
+				summary = soup.select_one('.article-content_summary .text-block').get_text().strip()
+			except AttributeError:
+				summary = soup.find("meta",  property="og:description").get('content').strip()
+			try:
+				image_url = self.make_relative_links_absolute(\
+				soup.select_one('figure.article-picture img').get('data-src'))
+			except AttributeError:
+				image_url = soup.select_one('figure iframe').get('data-src')
+
+		return {'article_url':link,
+				'article_title':title,
+				'publication_date':date,
+				'author':authors,
+				'summary':summary,
+				'image_url':image_url}
+
 	def update_top_stories(self):
-		top_categories = self.get_top_stories()
-		print('A total of {} articles'.format(len(top_categories)))
-		for cat in top_categories:
-			print('-'*50)
-			print(cat)
+		articles = self.get_top_stories()
+		article_info = []
+		for article in articles:
+			try:
+				logger.info('Updating story content for ' + article)
+				story = self.get_story_details(article)
+				article_info.append(Article(title=story['article_title'],
+                                            article_url=story['article_url'],
+                                            article_image_url=story['image_url'],
+                                            author=story['author'],
+                                            publication_date=story['publication_date'],
+                                            summary=story['summary'],
+                                            news_source=self.news_source
+                                            ))
+
+			except Exception as e:
+				logger.exception('Crawling Error: {0} while getting data from: {1}'.format(e, article))
+				self.errors.append(error_to_string(e))
+		try:
+			Article.objects.bulk_create(article_info)
+			logger.info('')
+			logger.info('Succesfully updated Daily Nation Latest Articles.{} new articles added'.format(
+                len(article_info)))
+			self.crawl.total_articles=len(article_info)
+			self.crawl.save()
+		except Exception as e:
+			logger.exception('Error!!!{}'.format(e))
+			self.errors.append(error_to_string(e))
