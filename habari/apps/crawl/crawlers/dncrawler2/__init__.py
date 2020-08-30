@@ -36,7 +36,7 @@ class DNCrawler(AbstractBaseCrawler):
 		else:
 			if get_categories.status_code == 200:
 				soup = BeautifulSoup(get_categories.content, 'html.parser')
-				main_categories = soup.select('.menu-vertical a')
+				main_categories = soup.select('footer ul.categories-nav_categories a')
 
 				for cat in main_categories:
 					if cat.get('href') is not None:
@@ -67,9 +67,8 @@ class DNCrawler(AbstractBaseCrawler):
 		return story_links
 
 	def update_top_stories(self):
-		for link in self.categories:
-			print(link)
 		top_categories = self.get_top_stories()
+		print('A total of {} articles'.format(len(top_categories)))
 		for cat in top_categories:
 			print('-'*50)
 			print(cat)
