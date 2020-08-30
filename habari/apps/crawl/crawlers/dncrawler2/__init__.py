@@ -63,7 +63,7 @@ class DNCrawler(AbstractBaseCrawler):
 							story_links.append(story)
 			except Exception as e:
 				logger.exception(
-                    '{0} error while getting top stories for {1}'.format(e, stories))
+                    '{0} error while getting top stories for {1}'.format(e, category))
 				self.errors.append(error_to_string(e))
 
 		return story_links
