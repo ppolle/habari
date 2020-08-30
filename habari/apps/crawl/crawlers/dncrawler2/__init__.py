@@ -1,6 +1,7 @@
 import logging
 import requests
 from bs4 import BeautifulSoup
+from habari.apps.crawl.models import Article
 from habari.apps.crawl.crawlers import AbstractBaseCrawler
 from habari.apps.utils.error_utils import error_to_string, http_error_to_string
 
@@ -40,8 +41,7 @@ class DNCrawler(AbstractBaseCrawler):
 				for cat in main_categories:
 					if cat.get('href') is not None:
 						link = self.make_relative_links_absolute(cat.get('href'))
-						if not self.partial_links_to_ignore(link):
-							categories.append(link)
+						categories.append(link)
 
 		return categories
 
@@ -53,9 +53,12 @@ class DNCrawler(AbstractBaseCrawler):
 				top_stories = requests.get(category)
 				if top_stories.status_code == 200:
 					soup = BeautifulSoup(top_stories.content, 'html.parser')
-					stories = soup.select('a article')
+					stories = soup.select('a.teaser-image-large') + soup.select('a.article-collection-teaser')
 					for story in stories:
-						story_links.append(story)
+						story = self.make_relative_links_absolute(story.get('href'))
+						if not Article.objects.filter(article_url=story).exists() and \
+						story not in story_links and self.check_for_top_level_domain(story):
+							story_links.append(story)
 			except Exception as e:
 				logger.exception(
                     '{0} error while getting top stories for {1}'.format(e, stories))
@@ -64,6 +67,8 @@ class DNCrawler(AbstractBaseCrawler):
 		return story_links
 
 	def update_top_stories(self):
+		for link in self.categories:
+			print(link)
 		top_categories = self.get_top_stories()
 		for cat in top_categories:
 			print('-'*50)
