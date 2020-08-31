@@ -63,7 +63,7 @@ class DNCrawler(AbstractBaseCrawler):
 							story_links.append(story)
 			except Exception as e:
 				logger.exception(
-                    '{0} error while getting top stories for {1}'.format(e, stories))
+                    '{0} error while getting top stories for {1}'.format(e, category))
 				self.errors.append(error_to_string(e))
 
 		return story_links
@@ -87,7 +87,10 @@ class DNCrawler(AbstractBaseCrawler):
 				image_url = self.make_relative_links_absolute(\
 				soup.select_one('figure.article-picture img').get('data-src'))
 			except AttributeError:
-				image_url = soup.select_one('figure iframe').get('data-src')
+				try:
+					image_url = soup.select_one('figure iframe.lazy-iframe_iframe').get('data-src')
+				except AttributeError:
+					image_url = soup.select_one('figure iframe').get('src')
 
 		return {'article_url':link,
 				'article_title':title,
