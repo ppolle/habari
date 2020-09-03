@@ -17,6 +17,7 @@ class DNCrawler(AbstractBaseCrawler):
 
 	def oped_articles(self, url):
 		links = ('https://nation.africa/kenya/blogs-opinion/',
+			'https://nation.africa/kenya/photos/',
 			)
 
 		if url.startswith(links):
@@ -105,7 +106,10 @@ class DNCrawler(AbstractBaseCrawler):
 				try:
 					image_url = soup.select_one('figure iframe.lazy-iframe_iframe').get('data-src')
 				except AttributeError:
-					image_url = soup.select_one('figure iframe').get('src')
+					try:
+						image_url = soup.select_one('figure iframe').get('src')
+					except AttributeError:
+						image_url = soup.find("meta", property="og:image").get('content').strip()
 
 		return {'article_url':link,
 				'article_title':title,
