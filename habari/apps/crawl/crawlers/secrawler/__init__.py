@@ -27,6 +27,12 @@ class SECrawler(AbstractBaseCrawler):
 		else:
 			return True
 
+	def sde_level_articles(self, url):
+		if self.check_for_top_level_domain(url) and url.startswith('https://www.standardmedia.co.ke/entertainment/gallery'):
+			return True
+		else:
+			return False
+
 	def get_category_links(self):
 		'''
 		Get and return links to all categories as shown on self.url
@@ -50,7 +56,7 @@ class SECrawler(AbstractBaseCrawler):
 						cat = self.make_relative_links_absolute(
         					category.get('href'))
 
-						if cat not in categories and self.check_for_top_level_domain(cat) and \
+						if cat not in categories and self.sde_level_articles(cat) and \
 						self.partial_links_to_ignore(cat):
 							categories.append(cat)
 			else:
@@ -81,7 +87,7 @@ class SECrawler(AbstractBaseCrawler):
 					for article in articles:
 						if article.get('href') is not None:
 							article_link = self.make_relative_links_absolute(article.get('href'))
-							if article_link not in story_links and self.check_for_top_level_domain(article_link) and not \
+							if article_link not in story_links and self.sde_level_articles(article_link) and not \
 							Article.objects.filter(article_url=article_link).exists() and self.partial_links_to_ignore(article_link):
 								story_links.append(article_link)
 
