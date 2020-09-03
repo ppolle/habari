@@ -15,16 +15,23 @@ class DNCrawler(AbstractBaseCrawler):
 		self.url = self.news_source.url
 		self.categories = self.get_category_links()
 
-	def partial_links_to_ignore(self, url):
-		links = ('https://www.nation.co.ke/kenya/news',
-			'https://www.nation.co.ke/kenya/business',
-			'https://www.nation.co.ke/kenya/counties'
+	def oped_articles(self, url):
+		links = ('https://nation.africa/kenya/blogs-opinion/',
 			)
 
 		if url.startswith(links):
 			return True
 		else:
 			return False
+
+	def links_to_avoid(self, url):
+		links = ('https://nation.africa/kenya/blogs-opinion/cartoons/',
+			)
+
+		if url.startswith(links):
+			return False
+		else:
+			return True
 
 	def get_category_links(self):
 		logger.info('Getting links to all categories and sub-categories')
@@ -57,16 +64,16 @@ class DNCrawler(AbstractBaseCrawler):
 					soup = BeautifulSoup(top_stories.content, 'html.parser')
 					stories = soup.select('a.teaser-image-large') + soup.select('a.article-collection-teaser')
 					for story in stories:
-						story = self.make_relative_links_absolute(story.get('href'))
+						story = self.make_relative_links_absolute(story.get('href').strip())
 						if not Article.objects.filter(article_url=story).exists() and \
-						story not in story_links and self.check_for_top_level_domain(story):
+						self.check_for_top_level_domain(story) and self.links_to_avoid(story):
 							story_links.append(story)
 			except Exception as e:
 				logger.exception(
                     '{0} error while getting top stories for {1}'.format(e, category))
 				self.errors.append(error_to_string(e))
 
-		return story_links
+		return set(story_links)
 
 	def get_story_details(self, link):
 		story = requests.get(link)
@@ -74,8 +81,16 @@ class DNCrawler(AbstractBaseCrawler):
 		if story.status_code == 200:
 			soup = BeautifulSoup(story.content, 'html.parser')
 
-			title = soup.select_one('h1.title-medium').get_text().strip()
-			publication_date = soup.select_one('time.date').get('datetime')
+			try:
+				title = soup.select_one('h1.title-medium').get_text().strip()
+			except AttributeError:
+				title = soup.select_one('h1.title-large').get_text().strip()
+			try:
+				publication_date = soup.select_one('time.date').get('datetime')
+
+			except AttributeError:
+				publication_date = soup.find("meta",  property="og:article:published_time").get('content').strip()
+
 			date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%Y-%m-%dT%H:%M:%SZ'), is_dst=None)
 			author_list = soup.select('.article-authors_texts .article-authors_authors')
 			authors = self.sanitize_author_iterable(author_list)
@@ -99,13 +114,58 @@ class DNCrawler(AbstractBaseCrawler):
 				'summary':summary,
 				'image_url':image_url}
 
+	def get_oped_article_details(self, url):
+		story = requests.get(url)
+
+		if story.status_code == 200:
+			soup = BeautifulSoup(story.content, 'html.parser')
+
+			try:
+				title = soup.select_one('h1.title-medium').get_text().strip()
+			except AttributeError:
+				title = soup.select_one('h1.title-large').get_text().strip()
+			try:
+				publication_date = soup.select_one('time.date').get('datetime')
+
+			except AttributeError:
+				publication_date = soup.find("meta",  property="og:article:published_time").get('content').strip()
+
+			date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%Y-%m-%dT%H:%M:%SZ'), is_dst=None)
+			author_list = soup.select('.article-authors_texts .article-authors_authors')
+			authors = self.sanitize_author_iterable(author_list)
+			try:
+				summary = soup.select_one('.article-content_summary .text-block').get_text().strip()
+			except AttributeError:
+				summary = soup.find("meta",  property="og:description").get('content').strip()
+			try:
+				image_url = self.make_relative_links_absolute(\
+				soup.select_one('figure.article-picture img').get('data-src'))
+			except AttributeError:
+				try:
+					image_url = soup.select_one('figure iframe.lazy-iframe_iframe').get('data-src')
+				except AttributeError:
+					try:
+						image_url = soup.select_one('figure iframe').get('src')
+					except AttributeError:
+						image_url = soup.find("meta", property="og:image").get('content').strip()
+
+		return {'article_url':url,
+				'article_title':title,
+				'publication_date':date,
+				'author':authors,
+				'summary':summary,
+				'image_url':image_url}
+
 	def update_top_stories(self):
 		articles = self.get_top_stories()
 		article_info = []
 		for article in articles:
 			try:
-				logger.info('Updating story content for ' + article)
-				story = self.get_story_details(article)
+				logger.info('Updating story content for {}'.format(article))
+				if self.oped_articles(article):
+					story = self.get_oped_article_details(article)
+				else:
+					story = self.get_story_details(article)
 				article_info.append(Article(title=story['article_title'],
                                             article_url=story['article_url'],
                                             article_image_url=story['image_url'],
