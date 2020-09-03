@@ -61,5 +61,14 @@
       "slug": "TS",
       "url": "https://www.the-star.co.ke/"
     }
+  },
+  {
+    "model": "crawl.NewsSource",
+    "pk": 8,
+    "fields": {
+      "name": "THE STANDARD ENTERTAINMENT",
+      "slug": "SE",
+      "url": "https://www.standardmedia.co.ke/entertainment/"
+    }
   }
 ]
