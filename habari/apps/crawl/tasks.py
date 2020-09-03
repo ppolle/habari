@@ -8,7 +8,7 @@ from habari.apps.crawl.crawlers import (smcrawler, tscrawler, dncrawler, dmcrawl
 @shared_task(autoretry_for=(Exception,))
 def frequent_crawlers():
 	crawlers ={
-        'DN': dncrawler.DNCrawler,
+        'DN': dncrawler2.DNCrawler,
         'SM': smcrawler.SMCrawler,
         'TS': tscrawler.TSCrawler,
         'DM': dmcrawler.DMCrawler
