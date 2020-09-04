@@ -81,7 +81,9 @@ class SMCrawler(AbstractBaseCrawler):
 
         if request.status_code == 200:
             soup = BeautifulSoup(request.content, 'lxml')
-            if soup.find(string=re.compile('Log in for free access to most premium news and information |Create your free account or log in to continue reading|Log in or register to access premium content only available to our subscribers')):
+            if soup.find(string=re.compile('Log in for free access to most premium news and information \
+                |Create your free account or log in to continue reading\
+                |Log in or register to access premium content only available to our subscribers')):
                 if article['title'] == '':
                     article['title'] = 'Title Not Available'
 
@@ -132,6 +134,9 @@ class SMCrawler(AbstractBaseCrawler):
                     article_image_url = soup.find("meta",  property="og:image:secure_url").get('content')
 
                 article['article_image_url'] = article_image_url
+        
+        elif request.status_code == 500:
+            article['article_image_url'] = 'None'
         else:
             logger.exception('{} Error while updating article details for {}'.format(request.status_code, article['article_url']))
             self.errors.append(http_error_to_string(request.status_code,article['article_url']))
