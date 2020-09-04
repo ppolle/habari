@@ -2,7 +2,7 @@ import re
 from celery import shared_task
 from django.utils import timezone
 from habari.apps.crawl.models import NewsSource, Crawl, Article
-from habari.apps.crawl.crawlers import (smcrawler, tscrawler, dncrawler, dmcrawler,
+from habari.apps.crawl.crawlers import (smcrawler, tscrawler, dncrawler2, dmcrawler,
  eacrawler, bdcrawler, ctcrawler, secrawler)
 
 @shared_task(autoretry_for=(Exception,))
@@ -41,7 +41,7 @@ def retry_failed_crawls():
 	Retry crawls that have an error status or stuck in a Crawing status
 	'''
 	crawler_classes = {
-	'DN': dncrawler.DNCrawler,
+	'DN': dncrawler2.DNCrawler,
     'SM': smcrawler.SMCrawler,
     'TS': tscrawler.TSCrawler,
     'DM': dmcrawler.DMCrawler,
