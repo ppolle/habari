@@ -28,7 +28,8 @@ class SECrawler(AbstractBaseCrawler):
 			return True
 
 	def sde_level_articles(self, url):
-		if self.check_for_top_level_domain(url) and url.startswith('https://www.standardmedia.co.ke/entertainment/gallery'):
+		if self.check_for_top_level_domain(url) and \
+		url.startswith('https://www.standardmedia.co.ke/entertainment/'):
 			return True
 		else:
 			return False
