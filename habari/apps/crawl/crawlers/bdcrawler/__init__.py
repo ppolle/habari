@@ -117,12 +117,19 @@ class BDCrawler(AbstractBaseCrawler):
             soup = BeautifulSoup(story.content, 'html.parser')
 
             title = soup.find(class_='article-title').get_text().strip()
-            publication_date = soup.select_one(
-                '.page-box-inner header small.byline').get_text().strip()
-            date = pytz.timezone("Africa/Nairobi").localize(
-                datetime.strptime(publication_date, '%A, %B %d, %Y %H:%M'), is_dst=None)
-            author_list = soup.select(
-                ' article.article.article-summary header.article-meta-summary ')
+            try:
+            	publication_date = soup.select_one('.page-box-inner header small.byline').get_text().strip()
+            	date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%A, %B %d, %Y %H:%M'), is_dst=None)
+            except ValueError:
+            	publication_date = soup.find("meta",  property="og:article:published_time").get('content').strip()
+            	date = pytz.timezone("Africa/Nairobi").localize(
+	                datetime.strptime(publication_date, '%Y-%m-%d %H:%M:%S'), is_dst=None)
+	        # except ValueError:
+	        # 	publication_date = soup.find("meta",  property="og:article:published_time").get('content').strip()
+	        # 	date = pytz.timezone("Africa/Nairobi").localize(
+	        #         datetime.strptime(publication_date, '%Y-%m-%d %H:%M:%S'), is_dst=None)
+
+            author_list = soup.select(' article.article.article-summary header.article-meta-summary ')
             author = self.sanitize_author_iterable(author_list)
 
             try:
