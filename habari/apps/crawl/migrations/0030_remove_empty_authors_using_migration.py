@@ -2,12 +2,15 @@
 
 from django.db import migrations
 
-def remove_empty_author_strings(apps. schema_editor):
-	Article = apps.get_model('crawl', 'Article')
-	articles = Article.objects.filter(author__contains='')
-	for article in articles:
-		pass
+def remove_empty_author_strings(apps, schema_editor):
+    Article = apps.get_model('crawl', 'Article')
+    articles = Article.objects.filter(author__contains=[''])
 
+    for article in articles:
+        authors = [i for i in article.author if i]
+        article.author = authors
+        article.save()
+		
 class Migration(migrations.Migration):
 
     dependencies = [
