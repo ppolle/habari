@@ -117,7 +117,8 @@ class BDCrawler(AbstractBaseCrawler):
         story = requests.get(link)
         if story.status_code == 200:
             soup = BeautifulSoup(story.content, 'html.parser')
-
+            # author_page = soup.select_one('header.author-header').get_text()
+            # if not author_page:
             title = soup.find(class_='article-title').get_text().strip()
             try:
             	publication_date = soup.select_one('.page-box-inner header small.byline').get_text().strip()
@@ -158,8 +159,9 @@ class BDCrawler(AbstractBaseCrawler):
         top_articles = self.get_top_stories()
         article_info = []
         for article in top_articles:
+            logger.info('Updating story content for ' + article)
             try:
-                logger.info('Updating story content for ' + article)
+                
                 story = self.get_story_details(article)
 
                 article_info.append(Article(title=story['article_title'],

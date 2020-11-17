@@ -81,7 +81,10 @@ class AbstractBaseCrawler:
         for item in author_iterable:
             if item is not None:
                 authors = re.split('&| and |,', item.get_text().strip().lower())
-                new_authors = [author_list.append(a) for a in map(lambda x:self.sanitize_author_string(x), authors)]
+                for author in authors:
+                    sanitized_author = self.sanitize_author_string(author)
+                    if sanitized_author:
+                        author_list.append(sanitized_author)
 
         return author_list
 
