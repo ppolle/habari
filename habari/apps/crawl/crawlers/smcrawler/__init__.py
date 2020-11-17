@@ -1,7 +1,6 @@
 import re
 import pytz
 import logging
-import requests
 from datetime import datetime
 from bs4 import BeautifulSoup
 from habari.apps.crawl.models import Article
@@ -37,7 +36,7 @@ class SMCrawler(AbstractBaseCrawler):
         for rss in rss_feeds:
             try:
                 logger.info('Getting top stories from {}'.format(rss))
-                request = requests.get(rss)
+                request = self.requests(rss)
                 if request.status_code == 200:
                     soup = BeautifulSoup(request.content, 'xml')
                     articles = soup.find_all('item')
@@ -77,7 +76,7 @@ class SMCrawler(AbstractBaseCrawler):
         return {story['article_url']:story for story in stories}.values()
 
     def update_article_details(self, article):
-        request = requests.get(article['article_url'])
+        request = self.requests(article['article_url'])
 
         if request.status_code == 200:
             soup = BeautifulSoup(request.content, 'lxml')
