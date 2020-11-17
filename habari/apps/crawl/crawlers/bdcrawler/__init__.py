@@ -1,7 +1,6 @@
 import re
 import pytz
 import logging
-import requests
 from datetime import datetime
 from bs4 import BeautifulSoup
 from habari.apps.crawl.models import Article
@@ -34,7 +33,7 @@ class BDCrawler(AbstractBaseCrawler):
         logger.info('Getting links to all categories and sub-categories')
         categories = [self.url, ]
         try:
-            get_categories = requests.get(self.url)
+            get_categories = self.requests(self.url)
         except Exception as e:
             logger.exception(
                 'Error: {0} , while getting categories from: {1}'.format(e, self.url))
@@ -58,7 +57,7 @@ class BDCrawler(AbstractBaseCrawler):
 
         for category in categories:
             try:
-                get_all_categories = requests.get(category)
+                get_all_categories = self.requests(category)
             except Exception as e:
                 logger.exception(
                     'Error: {0} while getting categories from {1}'.format(e, category))
@@ -89,7 +88,7 @@ class BDCrawler(AbstractBaseCrawler):
 
         for stories in self.categories:
             try:
-                top_stories = requests.get(stories)
+                top_stories = self.requests(stories)
                 if top_stories.status_code == 200:
                     soup = BeautifulSoup(top_stories.content, 'html.parser')
                     articles = soup.select('.article a')
@@ -114,7 +113,7 @@ class BDCrawler(AbstractBaseCrawler):
         return filter(lambda x: x not in self.categories, story_links)
 
     def get_story_details(self, link):
-        story = requests.get(link)
+        story = self.requests(link)
         if story.status_code == 200:
             soup = BeautifulSoup(story.content, 'html.parser')
             # author_page = soup.select_one('header.author-header').get_text()

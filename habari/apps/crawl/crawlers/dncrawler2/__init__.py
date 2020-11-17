@@ -1,6 +1,5 @@
 import pytz
 import logging
-import requests
 from datetime import datetime
 from bs4 import BeautifulSoup
 from habari.apps.crawl.models import Article
@@ -39,7 +38,7 @@ class DNCrawler(AbstractBaseCrawler):
 		categories = [self.url, ]
 
 		try:
-			get_categories = requests.get(self.url)
+			get_categories = self.requests(self.url)
 		except Exception as e:
 			logger.exception('Error: {0} while getting categories from {1}'.format(e,self.url))
 			self.errors.append(error_to_string(e))
@@ -60,7 +59,7 @@ class DNCrawler(AbstractBaseCrawler):
 		story_links = []
 		for category in self.categories:
 			try:
-				top_stories = requests.get(category)
+				top_stories = self.requests(category)
 				if top_stories.status_code == 200:
 					soup = BeautifulSoup(top_stories.content, 'html.parser')
 					stories = soup.select('a.teaser-image-large') + soup.select('a.article-collection-teaser')
@@ -77,7 +76,7 @@ class DNCrawler(AbstractBaseCrawler):
 		return set(story_links)
 
 	def get_story_details(self, link):
-		story = requests.get(link)
+		story = self.requests(link)
 
 		if story.status_code == 200:
 			soup = BeautifulSoup(story.content, 'html.parser')
@@ -119,7 +118,7 @@ class DNCrawler(AbstractBaseCrawler):
 				'image_url':image_url}
 
 	def get_oped_article_details(self, url):
-		story = requests.get(url)
+		story = self.requests(url)
 
 		if story.status_code == 200:
 			soup = BeautifulSoup(story.content, 'html.parser')

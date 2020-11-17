@@ -1,6 +1,7 @@
 import re
 import string
 import logging
+import requests
 import tldextract
 from datetime import datetime, timedelta
 from habari.apps.utils.date_utils import create_timedelta_object
@@ -87,5 +88,8 @@ class AbstractBaseCrawler:
                         author_list.append(sanitized_author)
 
         return author_list
+
+    def requests(self, url):
+        return requests.get(url, headers={'User-Agent': 'Mozille/5.0'})
 
 
