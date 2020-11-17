@@ -173,17 +173,17 @@ CELERY_TASK_DEFAULT_QUEUE = 'default'
 CELERY_BEAT_SCHEDULE = {
     'frequent_crawlers': {
         'task':'habari.apps.crawl.tasks.frequent_crawlers',
-        'schedule':crontab(minute=0,hour='*/4'),
+        'schedule':crontab(minute=0,hour='*/2'),
         'options': {'queue':'crawling_queue'}
     },
     'non_frequent_crawlers': {
         'task':'habari.apps.crawl.tasks.non_frequent_crawlers',
-        'schedule':crontab(minute=0,hour='*/6'),
+        'schedule':crontab(minute=0,hour='*/3'),
         'options': {'queue':'crawling_queue'}
     },
     'bd_crawler': {
         'task':'habari.apps.crawl.tasks.bd_crawler',
-        'schedule':crontab(minute=0,hour='*/5',day_of_week='1-5'),
+        'schedule':crontab(minute=0,hour='*/2',day_of_week='1-5'),
         'options': {'queue':'crawling_queue'}
     },
     'retry_failed_crawls': {
