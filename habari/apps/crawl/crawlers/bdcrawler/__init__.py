@@ -21,7 +21,9 @@ class BDCrawler(AbstractBaseCrawler):
         links = ('https://www.businessdailyafrica.com/author-profile/',
                  'https://www.businessdailyafrica.com/videos/',
                  'https://www.businessdailyafrica.com/datahub/',
-                 'https://www.businessdailyafrica.com/news/counties/Traders-suffer-losses-as-Gikomba-market-burns/4003142-5582822-ovxkjr/index.html')
+                 'https://www.businessdailyafrica.com/news/counties/Traders-suffer-losses-as-Gikomba-market-burns/4003142-5582822-ovxkjr/index.html',
+                 'https://www.businessdailyafrica.com/bd/author-profiles/',
+                 'https://www.businessdailyafrica.com/bd/videos/',)
 
         if url.startswith(links):
             return True
@@ -115,7 +117,8 @@ class BDCrawler(AbstractBaseCrawler):
         story = requests.get(link)
         if story.status_code == 200:
             soup = BeautifulSoup(story.content, 'html.parser')
-
+            # author_page = soup.select_one('header.author-header').get_text()
+            # if not author_page:
             title = soup.find(class_='article-title').get_text().strip()
             try:
             	publication_date = soup.select_one('.page-box-inner header small.byline').get_text().strip()
@@ -124,12 +127,8 @@ class BDCrawler(AbstractBaseCrawler):
             	publication_date = soup.find("meta",  property="og:article:published_time").get('content').strip()
             	date = pytz.timezone("Africa/Nairobi").localize(
 	                datetime.strptime(publication_date, '%Y-%m-%d %H:%M:%S'), is_dst=None)
-	        # except ValueError:
-	        # 	publication_date = soup.find("meta",  property="og:article:published_time").get('content').strip()
-	        # 	date = pytz.timezone("Africa/Nairobi").localize(
-	        #         datetime.strptime(publication_date, '%Y-%m-%d %H:%M:%S'), is_dst=None)
 
-            author_list = soup.select(' article.article.article-summary header.article-meta-summary ')
+            author_list = soup.select('.mobileShow article.article.article-summary header.article-meta-summary strong')
             author = self.sanitize_author_iterable(author_list)
 
             try:
@@ -160,8 +159,9 @@ class BDCrawler(AbstractBaseCrawler):
         top_articles = self.get_top_stories()
         article_info = []
         for article in top_articles:
+            logger.info('Updating story content for ' + article)
             try:
-                logger.info('Updating story content for ' + article)
+                
                 story = self.get_story_details(article)
 
                 article_info.append(Article(title=story['article_title'],
