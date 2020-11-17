@@ -1,6 +1,5 @@
 import pytz
 import logging
-import requests
 from datetime import datetime
 from bs4 import BeautifulSoup
 from habari.apps.crawl.models import Article
@@ -20,7 +19,7 @@ class EACrawler(AbstractBaseCrawler):
         rss_feeds = []
 
         try:
-            get_categories = requests.get(self.url)
+            get_categories = self.requests(self.url)
         except Exception as e:
             logger.exception('Error:{} while getting rss feeds'.format(e))
             self.errors.append(error_to_string(e))
@@ -41,7 +40,7 @@ class EACrawler(AbstractBaseCrawler):
 
         for category in categories:
             try:
-                request = requests.get(category)
+                request = self.requests(category)
             except Exception as e:
                 logger.exception('Error: {0} while getting {1}'.format(e,category))
                 self.errors.append(error_to_string(e))
@@ -68,7 +67,7 @@ class EACrawler(AbstractBaseCrawler):
         for rss in rss_feeds:
             try:
                 logger.info('Getting top stories from {}'.format(rss))
-                request = requests.get(rss)
+                request = self.requests(rss)
                 if request.status_code == 200:
                     soup = BeautifulSoup(request.content, 'xml')
                     articles = soup.find_all('item')
@@ -105,7 +104,7 @@ class EACrawler(AbstractBaseCrawler):
         return {story['article_url']:story for story in stories}.values()
 
     def update_article_details(self, article):
-        request = requests.get(article['article_url'])
+        request = self.requests(article['article_url'])
 
         if request.status_code == 200:
             soup = BeautifulSoup(request.content, 'lxml')

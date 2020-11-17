@@ -1,7 +1,6 @@
 import re
 import pytz
 import logging
-import requests
 from datetime import datetime
 from bs4 import BeautifulSoup
 from habari.apps.crawl.models import Article
