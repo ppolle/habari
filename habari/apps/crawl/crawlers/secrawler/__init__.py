@@ -42,7 +42,7 @@ class SECrawler(AbstractBaseCrawler):
 		categories = [self.url]
 
 		try:
-			get_categories = requests.get(self.url)
+			get_categories = self.requests(self.url)
 		except Exception as e:
 			logger.exception(
                 'Error: {0} , while getting categories from: {1}'.format(e, self.url))
@@ -74,7 +74,7 @@ class SECrawler(AbstractBaseCrawler):
 
 		for category in self.categories:
 			try:
-				stories = requests.get(category)
+				stories = self.requests(category)
 				if stories.status_code == 200:
 					soup = BeautifulSoup(stories.content, 'lxml')
 
@@ -100,7 +100,7 @@ class SECrawler(AbstractBaseCrawler):
 		return story_links
 
 	def get_story_details(self, link):
-		story = requests.get(link)
+		story = self.requests(link)
 		if story.status_code == 200:
 			soup = BeautifulSoup(story.content, 'lxml')
 			title = printable_text(soup.find("meta", property="og:title").get('content'))
