@@ -60,7 +60,7 @@ class CTCrawler(AbstractBaseCrawler):
                     soup = BeautifulSoup(request.content, 'html.parser')
                     social_links = soup.select('.social-networks a')
                     for social_link in social_links:
-                        if social_link.get('href').endswith('.xml') and social_link.get('href') is not None:
+                        if social_link.get('href').endswith('.rss') and social_link.get('href') is not None:
                             link = self.make_relative_links_absolute(social_link.get('href'))
                             if self.partial_links_to_ignore(link): rss_feeds.append(link)
                 else:
