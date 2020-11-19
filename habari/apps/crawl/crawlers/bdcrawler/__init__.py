@@ -111,7 +111,7 @@ class BDCrawler(AbstractBaseCrawler):
 
         return filter(lambda x: x not in self.categories, story_links)
 
-    def get_story_details(self, link):
+    def update_article_details(self, link):
         story = requests.get(link)
         if story.status_code == 200:
             soup = BeautifulSoup(story.content, 'html.parser')
@@ -161,8 +161,8 @@ class BDCrawler(AbstractBaseCrawler):
         article_info = []
         for article in top_articles:
             try:
-                logger.info('Updating story content for ' + article)
-                story = self.get_story_details(article)
+                logger.info('Updating article details for ' + article)
+                story = self.update_article_details(article)
 
                 article_info.append(Article(title=story['article_title'],
                                             article_url=story['article_url'],

@@ -72,7 +72,7 @@ class TSCrawler(AbstractBaseCrawler):
 
         return filter(lambda x:x not in ignore_links, story_links)
 
-    def get_article_details(self, link):
+    def update_article_details(self, link):
         story = requests.get(link)
         if story.status_code == 200:
             soup = BeautifulSoup(story.content, 'lxml')
@@ -132,8 +132,8 @@ class TSCrawler(AbstractBaseCrawler):
 
         for article in stories:
             try:
-                logger.info('Updating story content for: {}'.format(article))
-                story = self.get_article_details(article)
+                logger.info('Updating article details for: {}'.format(article))
+                story = self.update_article_details(article)
  
                 article_info.append(Article(title=story['article_title'],
                                             article_url=story['article_url'],
