@@ -1,7 +1,6 @@
 import re
 import pytz
 import logging
-import requests
 from datetime import datetime
 from bs4 import BeautifulSoup
 from habari.apps.crawl.models import Article
@@ -30,7 +29,7 @@ class TSCrawler(AbstractBaseCrawler):
         categories = [self.url,]
 
         try:
-            get_categories = requests.get(self.url)
+            get_categories = self.requests(self.url)
         except Exception as e:
             logger.exception('Error: {0} while getting categories from {1}'.format(e,self.url))
         else:
@@ -45,15 +44,15 @@ class TSCrawler(AbstractBaseCrawler):
                             categories.append(cat)
 
         return categories
-        
+
     def get_top_stories(self):
         logger.info('Getting top stories')
         story_links = []
         ignore_links = ['https://www.the-star.co.ke/news/2020-03-09-photos-filthy-city-markets-raise-health-worries/',]
-        
+
         for category in self.get_category_links():
             try:
-                top_stories = requests.get(category)
+                top_stories = self.requests(category)
                 if top_stories.status_code == 200:
                     soup = BeautifulSoup(top_stories.content, 'lxml')
                     articles = soup.select('.article-body a')
@@ -73,7 +72,7 @@ class TSCrawler(AbstractBaseCrawler):
         return filter(lambda x:x not in ignore_links, story_links)
 
     def update_article_details(self, link):
-        story = requests.get(link)
+        story = self.requests(link)
         if story.status_code == 200:
             soup = BeautifulSoup(story.content, 'lxml')
             try:
@@ -134,7 +133,7 @@ class TSCrawler(AbstractBaseCrawler):
             try:
                 logger.info('Updating article details for: {}'.format(article))
                 story = self.update_article_details(article)
- 
+
                 article_info.append(Article(title=story['article_title'],
                                             article_url=story['article_url'],
                                             article_image_url=story['image_url'],
