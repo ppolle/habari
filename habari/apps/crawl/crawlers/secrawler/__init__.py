@@ -98,7 +98,7 @@ class SECrawler(AbstractBaseCrawler):
 
 		return story_links
 
-	def get_story_details(self, link):
+	def update_article_details(self, link):
 		story = self.requests(link)
 		if story.status_code == 200:
 			soup = BeautifulSoup(story.content, 'lxml')
@@ -128,7 +128,7 @@ class SECrawler(AbstractBaseCrawler):
 		for article in top_articles:
 			try:
 				logger.info('Updating article details for {}'.format(article))
-				details = self.get_story_details(article)
+				details = self.update_article_details(article)
 				article_info.append(Article(title=details['article_title'],
                                             article_url=details['article_url'],
                                             article_image_url=details['image_url'],
@@ -136,7 +136,7 @@ class SECrawler(AbstractBaseCrawler):
                                             publication_date=details['publication_date'],
                                             summary=details['summary'],
                                             news_source=self.news_source
-                                            ))		
+                                            ))
 			except Exception as e:
 				logger.exception('Crawling Error: {0} while getting data from: {1}'.format(e, article))
 				self.errors.append(error_to_string(e))

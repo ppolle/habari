@@ -159,16 +159,19 @@ class DNCrawler(AbstractBaseCrawler):
 				'summary':summary,
 				'image_url':image_url}
 
+	def update_article_details(self, article):
+		if self.oped_articles(article):
+			return self.get_oped_article_details(article)
+		else:
+			return self.get_story_details(article)
+
 	def update_top_stories(self):
 		articles = self.get_top_stories()
 		article_info = []
 		for article in articles:
 			try:
-				logger.info('Updating story content for {}'.format(article))
-				if self.oped_articles(article):
-					story = self.get_oped_article_details(article)
-				else:
-					story = self.get_story_details(article)
+				logger.info('Updating article details for {}'.format(article))
+				story = self.update_article_details(article)
 				article_info.append(Article(title=story['article_title'],
                                             article_url=story['article_url'],
                                             article_image_url=story['image_url'],

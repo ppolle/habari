@@ -44,12 +44,12 @@ class TSCrawler(AbstractBaseCrawler):
                             categories.append(cat)
 
         return categories
-        
+
     def get_top_stories(self):
         logger.info('Getting top stories')
         story_links = []
         ignore_links = ['https://www.the-star.co.ke/news/2020-03-09-photos-filthy-city-markets-raise-health-worries/',]
-        
+
         for category in self.get_category_links():
             try:
                 top_stories = self.requests(category)
@@ -71,7 +71,7 @@ class TSCrawler(AbstractBaseCrawler):
 
         return filter(lambda x:x not in ignore_links, story_links)
 
-    def get_article_details(self, link):
+    def update_article_details(self, link):
         story = self.requests(link)
         if story.status_code == 200:
             soup = BeautifulSoup(story.content, 'lxml')
@@ -131,9 +131,9 @@ class TSCrawler(AbstractBaseCrawler):
 
         for article in stories:
             try:
-                logger.info('Updating story content for: {}'.format(article))
-                story = self.get_article_details(article)
- 
+                logger.info('Updating article details for: {}'.format(article))
+                story = self.update_article_details(article)
+
                 article_info.append(Article(title=story['article_title'],
                                             article_url=story['article_url'],
                                             article_image_url=story['image_url'],
