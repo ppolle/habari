@@ -114,14 +114,10 @@ class DMCrawler(AbstractBaseCrawler):
                     image_url = 'None'
 
             try:
-                author_string = soup.select('.story-view .author')
+                author_string = soup.select('.author strong')
                 author = self.sanitize_author_iterable(author_string)
             except AttributeError:
-                try:
-                    author_string = soup.select('.author strong')
-                    author = self.sanitize_author_iterable(author_string)
-                except AttributeError:
-                    author = []
+                author = []
 
             article['article_image_url'] = image_url
             article['author'] = author
