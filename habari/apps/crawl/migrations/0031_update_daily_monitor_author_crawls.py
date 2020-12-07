@@ -10,9 +10,13 @@ def update_empty_daily_monitor_author_lists(apps, schema_editor):
 	crawler_class = DMCrawler()
 	for article in articles:
 		article_details = {'article_url':article.article_url}
-		update_details = crawler_class.update_article_details(article_details)
-		article.author = update_details['author']
-		article.save()
+		try:
+			print('Updating article details for :{}'.format(article_details['article_url']))
+			update_details = crawler_class.update_article_details(article_details)
+			article.author = update_details['author']
+			article.save()
+		except KeyError:
+			print('Failed to update content for :{}'.format(article_details['article_url']))
 
 class Migration(migrations.Migration):
 
