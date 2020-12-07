@@ -191,10 +191,10 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(minute='*/30'),
         'options': {'queue':'crawling_queue'}
     },
-    'sanitize_sm_author_field': {
-        'task': 'habari.apps.crawl.tasks.sanitize_sm_author_lists_with_empty_strings',
+    'sanitize_author_field': {
+        'task': 'habari.apps.crawl.tasks.sanitize_author_lists_with_empty_strings',
         'schedule': crontab(minute='*/5'),
-        'options': {'queue':'sanitize_sm_authors'}
+        'options': {'queue':'sanitize_authors'}
     }
 }
 

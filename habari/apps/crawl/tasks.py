@@ -63,35 +63,32 @@ def retry_failed_crawls():
 			crawl = crawl_class().run()
 
 @shared_task(autoretry_for=(Exception,))
-def sanitize_sm_author_lists_with_empty_strings():
+def sanitize_author_lists_with_empty_strings():
 	'''
 	Correct Standard Media author lists that crawl for lists with a empty strings. This causes author url errors on standard media pages
 	'''
-	import requests
-	from bs4 import BeautifulSoup
+	crawler_classes = {
+	'DN': dncrawler2.DNCrawler,
+    'SM': smcrawler.SMCrawler,
+    'TS': tscrawler.TSCrawler,
+    'DM': dmcrawler.DMCrawler,
+    'EA': eacrawler.EACrawler,
+	'CT': ctcrawler.CTCrawler,
+	'BD': bdcrawler.BDCrawler,
+	'SE': secrawler.SECrawler
+	}
+	non_dictionary_classes = ['DN','TS','BD','SE']
 
-	source = NewsSource.objects.get(slug='SM')
-	articles = Article.objects.filter(news_source=source, author__contains=[''])
+	articles = Article.objects.filter(author__contains=[''])
 	for article in articles:
-		request = requests.get(article.article_url)
-		if request.status_code == 200:
-			soup = BeautifulSoup(request.content, 'lxml')
-			try:
-				author = [a.strip().upper() for a in soup.select_one('.article-meta a').get_text().split(' and ') if a is not '']
-			except AttributeError:
-				try:
-					author = [a.strip().upper() for a in soup.select('div .io-hidden-author').get_text()]
-				except AttributeError:
-					try:
-						author = [a.strip().upper() for a in soup.select_one('.small.text-muted.mb-3 a').get_text().lower().split(' and ')]
-					except AttributeError:
-						try:
-							author = [a.strip().upper() for a in re.split('&| and |, ', soup.find("meta",  attrs={'name':'author'}).get('content').lower())]
-						except AttributeError:
-							author = []			
+		slug = article.news_source.slug
+		article_url = {'article_url':article.article_url}
+		crawler_class = crawler_classes.get(slug)
 		
-			if author == [''] or author == [':']:
-				author = []
+		if slug in non_dictionary_classes:
+			update_details = crawler_class().update_article_details(article_url['article_url'])
+		else:
+			update_details = crawler_class().update_article_details(article_url)
 		
-		article.author = author
+		article.author = update_details['author']
 		article.save()
