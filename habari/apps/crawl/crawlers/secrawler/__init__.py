@@ -1,7 +1,6 @@
 import re
 import pytz
 import logging
-import requests
 from datetime import datetime
 from bs4 import BeautifulSoup
 from habari.apps.crawl.models import Article
@@ -42,7 +41,7 @@ class SECrawler(AbstractBaseCrawler):
 		categories = [self.url]
 
 		try:
-			get_categories = requests.get(self.url)
+			get_categories = self.requests(self.url)
 		except Exception as e:
 			logger.exception(
                 'Error: {0} , while getting categories from: {1}'.format(e, self.url))
@@ -74,7 +73,7 @@ class SECrawler(AbstractBaseCrawler):
 
 		for category in self.categories:
 			try:
-				stories = requests.get(category)
+				stories = self.requests(category)
 				if stories.status_code == 200:
 					soup = BeautifulSoup(stories.content, 'lxml')
 
@@ -99,8 +98,8 @@ class SECrawler(AbstractBaseCrawler):
 
 		return story_links
 
-	def get_story_details(self, link):
-		story = requests.get(link)
+	def update_article_details(self, link):
+		story = self.requests(link)
 		if story.status_code == 200:
 			soup = BeautifulSoup(story.content, 'lxml')
 			title = printable_text(soup.find("meta", property="og:title").get('content'))
@@ -129,7 +128,7 @@ class SECrawler(AbstractBaseCrawler):
 		for article in top_articles:
 			try:
 				logger.info('Updating article details for {}'.format(article))
-				details = self.get_story_details(article)
+				details = self.update_article_details(article)
 				article_info.append(Article(title=details['article_title'],
                                             article_url=details['article_url'],
                                             article_image_url=details['image_url'],
@@ -137,7 +136,7 @@ class SECrawler(AbstractBaseCrawler):
                                             publication_date=details['publication_date'],
                                             summary=details['summary'],
                                             news_source=self.news_source
-                                            ))		
+                                            ))
 			except Exception as e:
 				logger.exception('Crawling Error: {0} while getting data from: {1}'.format(e, article))
 				self.errors.append(error_to_string(e))

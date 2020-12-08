@@ -1,6 +1,5 @@
 import pytz
 import logging
-import requests
 from datetime import datetime
 from bs4 import BeautifulSoup
 from habari.apps.crawl.models import Article
@@ -31,7 +30,7 @@ class CTCrawler(AbstractBaseCrawler):
         rss_feeds = []
 
         try:
-            get_categories = requests.get(self.url)
+            get_categories = self.requests(self.url)
         except Exception as e:
             logger.exception('Error!!{} while getting rss categories'.format(e))
             self.errors.append(error_to_string(e))
@@ -52,7 +51,7 @@ class CTCrawler(AbstractBaseCrawler):
 
         for category in categories:
             try:
-                request = requests.get(category)
+                request = self.requests(category)
             except Exception as e:
                 logger.exception('Error: {} while getting rss feeds'.format(e))
                 self.errors.append(error_to_string(e))
@@ -61,7 +60,7 @@ class CTCrawler(AbstractBaseCrawler):
                     soup = BeautifulSoup(request.content, 'html.parser')
                     social_links = soup.select('.social-networks a')
                     for social_link in social_links:
-                        if social_link.get('href').endswith('.xml') and social_link.get('href') is not None:
+                        if social_link.get('href').endswith('.rss') and social_link.get('href') is not None:
                             link = self.make_relative_links_absolute(social_link.get('href'))
                             if self.partial_links_to_ignore(link): rss_feeds.append(link)
                 else:
@@ -77,7 +76,7 @@ class CTCrawler(AbstractBaseCrawler):
         for rss in rss_feeds:
             try:
                 logger.info('Getting top stories from {}'.format(rss))
-                request = requests.get(rss)
+                request = self.requests(rss)
                 if request.status_code == 200:
                     soup = BeautifulSoup(request.content, 'xml')
                     articles = soup.find_all('item')
@@ -113,7 +112,7 @@ class CTCrawler(AbstractBaseCrawler):
         return {story['article_url']:story for story in stories}.values()
 
     def update_article_details(self, article):
-        request = requests.get(article['article_url'])
+        request = self.requests(article['article_url'])
 
         if request.status_code == 200:
             soup = BeautifulSoup(request.content, 'lxml')

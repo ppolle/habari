@@ -1,7 +1,6 @@
 import re
 import pytz
 import logging
-import requests
 from datetime import datetime
 from bs4 import BeautifulSoup
 from habari.apps.crawl.models import Article
@@ -21,7 +20,7 @@ class DMCrawler(AbstractBaseCrawler):
         rss_feeds = []
 
         try:
-            get_categories = requests.get(self.url)
+            get_categories = self.requests(self.url)
         except Exception as e:
             logger.exception('Error!! {}while getting rss feeds'.format(e))
             self.errors.append(error_to_string(e))
@@ -42,7 +41,7 @@ class DMCrawler(AbstractBaseCrawler):
 
         for category in categories:
             try:
-                request = requests.get(category)
+                request = self.requests(category)
             except Exception as e:
                 logger.exception('Error: {0} while getting RSS from {1}'.format(e,category))
                 self.errors.append(error_to_string(e))
@@ -52,7 +51,7 @@ class DMCrawler(AbstractBaseCrawler):
                     social_links = soup.select('.social-networks a')
                     for social_link in social_links:
                         link = social_link.get('href')
-                        if link.endswith('.xml') and link is not None:
+                        if link.endswith('.rss') and link is not None:
                             rss_feeds.append(
                                 self.make_relative_links_absolute(link))
                 else:
@@ -68,7 +67,7 @@ class DMCrawler(AbstractBaseCrawler):
         for rss in rss_feeds:
             try:
                 logger.info('Getting top stories from {}'.format(rss))
-                request = requests.get(rss)
+                request = self.requests(rss)
                 if request.status_code == 200:
                     soup = BeautifulSoup(request.content, 'xml')
                     articles = soup.find_all('item')
@@ -100,7 +99,7 @@ class DMCrawler(AbstractBaseCrawler):
         return {story['article_url']:story for story in stories}.values()
 
     def update_article_details(self, article):
-        request = requests.get(article['article_url'])
+        request = self.requests(article['article_url'])
 
         if request.status_code == 200:
             soup = BeautifulSoup(request.content, 'lxml')
@@ -115,7 +114,7 @@ class DMCrawler(AbstractBaseCrawler):
                     image_url = 'None'
 
             try:
-                author_string = soup.select('.story-view .author')
+                author_string = soup.select('.author strong')
                 author = self.sanitize_author_iterable(author_string)
             except AttributeError:
                 author = []

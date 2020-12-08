@@ -1,7 +1,6 @@
 import re
 import pytz
 import logging
-import requests
 from datetime import datetime
 from bs4 import BeautifulSoup
 from habari.apps.crawl.models import Article
@@ -21,7 +20,9 @@ class BDCrawler(AbstractBaseCrawler):
         links = ('https://www.businessdailyafrica.com/author-profile/',
                  'https://www.businessdailyafrica.com/videos/',
                  'https://www.businessdailyafrica.com/datahub/',
-                 'https://www.businessdailyafrica.com/news/counties/Traders-suffer-losses-as-Gikomba-market-burns/4003142-5582822-ovxkjr/index.html')
+                 'https://www.businessdailyafrica.com/news/counties/Traders-suffer-losses-as-Gikomba-market-burns/4003142-5582822-ovxkjr/index.html',
+                 'https://www.businessdailyafrica.com/bd/author-profiles/',
+                 'https://www.businessdailyafrica.com/bd/videos/',)
 
         if url.startswith(links):
             return True
@@ -32,7 +33,7 @@ class BDCrawler(AbstractBaseCrawler):
         logger.info('Getting links to all categories and sub-categories')
         categories = [self.url, ]
         try:
-            get_categories = requests.get(self.url)
+            get_categories = self.requests(self.url)
         except Exception as e:
             logger.exception(
                 'Error: {0} , while getting categories from: {1}'.format(e, self.url))
@@ -56,7 +57,7 @@ class BDCrawler(AbstractBaseCrawler):
 
         for category in categories:
             try:
-                get_all_categories = requests.get(category)
+                get_all_categories = self.requests(category)
             except Exception as e:
                 logger.exception(
                     'Error: {0} while getting categories from {1}'.format(e, category))
@@ -87,7 +88,7 @@ class BDCrawler(AbstractBaseCrawler):
 
         for stories in self.categories:
             try:
-                top_stories = requests.get(stories)
+                top_stories = self.requests(stories)
                 if top_stories.status_code == 200:
                     soup = BeautifulSoup(top_stories.content, 'html.parser')
                     articles = soup.select('.article a')
@@ -111,18 +112,22 @@ class BDCrawler(AbstractBaseCrawler):
 
         return filter(lambda x: x not in self.categories, story_links)
 
-    def get_story_details(self, link):
-        story = requests.get(link)
+    def update_article_details(self, link):
+        story = self.requests(link)
         if story.status_code == 200:
             soup = BeautifulSoup(story.content, 'html.parser')
-
+            # author_page = soup.select_one('header.author-header').get_text()
+            # if not author_page:
             title = soup.find(class_='article-title').get_text().strip()
-            publication_date = soup.select_one(
-                '.page-box-inner header small.byline').get_text().strip()
-            date = pytz.timezone("Africa/Nairobi").localize(
-                datetime.strptime(publication_date, '%A, %B %d, %Y %H:%M'), is_dst=None)
-            author_list = soup.select(
-                ' article.article.article-summary header.article-meta-summary ')
+            try:
+            	publication_date = soup.select_one('.page-box-inner header small.byline').get_text().strip()
+            	date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%A, %B %d, %Y %H:%M'), is_dst=None)
+            except ValueError:
+            	publication_date = soup.find("meta",  property="og:article:published_time").get('content').strip()
+            	date = pytz.timezone("Africa/Nairobi").localize(
+	                datetime.strptime(publication_date, '%Y-%m-%d %H:%M:%S'), is_dst=None)
+
+            author_list = soup.select('.mobileShow article.article.article-summary header.article-meta-summary strong')
             author = self.sanitize_author_iterable(author_list)
 
             try:
@@ -153,9 +158,10 @@ class BDCrawler(AbstractBaseCrawler):
         top_articles = self.get_top_stories()
         article_info = []
         for article in top_articles:
+            logger.info('Updating story content for ' + article)
             try:
-                logger.info('Updating story content for ' + article)
-                story = self.get_story_details(article)
+                logger.info('Updating article details for ' + article)
+                story = self.update_article_details(article)
 
                 article_info.append(Article(title=story['article_title'],
                                             article_url=story['article_url'],
