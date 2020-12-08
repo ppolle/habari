@@ -12,7 +12,7 @@
 {% block content %}
 
 	{% for article in articles %}
-	{{ forloop.counter0|add:articles.start_index }}. <a href="{{article.article_url}}" target="_blank">{{article.title|title}}</a>
+	{{ forloop.counter0|add:articles.start_index }}. <a href="{{article.article_url}}" target="_blank">{{article.title|title_cap}}</a>
 	<p>
 	<small><strong>Publication date</strong>: {{article.publication_date}} , <strong>Authors</strong>: {% for author in article.author%}{{author|author_capitalize}}{%if not forloop.last%}, {%endif%}{% empty %}No Author{%endfor%}</small>
 	</p>
