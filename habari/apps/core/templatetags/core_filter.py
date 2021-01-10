@@ -1,4 +1,4 @@
-from string import capwords
+import re
 from django import template
 register = template.Library()
 
@@ -24,3 +24,5 @@ def startswith(value, starts):
 def title_cap(value):
 	return " ".join(s if s.isupper() else s.capitalize() for s in value.split())
 
+def capitalize_words(value):
+	pass

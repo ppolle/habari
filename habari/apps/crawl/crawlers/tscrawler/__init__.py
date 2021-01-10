@@ -24,6 +24,9 @@ class TSCrawler(AbstractBaseCrawler):
         else:
             return False
 
+    def morning_brief_indentifier(self, url):
+        pass
+
     def get_category_links(self):
         logger.info('Getting links to all categories and subcategories')
         categories = [self.url,]
