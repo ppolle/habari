@@ -116,10 +116,10 @@ class BDCrawler(AbstractBaseCrawler):
         story = self.requests(link)
         if story.status_code == 200:
             soup = BeautifulSoup(story.content, 'html.parser')
-            author_page = soup.select_one('header.author-header').get_text()
-            if author_page:
+            try:
+                author_page = soup.select_one('header.author-header').get_text()
                 return {'author-page':True}
-            else:
+            except AttributeError:
                 title = soup.find(class_='article-title').get_text().strip()
                 try:
                 	publication_date = soup.select_one('.page-box-inner header small.byline').get_text().strip()
