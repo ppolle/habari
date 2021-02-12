@@ -16,7 +16,7 @@
 	<img src="{{article.article_image_url}}" alt="Girl in a jacket" class="img-responsive img-rounded"> 
 </div>
 <div>
-<small><strong>Authors</strong>: {% for author in article.author%}<a href="">{{author|author_capitalize}}</a>{%if not forloop.last%}, {%endif%}{% empty %}No Author{%endfor%}</small>
+<small><strong>Authors</strong>: {% for author in article.author%}<a href="{% url 'author' article.news_source.slug author|author_slug %}">{{author|author_capitalize}}</a>{%if not forloop.last%}, {%endif%}{% empty %}No Author{%endfor%}</small>
 </div>
 <div>
 	{{article_details|safe}}
