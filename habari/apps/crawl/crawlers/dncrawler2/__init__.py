@@ -194,3 +194,17 @@ class DNCrawler(AbstractBaseCrawler):
 		except Exception as e:
 			logger.exception('Error!!!{}'.format(e))
 			self.errors.append(error_to_string(e))
+
+	def get_article(self,article_url):
+		'''
+		Get actual article content
+		'''
+		story = self.requests(article_url)
+
+		if story.status_code == 200:
+			soup = BeautifulSoup(story.content, 'html.parser')
+
+			article = soup.select('')
+
+		return 
+
