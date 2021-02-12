@@ -204,7 +204,7 @@ class DNCrawler(AbstractBaseCrawler):
 		if story.status_code == 200:
 			soup = BeautifulSoup(story.content, 'html.parser')
 
-			article = soup.select('')
+			article = soup.select('section .text-block')
 
-		return 
+		return article
 

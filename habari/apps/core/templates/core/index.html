@@ -13,7 +13,11 @@ Front Page <small>(The Most Recent News Articles)</small>
 		<h5><strong>{{source}} - {{source.slug}}</strong></h5>
 		{% for article in source.front_page_filtered_Set %}
 		<strong>{{ forloop.counter }}.</strong>
+		{% if source.slug == 'DN' %}
+		<a href="{% url 'get_article' source.slug article.id %}" >{{article.title|title_cap}}</a><br>
+		{%else%}
 		<a href="{{article.article_url}}" target="_blank">{{article.title|title_cap}}</a><br>
+		{%endif%}
 		<p>
 		<small><strong>Publication date</strong>: {{article.publication_date}} , <strong>Authors</strong>: {% for author in article.author%}<a href="{% url 'author' source.slug author|author_slug %}">{{author|author_capitalize}}</a>{%if not forloop.last%}, {%endif%}{% empty %}No Author{%endfor%}</small>
 		</p>

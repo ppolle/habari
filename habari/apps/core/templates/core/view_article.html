@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load core_filter %}
+
+{% block title%}
+{{article.news_source.name|title}}<small>({{ article.publication_date|date:"l, jS F Y" }})</small>
+{% endblock %}
+
+{% block source%}
+
+{% endblock %}
+
+{% block content %}
+
+<h2><a href="{{article.article_url}}" target="_blank">{{article.title|title_cap}}</a></h2>
+<div>
+	<img src="{{article.article_image_url}}" alt="Girl in a jacket" class="img-responsive img-rounded"> 
+</div>
+<div>
+<small><strong>Authors</strong>: {% for author in article.author%}<a href="">{{author|author_capitalize}}</a>{%if not forloop.last%}, {%endif%}{% empty %}No Author{%endfor%}</small>
+</div>
+<div>
+	{{article_details|safe}}
+</div>
+ 
+
+{% endblock %}
