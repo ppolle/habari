@@ -3,7 +3,7 @@ anyjson==0.3.3
 asgiref==3.2.7
 beautifulsoup4==4.7.1
 billiard==3.6.3.0
-celery==4.4.2
+celery==5.2.2
 certifi==2019.6.16
 chardet==3.0.4
 coreapi==2.3.3
