@@ -120,11 +120,15 @@ class BDCrawler(AbstractBaseCrawler):
                 author_page = soup.select_one('header.author-header').get_text()
                 return {'author-page':True}
             except AttributeError:
-                title = soup.find(class_='article-title').get_text().strip()
+                try:
+                    title = soup.find(class_='article-title').get_text().strip()
+                except AttributeError:
+                    title  = soup.find("meta",  property="og:title").get('content').strip()
+
                 try:
                 	publication_date = soup.select_one('.page-box-inner header small.byline').get_text().strip()
                 	date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%A, %B %d, %Y %H:%M'), is_dst=None)
-                except ValueError:
+                except AttributeError:
                 	publication_date = soup.find("meta",  property="og:article:published_time").get('content').strip()
                 	date = pytz.timezone("Africa/Nairobi").localize(
     	                datetime.strptime(publication_date, '%Y-%m-%d %H:%M:%S'), is_dst=None)
