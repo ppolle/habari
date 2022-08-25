@@ -17,7 +17,9 @@ class TSCrawler(AbstractBaseCrawler):
     def partial_links_to_ignore(self, url):
         links = ('https://www.the-star.co.ke/video/',
             'https://www.the-star.co.ke/classifieds/',
-            'https://www.the-star.co.ke/cartoon/')
+            'https://www.the-star.co.ke/cartoon/',
+            'https://www.the-star.co.ke/buy/?redirect=/'
+            )
 
         if url.startswith(links):
             return True
