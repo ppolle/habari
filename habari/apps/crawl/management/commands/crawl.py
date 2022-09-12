@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from habari.apps.crawl.crawlers import (dncrawler2, eacrawler, bdcrawler, ctcrawler, dmcrawler,
-    smcrawler, tscrawler, secrawler)
+    smcrawler, tscrawler, secrawler, dmcrawler2)
 
 class Command(BaseCommand):
     help = 'Crawl News Sources for New Articles'
@@ -14,7 +14,7 @@ class Command(BaseCommand):
         'EA': eacrawler.EACrawler,
         'CT': ctcrawler.CTCrawler,
         'SM': smcrawler.SMCrawler,
-        'DM': dmcrawler.DMCrawler,
+        'DM': dmcrawler2.DMCrawler,
         'TS': tscrawler.TSCrawler,
         'SE': secrawler.SECrawler
         }
