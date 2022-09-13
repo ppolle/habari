@@ -10,9 +10,11 @@ urlpatterns = [
     url(r'^profile/$', views.profile, name='profile'),
     url(r'^logout/$', views.logout, name='logout'),
     url(r'^regenerate-token/$', views.regenerate_token, name='regenerate_token'),
+    url(r'^article/(?P<source>\w+)/(?P<article_id>\d+)/$', views.get_article, name='get_article'),
     url(r'^(?P<source>\w+)/$', views.get_source, name='sources'),
     url(r'^(?P<source>\w+)/(?P<year>\d{4})/(?P<month>\d{2})/(?P<day>\d{2})/$', views.day, name='day'),
     url(r'^(?P<source>\w+)/(?P<author>.+)/$', views.get_author_articles, name='author'),
+
 
 
 ]

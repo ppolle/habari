@@ -140,3 +140,18 @@ def regenerate_token(request):
 	messages.success(request, 'Api key has been regenerated.')
 
 	return redirect('profile')
+
+def get_article(request, source, article_id):
+	'''
+	View article in app
+	'''
+	print('noma')
+	from habari.apps.crawl.crawlers.dncrawler2 import DNCrawler
+	source  = source.strip().upper()
+
+	article = get_object_or_404(Article, pk=article_id)
+	print(article.title)
+	article_details = DNCrawler().get_article(article.article_url)
+
+	return render(request, 'core/view_article.html', {'article':article, 'article_details':article_details})
+

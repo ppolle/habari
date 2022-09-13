@@ -8,15 +8,16 @@ from habari.apps.utils.error_utils import error_to_string, http_error_to_string
 
 logger = logging.getLogger(__name__)
 
-class DNCrawler(AbstractBaseCrawler):
+class DMCrawler(AbstractBaseCrawler):
 	def __init__(self):
-		super().__init__('DN')
+		super().__init__('DM')
 		self.url = self.news_source.url
 		self.categories = self.get_category_links()
 
 	def oped_articles(self, url):
 		links = ('https://nation.africa/kenya/blogs-opinion/',
 			'https://nation.africa/kenya/photos/',
+			'https://www.monitor.co.ug/uganda/pictorial/'
 			)
 
 		if url.startswith(links):
@@ -26,6 +27,7 @@ class DNCrawler(AbstractBaseCrawler):
 
 	def links_to_avoid(self, url):
 		links = ('https://nation.africa/kenya/blogs-opinion/cartoons/',
+			'https://nation.africa/kenya/account',
 			)
 
 		if url.startswith(links):
@@ -139,7 +141,10 @@ class DNCrawler(AbstractBaseCrawler):
 			try:
 				summary = soup.select_one('.article-content_summary .text-block').get_text().strip()
 			except AttributeError:
-				summary = soup.find("meta",  property="og:description").get('content').strip()
+				try:
+					summary = soup.find("meta",  property="og:description").get('content').strip()
+				except Exception:
+					summary = ''
 			try:
 				image_url = self.make_relative_links_absolute(\
 				soup.select_one('figure.article-picture img').get('data-src'))
@@ -204,7 +209,6 @@ class DNCrawler(AbstractBaseCrawler):
 		if story.status_code == 200:
 			soup = BeautifulSoup(story.content, 'html.parser')
 
-			article = soup.select('section .text-block')
-
+			article = soup.select('div.paragraph-wrapper')
 		return article
 

@@ -17,12 +17,17 @@ class TSCrawler(AbstractBaseCrawler):
     def partial_links_to_ignore(self, url):
         links = ('https://www.the-star.co.ke/video/',
             'https://www.the-star.co.ke/classifieds/',
-            'https://www.the-star.co.ke/cartoon/')
+            'https://www.the-star.co.ke/cartoon/',
+            'https://www.the-star.co.ke/buy/?redirect=/'
+            )
 
         if url.startswith(links):
             return True
         else:
             return False
+
+    def morning_brief_indentifier(self, url):
+        pass
 
     def get_category_links(self):
         logger.info('Getting links to all categories and subcategories')

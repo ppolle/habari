@@ -40,11 +40,13 @@ class AbstractBaseCrawler:
 
     def create_datetime_object_from_string(self, date_string):
         date_pattern_1 = re.search(
-            r"(\d+ year?years?,? )?(\d+ months?month?,? )?(\d+ week?weeks?,? )?(\d+ days?day?,? )?(\d+ hours?hour?,? )?(\d+ minutes?minute?,? )?(\d+ seconds?second? )?ago", date_string)
+            r"(\d+ year?years?,? )?(\d+ months?month?,? )?(\d+ week?weeks?,? )?(\d+ days?day?,? )?(\d+ hours?hour?,? )?(\d+ minutes?minute?,? )?(\d+ seconds?second? )?(\d+h?m?s?,? )?ago", date_string)
         date_pattern_2 = re.search(
             r"^(0[1-9]|[12][0-9]|3[01])[- /.](0[1-9]|1[012])[- /.](19|20)\d\d$", date_string)
         date_pattern_3 = re.search(
             r"^(Sun|Mon|Tue|Wed|Thur|Fri|Sat)\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s(0[1-9]|[12][0-9]|3[01])\s[0-5][0-9]:[0-5][0-9]:[0-5][0-9]\s(UTC|IST|CST|EAT|EST)\s(19|20)\d\d$", date_string)
+        date_pattern_4= re.search(
+            r"^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\.\s\d+,\s\d+", date_string)
 
         if date_pattern_1:
             return create_timedelta_object(date_string)
@@ -54,6 +56,8 @@ class AbstractBaseCrawler:
 
         elif date_pattern_3:
             return datetime.strptime(date_string, '%a %b %d %H:%M:%S %Z %Y')
+        elif date_pattern_4:
+            return datetime.strptime(date_string, '%b. %d, %Y')
         else:
             return datetime.now()
 

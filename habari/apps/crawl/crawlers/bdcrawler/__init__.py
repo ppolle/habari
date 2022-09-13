@@ -116,61 +116,67 @@ class BDCrawler(AbstractBaseCrawler):
         story = self.requests(link)
         if story.status_code == 200:
             soup = BeautifulSoup(story.content, 'html.parser')
-            # author_page = soup.select_one('header.author-header').get_text()
-            # if not author_page:
-            title = soup.find(class_='article-title').get_text().strip()
             try:
-            	publication_date = soup.select_one('.page-box-inner header small.byline').get_text().strip()
-            	date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%A, %B %d, %Y %H:%M'), is_dst=None)
-            except ValueError:
-            	publication_date = soup.find("meta",  property="og:article:published_time").get('content').strip()
-            	date = pytz.timezone("Africa/Nairobi").localize(
-	                datetime.strptime(publication_date, '%Y-%m-%d %H:%M:%S'), is_dst=None)
-
-            author_list = soup.select('.mobileShow article.article.article-summary header.article-meta-summary strong')
-            author = self.sanitize_author_iterable(author_list)
-
-            try:
-                image_url = self.make_relative_links_absolute(
-                    soup.select_one('.article-img-story img.photo_article').get('src').strip())
+                author_page = soup.select_one('header.author-header').get_text()
+                return {'author-page':True}
             except AttributeError:
                 try:
-                    image_url = soup.select_one(
-                        '.article-img-story.fluidMedia iframe').get('src').strip()
+                    title = soup.find(class_='article-title').get_text().strip()
                 except AttributeError:
-                    image_url = 'None'
+                    title  = soup.find("meta",  property="og:title").get('content').strip()
 
-            try:
-                summary = soup.select_one(
-                    '.summary-list').get_text().strip()[:3000]
-            except AttributeError:
-                summary = ' '
+                try:
+                	publication_date = soup.select_one('.page-box-inner header small.byline').get_text().strip()
+                	date = pytz.timezone("Africa/Nairobi").localize(datetime.strptime(publication_date, '%A, %B %d, %Y %H:%M'), is_dst=None)
+                except Exception:
+                	publication_date = soup.find("meta",  property="og:article:published_time").get('content').strip()
+                	date = pytz.timezone("Africa/Nairobi").localize(
+    	                datetime.strptime(publication_date, '%Y-%m-%d %H:%M:%S'), is_dst=None)
 
-        return {'article_url': link,
-                'image_url': image_url,
-                'article_title': title,
-                'publication_date': date,
-                'author': author,
-                'summary': summary
-                }
+                author_list = soup.select('.mobileShow article.article.article-summary header.article-meta-summary strong')
+                author = self.sanitize_author_iterable(author_list)
+
+                try:
+                    image_url = self.make_relative_links_absolute(
+                        soup.select_one('.article-img-story img.photo_article').get('src').strip())
+                except AttributeError:
+                    try:
+                        image_url = soup.select_one(
+                            '.article-img-story.fluidMedia iframe').get('src').strip()
+                    except AttributeError:
+                        image_url = 'None'
+
+                try:
+                    summary = soup.select_one(
+                        '.summary-list').get_text().strip()[:3000]
+                except AttributeError:
+                    summary = ' '
+
+                return {'article_url': link,
+                        'image_url': image_url,
+                        'article_title': title,
+                        'publication_date': date,
+                        'author': author,
+                        'summary': summary,
+                        'author-page':False
+                        }
 
     def update_top_stories(self):
         top_articles = self.get_top_stories()
         article_info = []
         for article in top_articles:
-            logger.info('Updating story content for ' + article)
+            logger.info('Updating article details for: ' + article)
             try:
-                logger.info('Updating article details for ' + article)
                 story = self.update_article_details(article)
-
-                article_info.append(Article(title=story['article_title'],
-                                            article_url=story['article_url'],
-                                            article_image_url=story['image_url'],
-                                            author=story['author'],
-                                            publication_date=story['publication_date'],
-                                            summary=story['summary'],
-                                            news_source=self.news_source
-                                            ))
+                if story['author-page'] is False:
+                    article_info.append(Article(title=story['article_title'],
+                                                article_url=story['article_url'],
+                                                article_image_url=story['image_url'],
+                                                author=story['author'],
+                                                publication_date=story['publication_date'],
+                                                summary=story['summary'],
+                                                news_source=self.news_source
+                                                ))
 
             except Exception as e:
                 logger.exception(
